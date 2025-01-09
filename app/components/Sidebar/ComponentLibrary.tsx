@@ -1,41 +1,196 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from "react";
+import { useFetcher } from "react-router";
+import type { FileSystemItem } from "~/types/files";
 
-const componentCategories = [
-  {
-    name: 'Microcontrollers',
-    items: [
-      { id: 'arduino-uno', name: 'Arduino Uno', icon: '🔲' },
-      { id: 'raspberry-pi', name: 'Raspberry Pi', icon: '🔲' },
-    ],
-  },
-  {
-    name: 'Outputs',
-    items: [
-      { id: 'led', name: 'LED', icon: '💡' },
-      { id: 'buzzer', name: 'Buzzer', icon: '🔊' },
-    ],
-  },
-  {
-    name: 'Resistors',
-    items: [
-      { id: 'resistor-10k', name: '10K Resistor', icon: '⚡' },
-      { id: 'resistor-1k', name: '1K Resistor', icon: '⚡' },
-    ],
-  },
-];
-
-export default function ComponentLibrary() {
-  return (
-    <div className="flex-1 overflow-y-auto">
-      {componentCategories.map((category) => (
-        <Category key={category.name} {...category} />
-      ))}
-    </div>
-  );
+interface ComponentItem {
+  id: string;
+  name: string;
+  path: string;
+  icon: string;
+  image?: {
+    src: string;
+    width: number;
+    height: number;
+  };
 }
 
-function Category({ name, items }) {
+interface ComponentCategory {
+  name: string;
+  items: ComponentItem[];
+  children?: ComponentCategory[];
+}
+
+export default function ComponentLibrary() {
   const [isExpanded, setIsExpanded] = useState(true);
+  const [categories, setCategories] = useState<ComponentCategory[]>([]);
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
+    new Set()
+  );
+  const fetcher = useFetcher();
+
+  useEffect(() => {
+    fetcher.load("/api/packages");
+  }, []);
+
+  useEffect(() => {
+    if (fetcher.data?.packages) {
+      console.log("Fetched packages:", fetcher.data.packages);
+      processPackages(fetcher.data.packages).then((processed) => {
+        console.log("Processed categories:", processed);
+        setCategories(processed);
+      });
+    }
+  }, [fetcher.data]);
+
+  const processPackages = async (
+    packages: FileSystemItem[]
+  ): Promise<ComponentCategory[]> => {
+    console.log("Processing packages:", packages);
+
+    const processDirectory = async (
+      dir: FileSystemItem
+    ): Promise<ComponentCategory> => {
+      const items: ComponentItem[] = [];
+      const children: ComponentCategory[] = [];
+
+      for (const item of dir.children || []) {
+        if (item.type === "directory") {
+          children.push(await processDirectory(item));
+        } else if (item.type === "file" && item.name.endsWith(".json")) {
+          try {
+            console.log("Loading component data for:", item.path);
+            const response = await fetch(
+              `/api/file-content?path=${encodeURIComponent(item.path)}`
+            );
+            const data = await response.json();
+            console.log("Loaded component data:", data);
+
+            const componentItem: ComponentItem = {
+              id: item.path,
+              name: data.name || item.name.replace(".json", ""),
+              path: item.path,
+              icon: "🔲",
+              image: data.image,
+            };
+            console.log("Created component item:", componentItem);
+            items.push(componentItem);
+          } catch (error) {
+            console.error(
+              `Error loading component data for ${item.path}:`,
+              error
+            );
+            items.push({
+              id: item.path,
+              name: item.name.replace(".json", ""),
+              path: item.path,
+              icon: "🔲",
+            });
+          }
+        }
+      }
+
+      return {
+        name: dir.name,
+        items,
+        ...(children.length > 0 && { children }),
+      };
+    };
+
+    const categories = await Promise.all(
+      packages.filter((pkg) => pkg.type === "directory").map(processDirectory)
+    );
+
+    console.log("Final categories:", categories);
+    return categories.sort((a, b) => a.name.localeCompare(b.name));
+  };
+
+  const toggleCategory = (categoryName: string) => {
+    setExpandedCategories((prev) => {
+      const next = new Set(prev);
+      if (next.has(categoryName)) {
+        next.delete(categoryName);
+      } else {
+        next.add(categoryName);
+      }
+      return next;
+    });
+  };
+
+  const CategoryItem = ({
+    category,
+    depth = 0,
+  }: {
+    category: ComponentCategory;
+    depth?: number;
+  }) => {
+    const hasContent =
+      category.items.length > 0 || (category.children?.length ?? 0) > 0;
+    if (!hasContent) return null;
+
+    return (
+      <div>
+        <button
+          className="w-full px-4 py-1 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm"
+          style={{ paddingLeft: `${1 + depth}rem` }}
+          onClick={() => toggleCategory(category.name)}
+        >
+          <span className="flex items-center">
+            <span className="mr-2">
+              {expandedCategories.has(category.name) ? "📂" : "📁"}
+            </span>
+            {category.name}
+          </span>
+          <span className="text-xs text-gray-500">{category.items.length}</span>
+        </button>
+        {expandedCategories.has(category.name) && (
+          <>
+            {category.items.length > 0 && (
+              <div className="ml-4" style={{ paddingLeft: `${depth}rem` }}>
+                {category.items.map((item) => (
+                  <div
+                    key={item.id}
+                    className="px-4 py-1 flex items-center hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer text-gray-900 dark:text-gray-100 text-sm"
+                    draggable
+                    onDragStart={(e) => {
+                      const dragData = {
+                        id: item.id,
+                        name: item.name,
+                        image: item.image,
+                      };
+                      console.log("Component data before drag:", item);
+                      console.log("Drag data being set:", dragData);
+                      e.dataTransfer.setData(
+                        "component",
+                        JSON.stringify(dragData)
+                      );
+                    }}
+                  >
+                    {item.image ? (
+                      <img
+                        src={item.image.src}
+                        alt={item.name}
+                        className="w-6 h-6 mr-2 object-contain"
+                      />
+                    ) : (
+                      <span className="mr-2">{item.icon}</span>
+                    )}
+                    <span>{item.name}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+            {category.children?.map((child) => (
+              <CategoryItem
+                key={child.name}
+                category={child}
+                depth={depth + 1}
+              />
+            ))}
+          </>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="border-b border-gray-200 dark:border-gray-700">
@@ -43,24 +198,33 @@ function Category({ name, items }) {
         className="w-full px-4 py-2 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100"
         onClick={() => setIsExpanded(!isExpanded)}
       >
-        <span>{name}</span>
-        <span>{isExpanded ? '−' : '+'}</span>
+        <span className="font-semibold">Components</span>
+        <span
+          className="transform transition-transform duration-200"
+          style={{
+            transform: isExpanded ? "rotate(0deg)" : "rotate(-90deg)",
+          }}
+        >
+          ▼
+        </span>
       </button>
-      
       {isExpanded && (
-        <div className="px-2 py-1">
-          {items.map((item) => (
-            <div
-              key={item.id}
-              className="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded cursor-move text-gray-900 dark:text-gray-100"
-              draggable
-            >
-              <span className="mr-2">{item.icon}</span>
-              <span>{item.name}</span>
+        <div className="py-2">
+          {fetcher.state === "loading" ? (
+            <div className="px-4 text-sm text-gray-500">
+              Loading components...
             </div>
-          ))}
+          ) : categories.length === 0 ? (
+            <div className="px-4 text-sm text-gray-500">
+              No components found
+            </div>
+          ) : (
+            categories.map((category) => (
+              <CategoryItem key={category.name} category={category} />
+            ))
+          )}
         </div>
       )}
     </div>
   );
-} 
+}

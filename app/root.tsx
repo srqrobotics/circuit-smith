@@ -9,6 +9,7 @@ import {
 import type { Route } from "./+types/root";
 import stylesheet from "./app.css?url";
 import Layout from "./components/Layout/Layout";
+import { FileProvider } from './contexts/FileContext';
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -45,7 +46,9 @@ export function RootLayout({ children }: { children: React.ReactNode }) {
 export default function App() {
   return (
     <RootLayout>
-      <Layout />
+      <FileProvider>
+        <Layout />
+      </FileProvider>
     </RootLayout>
   );
 }

@@ -1,5 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { Stage, Layer, Line, Group } from 'react-konva';
+import React, { useEffect, useState, useRef } from "react";
+import { Stage, Layer, Line, Group, Image } from "react-konva";
+import { useFile } from "~/contexts/FileContext";
+import type { Wire, DroppedComponent } from "~/types/circuit";
+import { handleWireDrawing } from "~/utils/wireManager";
+import { loadComponent, loadInitialComponents } from "~/utils/componentLoader";
 
 export default function Canvas() {
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
@@ -7,11 +11,21 @@ export default function Canvas() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [scale, setScale] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [components, setComponents] = useState<DroppedComponent[]>([]);
+  const [loadedImages, setLoadedImages] = useState<{
+    [key: string]: HTMLImageElement;
+  }>({});
+  const [isDraggingComponent, setIsDraggingComponent] = useState(false);
+  const [wires, setWires] = useState<Wire[]>([]);
+  const [isDrawingWire, setIsDrawingWire] = useState(false);
+  const [currentWire, setCurrentWire] = useState<number[]>([]);
+  const [wireColor, setWireColor] = useState("#ff0000"); // Default red wire
+  const stageRef = useRef<any>(null);
 
   useEffect(() => {
     setIsMounted(true);
     const updateDimensions = () => {
-      const container = document.getElementById('canvas-container');
+      const container = document.getElementById("canvas-container");
       if (container) {
         setDimensions({
           width: container.clientWidth,
@@ -21,10 +35,12 @@ export default function Canvas() {
     };
 
     updateDimensions();
-    window.addEventListener('resize', updateDimensions);
+    window.addEventListener("resize", updateDimensions);
+
+    loadInitialComponents(setLoadedImages, setComponents, setWires);
 
     return () => {
-      window.removeEventListener('resize', updateDimensions);
+      window.removeEventListener("resize", updateDimensions);
     };
   }, []);
 
@@ -57,58 +73,153 @@ export default function Canvas() {
     });
   };
 
-  const renderGridLines = () => {
-    const gridSize = 20;
-    const lines = [];
-    const numLinesX = Math.ceil(dimensions.width / (gridSize * scale));
-    const numLinesY = Math.ceil(dimensions.height / (gridSize * scale));
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    const stage = e.currentTarget.getElementsByTagName("canvas")[0];
+    if (!stage) return;
 
-    for (let i = 0; i <= numLinesX; i++) {
-      lines.push(
-        <Line
-          key={`v-${i}`}
-          points={[i * gridSize * scale, 0, i * gridSize * scale, numLinesY * gridSize * scale]}
-          stroke={isDarkMode ? '#374151' : '#ddd'}
-          strokeWidth={0.5}
-        />
-      );
-    }
+    const stageRect = stage.getBoundingClientRect();
+    const componentData = JSON.parse(e.dataTransfer.getData("component"));
 
-    for (let i = 0; i <= numLinesY; i++) {
-      lines.push(
-        <Line
-          key={`h-${i}`}
-          points={[0, i * gridSize * scale, numLinesX * gridSize * scale, i * gridSize * scale]}
-          stroke={isDarkMode ? '#374151' : '#ddd'}
-          strokeWidth={0.5}
-        />
-      );
-    }
+    const stageP = {
+      x: (e.clientX - stageRect.left - position.x) / scale,
+      y: (e.clientY - stageRect.top - position.y) / scale,
+    };
 
-    return lines;
+    await loadComponent(
+      componentData,
+      stageP,
+      scale,
+      loadedImages,
+      setLoadedImages,
+      setComponents
+    );
   };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const gridSize = 20;
+  const numLinesX = Math.ceil(dimensions.width / gridSize);
+  const numLinesY = Math.ceil(dimensions.height / gridSize);
+
+  const wireDrawingHandlers = handleWireDrawing(
+    isDrawingWire,
+    currentWire,
+    wireColor,
+    setWires,
+    setIsDrawingWire,
+    setCurrentWire,
+    () => {
+      const stage = stageRef.current;
+      return stage ? stage.getPointerPosition() : { x: 0, y: 0 };
+    }
+  );
 
   return (
     <div className="flex-1 flex flex-col min-h-0">
       <div className="h-10 border-b border-gray-200 dark:border-gray-700 flex items-center px-4 bg-white dark:bg-gray-800">
-        <Toolbar />
+        <Toolbar wireColor={wireColor} onWireColorChange={setWireColor} />
       </div>
-      <div id="canvas-container" className="flex-1 relative bg-white dark:bg-gray-800">
+      <div
+        id="canvas-container"
+        className="flex-1 relative bg-white dark:bg-gray-800"
+        onDrop={handleDrop}
+        onDragOver={handleDragOver}
+      >
         {isMounted && (
           <Stage
+            ref={stageRef}
             width={dimensions.width}
             height={dimensions.height}
             scaleX={scale}
             scaleY={scale}
             x={position.x}
             y={position.y}
-            draggable
+            draggable={!isDraggingComponent}
             onWheel={handleWheel}
             onDragEnd={handleDragEnd}
+            onMouseDown={wireDrawingHandlers.startDrawing}
+            onMouseMove={wireDrawingHandlers.continueDrawing}
+            onMouseUp={wireDrawingHandlers.finishDrawing}
           >
             <Layer>
               <Group>
-                {renderGridLines()}
+                {/* Grid lines */}
+                {Array.from({ length: 50 }, (_, i) => (
+                  <React.Fragment key={`grid-${i}`}>
+                    <Line
+                      points={[
+                        i * gridSize,
+                        0,
+                        i * gridSize,
+                        numLinesY * gridSize,
+                      ]}
+                      stroke={isDarkMode ? "#374151" : "#ddd"}
+                      strokeWidth={0.5}
+                    />
+                    <Line
+                      points={[
+                        0,
+                        i * gridSize,
+                        numLinesX * gridSize,
+                        i * gridSize,
+                      ]}
+                      stroke={isDarkMode ? "#374151" : "#ddd"}
+                      strokeWidth={0.5}
+                    />
+                  </React.Fragment>
+                ))}
+                {/* Wires */}
+                {wires.map((wire) => (
+                  <Line
+                    key={wire.id}
+                    points={wire.points}
+                    stroke={wire.color}
+                    strokeWidth={2}
+                    lineJoin="round"
+                    lineCap="round"
+                    cornerRadius={10}
+                  />
+                ))}
+                {isDrawingWire && currentWire.length >= 2 && (
+                  <Line
+                    points={currentWire}
+                    stroke={wireColor}
+                    strokeWidth={2}
+                    lineJoin="round"
+                    lineCap="round"
+                    cornerRadius={10}
+                  />
+                )}
+                {/* Dropped Components */}
+                {components.map(
+                  (component) =>
+                    loadedImages[component.image.src] && (
+                      <Image
+                        key={component.id}
+                        image={loadedImages[component.image.src]}
+                        x={component.x}
+                        y={component.y}
+                        width={component.image.width}
+                        height={component.image.height}
+                        draggable
+                        onDragStart={() => setIsDraggingComponent(true)}
+                        onDragEnd={(e) => {
+                          setIsDraggingComponent(false);
+                          const pos = e.target.position();
+                          setComponents((prev) =>
+                            prev.map((c) =>
+                              c.id === component.id
+                                ? { ...c, x: pos.x, y: pos.y }
+                                : c
+                            )
+                          );
+                        }}
+                      />
+                    )
+                )}
               </Group>
             </Layer>
           </Stage>
@@ -118,7 +229,13 @@ export default function Canvas() {
   );
 }
 
-function Toolbar() {
+function Toolbar({
+  wireColor,
+  onWireColorChange,
+}: {
+  wireColor: string;
+  onWireColorChange: (color: string) => void;
+}) {
   return (
     <>
       <button className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-gray-900 dark:text-gray-100 text-sm">
@@ -127,15 +244,17 @@ function Toolbar() {
       <button className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-gray-900 dark:text-gray-100 text-sm">
         Save
       </button>
-      <button className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-gray-900 dark:text-gray-100 text-sm">
-        Zoom In
-      </button>
-      <button className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-gray-900 dark:text-gray-100 text-sm">
-        Zoom Out
-      </button>
-      <button className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-gray-900 dark:text-gray-100 text-sm">
-        Start Simulation
-      </button>
+      <select
+        value={wireColor}
+        onChange={(e) => onWireColorChange(e.target.value)}
+        className="p-1.5 bg-transparent border rounded"
+      >
+        <option value="#ff0000">Red</option>
+        <option value="#000000">Black</option>
+        <option value="#0000ff">Blue</option>
+        <option value="#ffff00">Yellow</option>
+        <option value="#00ff00">Green</option>
+      </select>
     </>
   );
-} 
+}
