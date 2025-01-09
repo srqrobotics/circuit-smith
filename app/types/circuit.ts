@@ -9,6 +9,7 @@ export interface DroppedComponent {
   name: string;
   x: number;
   y: number;
+  rotation: number;
   image: {
     src: string;
     width: number;

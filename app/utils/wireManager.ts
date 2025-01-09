@@ -9,7 +9,7 @@ export function handleWireDrawing(
   setCurrentWire: React.Dispatch<React.SetStateAction<number[]>>,
   getPointerPosition: () => { x: number; y: number }
 ) {
-  const startDrawing = () => {
+  const startDrawing = (_e?: any) => {
     if (!isDrawingWire) {
       setIsDrawingWire(true);
       const pos = getPointerPosition();

@@ -4,6 +4,7 @@ import { useFile } from "~/contexts/FileContext";
 import type { Wire, DroppedComponent } from "~/types/circuit";
 import { handleWireDrawing } from "~/utils/wireManager";
 import { loadComponent, loadInitialComponents } from "~/utils/componentLoader";
+import { useCoordinates } from "~/contexts/CoordinateContext";
 
 export default function Canvas() {
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
@@ -21,6 +22,9 @@ export default function Canvas() {
   const [currentWire, setCurrentWire] = useState<number[]>([]);
   const [wireColor, setWireColor] = useState("#ff0000"); // Default red wire
   const stageRef = useRef<any>(null);
+  const [isCtrlPressed, setIsCtrlPressed] = useState(false);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const { setCoordinates } = useCoordinates();
 
   useEffect(() => {
     setIsMounted(true);
@@ -41,6 +45,24 @@ export default function Canvas() {
 
     return () => {
       window.removeEventListener("resize", updateDimensions);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Control") setIsCtrlPressed(true);
+    };
+
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.key === "Control") setIsCtrlPressed(false);
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
     };
   }, []);
 
@@ -117,6 +139,17 @@ export default function Canvas() {
     }
   );
 
+  const handleMouseMove = (e: any) => {
+    const stage = e.target.getStage();
+    const position = stage.getPointerPosition();
+    const scaledPosition = {
+      x: Math.round((position.x - stage.x()) / scale),
+      y: Math.round((position.y - stage.y()) / scale),
+    };
+    setMousePosition(scaledPosition);
+    setCoordinates(scaledPosition);
+  };
+
   return (
     <div className="flex-1 flex flex-col min-h-0">
       <div className="h-10 border-b border-gray-200 dark:border-gray-700 flex items-center px-4 bg-white dark:bg-gray-800">
@@ -137,11 +170,15 @@ export default function Canvas() {
             scaleY={scale}
             x={position.x}
             y={position.y}
-            draggable={!isDraggingComponent}
+            draggable={isCtrlPressed && !isDraggingComponent}
             onWheel={handleWheel}
             onDragEnd={handleDragEnd}
-            onMouseDown={wireDrawingHandlers.startDrawing}
-            onMouseMove={wireDrawingHandlers.continueDrawing}
+            onMouseMove={handleMouseMove}
+            onMouseDown={(e) => {
+              if (e.target === e.target.getStage()) {
+                wireDrawingHandlers.startDrawing(e);
+              }
+            }}
             onMouseUp={wireDrawingHandlers.finishDrawing}
           >
             <Layer>
@@ -204,9 +241,14 @@ export default function Canvas() {
                         y={component.y}
                         width={component.image.width}
                         height={component.image.height}
+                        rotation={component.rotation}
                         draggable
-                        onDragStart={() => setIsDraggingComponent(true)}
+                        onDragStart={(e) => {
+                          e.evt.stopPropagation();
+                          setIsDraggingComponent(true);
+                        }}
                         onDragEnd={(e) => {
+                          e.evt.stopPropagation();
                           setIsDraggingComponent(false);
                           const pos = e.target.position();
                           setComponents((prev) =>
@@ -216,6 +258,27 @@ export default function Canvas() {
                                 : c
                             )
                           );
+                        }}
+                        onTransform={(e) => {
+                          const node = e.target;
+                          setComponents((prev) =>
+                            prev.map((c) =>
+                              c.id === component.id
+                                ? { ...c, rotation: node.rotation() }
+                                : c
+                            )
+                          );
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "r" || e.key === "R") {
+                            setComponents((prev) =>
+                              prev.map((c) =>
+                                c.id === component.id
+                                  ? { ...c, rotation: c.rotation + 90 }
+                                  : c
+                              )
+                            );
+                          }
                         }}
                       />
                     )

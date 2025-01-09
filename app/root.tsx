@@ -9,7 +9,8 @@ import {
 import type { Route } from "./+types/root";
 import stylesheet from "./app.css?url";
 import Layout from "./components/Layout/Layout";
-import { FileProvider } from './contexts/FileContext';
+import { FileProvider } from "./contexts/FileContext";
+import { CoordinateProvider } from "./contexts/CoordinateContext";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -47,7 +48,9 @@ export default function App() {
   return (
     <RootLayout>
       <FileProvider>
-        <Layout />
+        <CoordinateProvider>
+          <Layout />
+        </CoordinateProvider>
       </FileProvider>
     </RootLayout>
   );
