@@ -208,29 +208,8 @@ export default function Canvas() {
                     />
                   </React.Fragment>
                 ))}
-                {/* Wires */}
-                {wires.map((wire) => (
-                  <Line
-                    key={wire.id}
-                    points={wire.points}
-                    stroke={wire.color}
-                    strokeWidth={2}
-                    lineJoin="round"
-                    lineCap="round"
-                    cornerRadius={10}
-                  />
-                ))}
-                {isDrawingWire && currentWire.length >= 2 && (
-                  <Line
-                    points={currentWire}
-                    stroke={wireColor}
-                    strokeWidth={2}
-                    lineJoin="round"
-                    lineCap="round"
-                    cornerRadius={10}
-                  />
-                )}
-                {/* Dropped Components */}
+
+                {/* Dropped Components - Render these first */}
                 {components.map(
                   (component) =>
                     loadedImages[component.image.src] && (
@@ -282,6 +261,29 @@ export default function Canvas() {
                         }}
                       />
                     )
+                )}
+
+                {/* Wires - Render these last to appear on top */}
+                {wires.map((wire) => (
+                  <Line
+                    key={wire.id}
+                    points={wire.points}
+                    stroke={wire.color}
+                    strokeWidth={2}
+                    lineJoin="round"
+                    lineCap="round"
+                    cornerRadius={10}
+                  />
+                ))}
+                {isDrawingWire && currentWire.length >= 2 && (
+                  <Line
+                    points={currentWire}
+                    stroke={wireColor}
+                    strokeWidth={2}
+                    lineJoin="round"
+                    lineCap="round"
+                    cornerRadius={10}
+                  />
                 )}
               </Group>
             </Layer>
