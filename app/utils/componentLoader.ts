@@ -45,8 +45,11 @@ export async function loadInitialComponents(
   setWires: React.Dispatch<React.SetStateAction<Wire[]>>
 ) {
   try {
-    const response = await fetch('/configs/initial-circuit.json');
+    const response = await fetch('/configs/arduino-fix.json');
     const config = await response.json();
+
+    // const response = await fetch('/packages/Microcontrollers/Arduino/arduino-uno/arduino-uno.json');
+    // const config = await response.json();
 
     // Load all images first
     const imageLoadPromises = config.components.map(async (component: DroppedComponent) => {
@@ -67,9 +70,17 @@ export async function loadInitialComponents(
       return newImages;
     });
 
-    // Set components and wires
+    // Set components
     setComponents(config.components);
-    setWires(config.wires);
+    
+    // Only set wires if they exist in the config
+    if (config.wires && config.wires.length > 0) {
+        // const config.wires = [
+        //     { "id": "wire-1", "points": [x0, y0, x1, y1], "color": "#ff0000" },
+        //     { "id": "wire-2", "points": [x0, y0, x1, y1], "color": "#ff0000" },
+        // ]
+        setWires(config.wires);
+    }
 
   } catch (error) {
     console.error("Failed to load initial components:", error);

@@ -29,7 +29,7 @@ async function getDirectoryContents(dirPath: string): Promise<FileSystemItem[]> 
 
 export async function loader() {
   try {
-    const packagesPath = join(process.cwd(), 'app', 'packages');
+    const packagesPath = join(process.cwd(), 'public', 'packages');
     const packages = await getDirectoryContents(packagesPath);
     return new Response(JSON.stringify({ packages }), {
       headers: { 'Content-Type': 'application/json' },

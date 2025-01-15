@@ -34,7 +34,7 @@ async function getDirectoryContents(dirPath: string): Promise<FileSystemItem[]> 
 
 export async function loader() {
   try {
-    const projectsPath = join(process.cwd(), 'app', 'projects');
+    const projectsPath = join(process.cwd(), 'public', 'projects');
     const files = await getDirectoryContents(projectsPath);
     return new Response(JSON.stringify({ files }), {
       headers: { 'Content-Type': 'application/json' },

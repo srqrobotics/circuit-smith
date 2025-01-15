@@ -1,17 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import type { EditorProps } from '@monaco-editor/react';
-import { useFile } from '~/contexts/FileContext';
+import React, { useState, useEffect } from "react";
+import type { EditorProps } from "@monaco-editor/react";
+import { useFile } from "~/contexts/FileContext";
 
 export default function RightSidebar() {
-  const [code, setCode] = useState('');
-  const [Editor, setEditor] = useState<React.ComponentType<EditorProps> | null>(null);
+  const [code, setCode] = useState("");
+  const [Editor, setEditor] = useState<React.ComponentType<EditorProps> | null>(
+    null
+  );
   const [isMounted, setIsMounted] = useState(false);
   const { selectedFile } = useFile();
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
-    import('@monaco-editor/react').then((module) => {
+    import("@monaco-editor/react").then((module) => {
       setEditor(() => module.default);
     });
   }, []);
@@ -21,18 +23,20 @@ export default function RightSidebar() {
       setIsLoading(true);
       try {
         if (selectedFile) {
-          const response = await fetch(`/api/file-content?path=${encodeURIComponent(selectedFile)}`);
+          const response = await fetch(
+            `/api/file-content?path=${encodeURIComponent(selectedFile)}`
+          );
           const data = await response.json();
           if (data.content !== undefined) {
             setCode(data.content);
           }
         } else {
-          const response = await fetch('/app/projects/defaultCode.txt');
+          const response = await fetch("/public/projects/defaultCode.txt");
           const text = await response.text();
           setCode(text);
         }
       } catch (error) {
-        console.error('Error loading file:', error);
+        console.error("Error loading file:", error);
       } finally {
         setIsLoading(false);
       }
@@ -48,19 +52,19 @@ export default function RightSidebar() {
   };
 
   const getFileName = () => {
-    if (!selectedFile) return 'defaultCode.txt';
-    const parts = selectedFile.split('/');
+    if (!selectedFile) return "defaultCode.txt";
+    const parts = selectedFile.split("/");
     return parts[parts.length - 1];
   };
 
   const getFilePath = () => {
-    if (!selectedFile) return '';
-    const projectsIndex = selectedFile.indexOf('app/projects/');
-    if (projectsIndex === -1) return '';
-    
-    const relativePath = selectedFile.slice(projectsIndex + 12); // 'app/projects/'.length = 12
-    const parts = relativePath.split('/');
-    return parts.slice(0, -1).join('/');
+    if (!selectedFile) return "";
+    const projectsIndex = selectedFile.indexOf("public/projects/");
+    if (projectsIndex === -1) return "";
+
+    const relativePath = selectedFile.slice(projectsIndex + 15); // 'public/projects/'.length = 15
+    const parts = relativePath.split("/");
+    return parts.slice(0, -1).join("/");
   };
 
   return (
@@ -96,7 +100,7 @@ export default function RightSidebar() {
             options={{
               minimap: { enabled: false },
               fontSize: 13,
-              lineNumbers: 'on',
+              lineNumbers: "on",
               roundedSelection: false,
               scrollBeyondLastLine: false,
               readOnly: false,
@@ -111,4 +115,4 @@ export default function RightSidebar() {
       </div>
     </div>
   );
-} 
+}
