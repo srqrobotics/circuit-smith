@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Stage, Layer, Line, Group, Image } from "react-konva";
+import { Stage, Layer, Line, Group, Image, Text } from "react-konva";
 import { useFile } from "~/contexts/FileContext";
 import type { Wire, DroppedComponent } from "~/types/circuit";
 import { handleWireDrawing } from "~/utils/wireManager";
@@ -25,6 +25,7 @@ export default function Canvas() {
   const [isCtrlPressed, setIsCtrlPressed] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const { setCoordinates } = useCoordinates();
+  const [hoveredWireId, setHoveredWireId] = useState<string | null>(null);
 
   useEffect(() => {
     setIsMounted(true);
@@ -112,14 +113,14 @@ export default function Canvas() {
       y: (e.clientY - stageRect.top - position.y) / scale,
     };
 
-    await loadComponent(
-      componentData,
-      stageP,
-      scale,
-      loadedImages,
-      setLoadedImages,
-      setComponents
-    );
+    // await loadComponent(
+    //   componentData,
+    //   stageP,
+    //   scale,
+    //   loadedImages,
+    //   setLoadedImages,
+    //   setComponents
+    // );
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -267,18 +268,32 @@ export default function Canvas() {
                     )
                 )}
 
-                {/* Wires - Render these last to appear on top */}
+                {/* Wires with Pin Labels */}
                 {wires.map((wire) => (
-                  <Line
-                    key={wire.id}
-                    points={wire.points}
-                    stroke={wire.color}
-                    strokeWidth={2}
-                    lineJoin="round"
-                    lineCap="round"
-                    cornerRadius={10}
-                  />
+                  <React.Fragment key={wire.id}>
+                    <Line
+                      points={wire.points}
+                      stroke={wire.color}
+                      strokeWidth={2}
+                      lineJoin="round"
+                      lineCap="round"
+                      cornerRadius={10}
+                      onMouseEnter={() => setHoveredWireId(wire.id)}
+                      onMouseLeave={() => setHoveredWireId(null)}
+                    />
+                    {hoveredWireId === wire.id && (
+                      <Text
+                        x={wire.points[0] + 5}
+                        y={wire.points[1] - 5}
+                        text={wire.id}
+                        fontSize={8}
+                        fill={wire.color}
+                        fontFamily="monospace"
+                      />
+                    )}
+                  </React.Fragment>
                 ))}
+
                 {isDrawingWire && currentWire.length >= 2 && (
                   <Line
                     points={currentWire}
