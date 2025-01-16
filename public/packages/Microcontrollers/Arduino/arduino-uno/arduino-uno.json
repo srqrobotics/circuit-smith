@@ -1,231 +1,69 @@
 {
   "name": "Arduino Uno",
   "type": "microcontroller",
-  "image": {
-    "src": "/images/components/arduino-uno.png",
-    "width": 120,
-    "height": 80
-  },
-  "pins": {
+  "digital-pins": {
     "id": [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      6,
-      7,
-      8,
-      9,
-      10,
-      11,
-      12,
-      13,
-      "A0",
-      "A1",
-      "A2",
-      "A3",
-      "A4",
-      "A5"
+      "pin-0",
+      "pin-1",
+      "pin-2",
+      "pin-3",
+      "pin-4",
+      "pin-5",
+      "pin-6",
+      "pin-7",
+      "pin-8",
+      "pin-9",
+      "pin-10",
+      "pin-11",
+      "pin-12",
+      "pin-13",
+      "GND-0",
+      "AREF",
+      "pin-A0",
+      "pin-A1",
+      "pin-A2",
+      "pin-A3",
+      "pin-A4",
+      "pin-A5",
+      "V_IN",
+      "GND-1",
+      "GND-2",
+      "5V",
+      "3.3V",
+      "RESET"
     ],
-    "rpos": [
-      {
-        "id": "pin-00",
-        "points": [
-          8,
-          17
-        ]
-      },
-      {
-        "id": "pin-01",
-        "points": [
-          8,
-          24
-        ]
-      },
-      {
-        "id": "pin-02",
-        "points": [
-          8,
-          32
-        ]
-      },
-      {
-        "id": "pin-03",
-        "points": [
-          8,
-          40
-        ]
-      },
-      {
-        "id": "pin-04",
-        "points": [
-          8,
-          48
-        ]
-      },
-      {
-        "id": "pin-05",
-        "points": [
-          8,
-          56
-        ]
-      },
-      {
-        "id": "pin-06",
-        "points": [
-          8,
-          63
-        ]
-      },
-      {
-        "id": "pin-07",
-        "points": [
-          8,
-          71
-        ]
-      },
-      {
-        "id": "pin-08",
-        "points": [
-          8,
-          89
-        ]
-      },
-      {
-        "id": "pin-09",
-        "points": [
-          8,
-          97
-        ]
-      },
-      {
-        "id": "pin-10",
-        "points": [
-          8,
-          104
-        ]
-      },
-      {
-        "id": "pin-11",
-        "points": [
-          8,
-          112
-        ]
-      },
-      {
-        "id": "pin-12",
-        "points": [
-          8,
-          120
-        ]
-      },
-      {
-        "id": "pin-13",
-        "points": [
-          8,
-          128
-        ]
-      },
-      {
-        "id": "pin-14",
-        "points": [
-          8,
-          135
-        ]
-      },
-      {
-        "id": "pin-15",
-        "points": [
-          8,
-          143
-        ]
-      },
-      {
-        "id": "pin-16",
-        "points": [
-          152,
-          17
-        ]
-      },
-      {
-        "id": "pin-17",
-        "points": [
-          152,
-          24
-        ]
-      },
-      {
-        "id": "pin-18",
-        "points": [
-          152,
-          32
-        ]
-      },
-      {
-        "id": "pin-19",
-        "points": [
-          152,
-          40
-        ]
-      },
-      {
-        "id": "pin-20",
-        "points": [
-          152,
-          48
-        ]
-      },
-      {
-        "id": "pin-21",
-        "points": [
-          152,
-          56
-        ]
-      },
-      {
-        "id": "pin-22",
-        "points": [
-          152,
-          73
-        ]
-      },
-      {
-        "id": "pin-23",
-        "points": [
-          152,
-          81
-        ]
-      },
-      {
-        "id": "pin-24",
-        "points": [
-          152,
-          88
-        ]
-      },
-      {
-        "id": "pin-25",
-        "points": [
-          152,
-          96
-        ]
-      },
-      {
-        "id": "pin-26",
-        "points": [
-          152,
-          104
-        ]
-      },
-      {
-        "id": "pin-27",
-        "points": [
-          152,
-          112
-        ]
-      }
+    "reloc": [
+      { "id": "pin-0", "points": [8, 17, 8, 17], "color": "#ff0000" },
+      { "id": "pin-1", "points": [8, 24, 8, 24], "color": "#ff0000" },
+      { "id": "pin-2", "points": [8, 32, 8, 32], "color": "#ff0000" },
+      { "id": "pin-3", "points": [8, 40, 8, 40], "color": "#ff0000" },
+      { "id": "pin-4", "points": [8, 48, 8, 48], "color": "#ff0000" },
+      { "id": "pin-5", "points": [8, 56, 8, 56], "color": "#ff0000" },
+      { "id": "pin-6", "points": [8, 63, 8, 63], "color": "#ff0000" },
+      { "id": "pin-7", "points": [8, 71, 8, 71], "color": "#ff0000" },
+      
+      { "id": "pin-8", "points": [8, 89, 8, 89], "color": "#ff0000" },
+      { "id": "pin-9", "points": [8, 97, 8, 97], "color": "#ff0000" },
+      { "id": "pin-10", "points": [8, 104, 8, 104], "color": "#ff0000" },
+      { "id": "pin-11", "points": [8, 112, 8, 112], "color": "#ff0000" },
+      { "id": "pin-12", "points": [8, 120, 8, 120], "color": "#ff0000" },
+      { "id": "pin-13", "points": [8, 128, 8, 128], "color": "#ff0000" },
+      { "id": "GND-0", "points": [8, 135, 8, 135], "color": "#ff0000" },
+      { "id": "AREF", "points": [8, 143, 8, 143], "color": "#ff0000" },
+      
+      { "id": "pin-A0", "points": [152, 17, 152, 17], "color": "#ff0000" },
+      { "id": "pin-A1", "points": [152, 24, 152, 24], "color": "#ff0000" },
+      { "id": "pin-A2", "points": [152, 32, 152, 32], "color": "#ff0000" },
+      { "id": "pin-A3", "points": [152, 40, 152, 40], "color": "#ff0000" },
+      { "id": "pin-A4", "points": [152, 48, 152, 48], "color": "#ff0000" },
+      { "id": "pin-A5", "points": [152, 56, 152, 56], "color": "#ff0000" },
+      
+      { "id": "V_IN", "points": [152, 73, 152, 73], "color": "#ff0000" },
+      { "id": "GND-1", "points": [152, 81, 152, 81], "color": "#ff0000" },
+      { "id": "GND-2", "points": [152, 88, 152, 88], "color": "#ff0000" },
+      { "id": "5V", "points": [152, 96, 152, 96], "color": "#ff0000" },
+      { "id": "3.3V", "points": [152, 104, 152, 104], "color": "#ff0000" },
+      { "id": "RESET", "points": [152, 112, 152, 112], "color": "#ff0000" }
     ]
   },
   "specs": {

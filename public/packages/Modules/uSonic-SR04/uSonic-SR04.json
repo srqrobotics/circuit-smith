@@ -1,0 +1,21 @@
+{
+  "name": "uSonic-SR04",
+  "type": "module",
+  "digital-pins": {
+    "id": [
+      "5V",
+      "Trig",
+      "Echo",
+      "GND"
+    ],
+    "reloc": [
+      {"id": "5V", "points": [72, 62]},
+      {"id": "Trig", "points": [80, 62]},
+      {"id": "Echo", "points": [88, 62]},
+      {"id": "GND", "points": [96, 62]}
+    ]
+  },
+  "specs": {
+    "voltage": "5V"
+  }
+}

@@ -14,6 +14,21 @@
       "pin-map": {
         "src": "/packages/Microcontrollers/Arduino/arduino-uno/arduino-uno.json"
       }
+    },
+    {
+      "id": "uSonic",
+      "name": "Ultrasonic SR04",
+      "x": 394,
+      "y": 100,
+      "rotation": 0,
+      "image": {
+        "src": "/packages/Modules/uSonic-SR04/uSonic-SR04.png",
+        "width": 0,
+        "height": 0
+      },
+      "pin-map": {
+        "src": "/packages/Modules/uSonic-SR04/uSonic-SR04.json"
+      }
     }
   ]
-}
+} 
