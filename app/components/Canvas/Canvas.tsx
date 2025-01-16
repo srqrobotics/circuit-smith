@@ -3,7 +3,7 @@ import { Stage, Layer, Line, Group, Image } from "react-konva";
 import { useFile } from "~/contexts/FileContext";
 import type { Wire, DroppedComponent } from "~/types/circuit";
 import { handleWireDrawing } from "~/utils/wireManager";
-import { loadComponent, loadInitialComponents } from "~/utils/componentLoader";
+import { ComponentLoader } from "~/utils/componentLoader";
 import { useCoordinates } from "~/contexts/CoordinateContext";
 
 export default function Canvas() {
@@ -41,7 +41,11 @@ export default function Canvas() {
     updateDimensions();
     window.addEventListener("resize", updateDimensions);
 
-    loadInitialComponents(setLoadedImages, setComponents, setWires);
+    ComponentLoader.loadInitialComponents(
+      setLoadedImages,
+      setComponents,
+      setWires
+    );
 
     return () => {
       window.removeEventListener("resize", updateDimensions);

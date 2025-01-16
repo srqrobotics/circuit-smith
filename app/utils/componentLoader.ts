@@ -1,88 +1,98 @@
 import { preloadImage } from './imageLoader';
 import type { DroppedComponent, Wire } from '~/types/circuit';
 
-export async function loadComponent(
-  componentData: any,
-  stagePosition: { x: number; y: number },
-  scale: number,
-  loadedImages: { [key: string]: HTMLImageElement },
-  setLoadedImages: React.Dispatch<React.SetStateAction<{ [key: string]: HTMLImageElement }>>,
-  setComponents: React.Dispatch<React.SetStateAction<DroppedComponent[]>>
-) {
-  if (!componentData.image) {
-    console.log("No image data in component:", componentData);
-    return;
-  }
+interface PinMapData {
+  'digital-pins': {
+    id: string[];
+    reloc: { id: string; points: number[] }[];
+  };
+}
 
-  try {
-    // Load image if not already loaded
-    if (!loadedImages[componentData.image.src]) {
-      const img = await preloadImage(componentData.image.src);
-      setLoadedImages((prev) => ({
-        ...prev,
-        [componentData.image.src]: img,
+export class ComponentLoader {
+  static locatePins(component: any): Wire[] {
+    const pinPoints: Wire[] = [];
+    
+    if (!component['pin-map']?.src) return pinPoints;
+
+    try {
+      const pinMapData: PinMapData = component.pinMap;
+      
+      pinMapData['digital-pins'].id.forEach((pinId: string) => {
+        const pinData = pinMapData['digital-pins'].reloc.find(
+          (pin) => pin.id === pinId
+        );
+        
+        if (pinData) {
+          const x = pinData.points[0] + component.x;
+          const y = pinData.points[1] + component.y;
+          pinPoints.push({
+            id: pinId,
+            points: [x, y, x, y],
+            color: "#ff0000"
+          });
+        }
+      });
+    } catch (error) {
+      document.dispatchEvent(new CustomEvent('console-output', { 
+        detail: { type: 'error', message: `Failed to generate pin wires: ${error}` }
       }));
     }
 
-    const newComponent: DroppedComponent = {
-      id: `${componentData.id}-${Date.now()}`,
-      name: componentData.name,
-      x: stagePosition.x,
-      y: stagePosition.y,
-      rotation: 0,
-      image: componentData.image,
-    };
-
-    setComponents((prev) => [...prev, newComponent]);
-  } catch (error) {
-    console.error("Failed to load component:", error);
+    return pinPoints;
   }
-}
 
-export async function loadInitialComponents(
-  setLoadedImages: React.Dispatch<React.SetStateAction<{ [key: string]: HTMLImageElement }>>,
-  setComponents: React.Dispatch<React.SetStateAction<DroppedComponent[]>>,
-  setWires: React.Dispatch<React.SetStateAction<Wire[]>>
-) {
-  try {
-    const response = await fetch('/configs/arduino-fix.json');
-    const config = await response.json();
+  static async loadInitialComponents(
+    setLoadedImages: React.Dispatch<React.SetStateAction<{ [key: string]: HTMLImageElement }>>,
+    setComponents: React.Dispatch<React.SetStateAction<DroppedComponent[]>>,
+    setWires: React.Dispatch<React.SetStateAction<Wire[]>>
+  ) {
+    try {
+      const response = await fetch('/configs/demo.json');
+      const config = await response.json();
 
-    // const response = await fetch('/packages/Microcontrollers/Arduino/arduino-uno/arduino-uno.json');
-    // const config = await response.json();
-
-    // Load all images first
-    const imageLoadPromises = config.components.map(async (component: DroppedComponent) => {
-      const img = await preloadImage(component.image.src);
-      component.image.width = img.naturalWidth;
-      component.image.height = img.naturalHeight;
-      return { src: component.image.src, img };
-    });
-
-    const loadedImgs = await Promise.all(imageLoadPromises);
-    
-    // Update loadedImages state
-    setLoadedImages((prev) => {
-      const newImages = { ...prev };
-      loadedImgs.forEach(({ src, img }) => {
-        newImages[src] = img;
+      // Load pin mappings
+      const pinWirePromises = config.components.map(async (component: any) => {
+        if (component['pin-map']?.src) {
+          const pinMapResponse = await fetch(component['pin-map'].src);
+          component.pinMap = await pinMapResponse.json();
+          return ComponentLoader.locatePins(component);
+        }
+        return [];
       });
-      return newImages;
-    });
 
-    // Set components
-    setComponents(config.components);
-    
-    // Only set wires if they exist in the config
-    if (config.wires && config.wires.length > 0) {
-        // const config.wires = [
-        //     { "id": "wire-1", "points": [x0, y0, x1, y1], "color": "#ff0000" },
-        //     { "id": "wire-2", "points": [x0, y0, x1, y1], "color": "#ff0000" },
-        // ]
-        setWires(config.wires);
+      // Load images
+      const imageLoadPromises = config.components.map(async (component: DroppedComponent) => {
+        const img = await preloadImage(component.image.src);
+        component.image.width = img.naturalWidth;
+        component.image.height = img.naturalHeight;
+        return { src: component.image.src, img };
+      });
+
+      // Wait for all promises to resolve
+      const [pinWires, loadedImgs] = await Promise.all([
+        Promise.all(pinWirePromises),
+        Promise.all(imageLoadPromises)
+      ]);
+
+      // Update states
+      setLoadedImages((prev) => {
+        const newImages = { ...prev };
+        loadedImgs.forEach(({ src, img }) => {
+          newImages[src] = img;
+        });
+        return newImages;
+      });
+
+      setComponents(config.components);
+
+      // Flatten pin wires array and set wires
+      const allPinWires = pinWires.flat();
+      if (allPinWires.length > 0) {
+        setWires(allPinWires);
+      }
+
+    } catch (error) {
+      console.error("Failed to load initial components:", error);
     }
-
-  } catch (error) {
-    console.error("Failed to load initial components:", error);
   }
 } 
