@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Stage, Layer, Line, Group, Image, Text } from "react-konva";
+import Konva from "konva";
 import { useFile } from "~/contexts/FileContext";
 import type { Wire, DroppedComponent } from "~/types/circuit";
 import { handleWireDrawing } from "~/utils/wireManager";
@@ -144,9 +145,13 @@ export default function Canvas() {
     }
   );
 
-  const handleMouseMove = (e: any) => {
+  const handleMouseMove = (e: Konva.KonvaEventObject<MouseEvent>) => {
     const stage = e.target.getStage();
+    if (!stage) return;
+
     const position = stage.getPointerPosition();
+    if (!position) return;
+
     const scaledPosition = {
       x: Math.round((position.x - stage.x()) / scale),
       y: Math.round((position.y - stage.y()) / scale),
@@ -253,7 +258,7 @@ export default function Canvas() {
                             )
                           );
                         }}
-                        onKeyDown={(e) => {
+                        onKeyDown={(e: React.KeyboardEvent) => {
                           if (e.key === "r" || e.key === "R") {
                             setComponents((prev) =>
                               prev.map((c) =>
