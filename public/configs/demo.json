@@ -30,5 +30,11 @@
         "src": "/packages/Modules/uSonic-SR04/uSonic-SR04.json"
       }
     }
+  ],
+  "wire": [
+    {"arduino-uno": "5V", "uSonic":"5V"},
+    {"arduino-uno": "pin-4", "uSonic":"Echo"},
+    {"arduino-uno": "pin-5", "uSonic":"Trig"},
+    {"arduino-uno": "GND-1", "uSonic":"GND"}
   ]
 } 
