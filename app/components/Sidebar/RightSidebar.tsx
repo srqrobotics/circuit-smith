@@ -31,7 +31,7 @@ export default function RightSidebar() {
             setCode(data.content);
           }
         } else {
-          const response = await fetch("/public/projects/defaultCode.txt");
+          const response = await fetch("/projects/defaultCode.txt");
           const text = await response.text();
           setCode(text);
         }
@@ -59,7 +59,7 @@ export default function RightSidebar() {
 
   const getFilePath = () => {
     if (!selectedFile) return "";
-    const projectsIndex = selectedFile.indexOf("public/projects/");
+    const projectsIndex = selectedFile.indexOf("/projects/");
     if (projectsIndex === -1) return "";
 
     const relativePath = selectedFile.slice(projectsIndex + 15); // 'public/projects/'.length = 15
