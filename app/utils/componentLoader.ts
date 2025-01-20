@@ -17,16 +17,16 @@ export class ComponentLoader {
     try {
       const pinMapData: PinMapData = component.pinMap;
       
-      pinMapData['digital-pins'].id.forEach((pinId: string) => {
+      pinMapData['digital-pins'].id.forEach((pinId: string, index: number) => {
         const pinData = pinMapData['digital-pins'].reloc.find(
-          (pin) => pin.id === pinId
+          (pin: { id: string; points: number[] }) => pin.id === pinId
         );
         
         if (pinData) {
           const x = pinData.points[0] + component.x;
           const y = pinData.points[1] + component.y;
           pinPoints.push({
-            id: pinId,
+            id: `${component.id}-${pinId}-${index}`,
             points: [x, y, x, y],
             color: "#ff0000"
           });
