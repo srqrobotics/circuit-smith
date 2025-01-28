@@ -1,0 +1,19 @@
+{
+  "name": "servo-SG90",
+  "type": "module",
+  "digital-pins": {
+    "id": [
+      "5V",
+      "POS",
+      "GND"
+    ],
+    "reloc": [
+      {"id": "5V", "points": [3, 8]},
+      {"id": "POS", "points": [3, 13]},
+      {"id": "GND", "points": [3, 18]}
+    ]
+  },
+  "specs": {
+    "voltage": "5V"
+  }
+}
