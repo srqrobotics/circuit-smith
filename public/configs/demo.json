@@ -1,40 +1,59 @@
 {
   "components": [
     {
-      "id": "arduino-uno",
-      "name": "Arduino Uno",
+      "id": "mcu",
+      "name": "Arduino",
       "x": 500,
       "y": 250,
       "rotation": 0,
       "image": {
-        "src": "/packages/Microcontrollers/Arduino/arduino-uno/arduino-uno.png",
+        "src": "/packages/Microcontrollers/Arduino/arduino-mega.png",
         "width": 0,
         "height": 0
       },
       "pin-map": {
-        "src": "/packages/Microcontrollers/Arduino/arduino-uno/arduino-uno.json"
+        "src": "/packages/Microcontrollers/Arduino/arduino-mega.json"
       }
     },
     {
-      "id": "uSonic",
+      "id": "ultrasonic-SR04",
       "name": "Ultrasonic SR04",
-      "x": 394,
-      "y": 100,
+      "x": 200,
+      "y": 50,
       "rotation": 0,
       "image": {
-        "src": "/packages/Modules/uSonic-SR04/uSonic-SR04.png",
+        "src": "/packages/Modules/ultrasonic-SR04.png",
         "width": 0,
         "height": 0
       },
       "pin-map": {
-        "src": "/packages/Modules/uSonic-SR04/uSonic-SR04.json"
+        "src": "/packages/Modules/ultrasonic-SR04.json"
+      }
+    },
+    {
+      "id": "servo-SG90",
+      "name": "Servo SG90",
+      "x": 700,
+      "y": 320,
+      "rotation": 0,
+      "image": {
+        "src": "/packages/Modules/servo-SG90.png",
+        "width": 0,
+        "height": 0
+      },
+      "pin-map": {
+        "src": "/packages/Modules/servo-SG90.json"
       }
     }
   ],
+  
   "wire": [
-    {"arduino-uno": "5V", "uSonic":"5V"},
-    {"arduino-uno": "pin-4", "uSonic":"Echo"},
-    {"arduino-uno": "pin-5", "uSonic":"Trig"},
-    {"arduino-uno": "GND-1", "uSonic":"GND"}
+    {"mcu": "5V", "ultrasonic-SR04":"5V"},
+    {"mcu": "D4", "ultrasonic-SR04":"ECHO"},
+    {"mcu": "D5", "ultrasonic-SR04":"TRIG"},
+    {"mcu": "GND-1", "ultrasonic-SR04":"GND"},
+    {"mcu": "5V", "servo-SG90":"5V"},
+    {"mcu": "D8", "servo-SG90":"POS"},
+    {"mcu": "GND-1", "servo-SG90":"GND"}
   ]
 } 

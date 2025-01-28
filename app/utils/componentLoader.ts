@@ -8,7 +8,24 @@ interface PinMapData {
   };
 }
 
+export const wireColor = {
+  red: "#ff0000",
+  black: "#000000",
+  blue: "#0000ff",
+  orange: "#ffa500",
+  green: "#00ff00",
+  brown: "#8b4513",
+  gray: "#808080",
+  white: "#ffffff",
+  yellow: "#ffff00",
+  violet: "#8a2be2",
+  rose: "#ff007f",
+  aqua: "#00ffff",
+} as const;
+
 export class ComponentLoader {
+  private static colorIndex = 0;
+
   static locatePins(component: any): Wire[] {
     const pinPoints: Wire[] = [];
 
@@ -44,6 +61,29 @@ export class ComponentLoader {
     }
 
     return pinPoints;
+  }
+
+  static getWireColor(wireType: string): string {
+    let color: string;
+    switch (wireType) {
+      case "5V":
+        color = wireColor.red;
+        break;
+      case "GND":
+        color = wireColor.black;
+        break;
+      default:
+        const availableColors = Object.entries(wireColor)
+          .filter(([key]) => key !== "red" && key !== "black")
+          .map(([_, value]) => value);
+        color =
+          availableColors[
+            (this.colorIndex =
+              ((this.colorIndex || 0) + 1) % availableColors.length)
+          ];
+    }
+
+    return `${color}`;
   }
 
   static async loadInitialComponents(
@@ -104,6 +144,7 @@ export class ComponentLoader {
           const connection = config.wire[key];
 
           const wireRoute: number[] = [];
+          const wireNames: { [key: string]: string } = {};
 
           Object.keys(connection).forEach((device) => {
             const pin = connection[device];
@@ -120,17 +161,18 @@ export class ComponentLoader {
             // Find matching pin id in pinMap array
             const matchingPin = pinMap.find((p: any) => p.id === pin);
             if (matchingPin) {
+              wireNames[key] = pin;
               wireRoute.push(matchingPin.points[0] + componentLocation.x);
               wireRoute.push(matchingPin.points[1] + componentLocation.y);
               // console.log(pin, matchingPin.points);
             }
           });
           // TODO: push what ever the points to make the route smooth..
-
+          console.log("pins", wireNames[key]);
           compWiring.push({
             id: `wire-${key}`,
             points: wireRoute,
-            color: "#ff0000",
+            color: ComponentLoader.getWireColor(wireNames[key]),
           });
         });
 
