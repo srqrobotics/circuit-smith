@@ -112,8 +112,10 @@ export class ComponentLoader {
     shortest_y = dist_to_top <= dist_to_bottom ? -dist_to_top : dist_to_bottom;
 
     const short_logic = Math.abs(shortest_x) <= Math.abs(shortest_y);
-    shortest_x = short_logic ? shortest_x : 0;
-    shortest_y = !short_logic ? shortest_y : 0;
+    const dirX = shortest_x / Math.abs(shortest_x);
+    const dirY = shortest_y / Math.abs(shortest_y);
+    shortest_x = short_logic ? shortest_x + 10 * dirX : 0;
+    shortest_y = !short_logic ? shortest_y + 10 * dirY : 0;
 
     return [shortest_x, shortest_y];
   }
@@ -207,14 +209,20 @@ export class ComponentLoader {
                 [componentLocation.x, componentLocation.y]
               );
               console.log("shortPath: ", shortPath[0], shortPath[1]);
+
+              if (wireRoute.length >= 4) {
+                wireRoute.splice(
+                  wireRoute.length - 2,
+                  0,
+                  x + shortPath[0],
+                  y + shortPath[1]
+                );
+              } else {
+                wireRoute.push(x + shortPath[0]);
+                wireRoute.push(y + shortPath[1]);
+              }
             }
 
-            // wireRoute.splice(
-            //   wireRoute.length - 2,
-            //   0,
-            //   shortPath[0],
-            //   shortPath[1]
-            // );
             // TODO: push what ever the points to make the route smooth..
           });
 
