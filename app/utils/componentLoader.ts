@@ -86,6 +86,38 @@ export class ComponentLoader {
     return `${color}`;
   }
 
+  static getShortPathDir(
+    pinLoc: number[],
+    compSize: number[],
+    compLoc: number[]
+  ): number[] {
+    const x_origin = compLoc[0];
+    const x_limit = compSize[0] + x_origin;
+    const x_pin = pinLoc[0];
+    const y_origin = compLoc[1];
+    const y_limit = compSize[1] + y_origin;
+    const y_pin = pinLoc[1];
+
+    let shortest_x = 0;
+    let shortest_y = 0;
+
+    // Pin is between bounds, find shorter distance to either edge
+    const dist_to_left = Math.abs(x_pin - x_origin);
+    const dist_to_right = Math.abs(x_limit - x_pin);
+    shortest_x = dist_to_left <= dist_to_right ? -dist_to_left : dist_to_right;
+
+    // Pin is between bounds, find shorter distance to either edge
+    const dist_to_top = Math.abs(y_pin - y_origin);
+    const dist_to_bottom = Math.abs(y_limit - y_pin);
+    shortest_y = dist_to_top <= dist_to_bottom ? -dist_to_top : dist_to_bottom;
+
+    const short_logic = Math.abs(shortest_x) <= Math.abs(shortest_y);
+    shortest_x = short_logic ? shortest_x : 0;
+    shortest_y = !short_logic ? shortest_y : 0;
+
+    return [shortest_x, shortest_y];
+  }
+
   static async loadInitialComponents(
     setLoadedImages: React.Dispatch<
       React.SetStateAction<{ [key: string]: HTMLImageElement }>
@@ -165,11 +197,27 @@ export class ComponentLoader {
 
             if (matchingPin) {
               wireNames[key] = pin;
-              wireRoute.push(matchingPin.points[0] + componentLocation.x);
-              wireRoute.push(matchingPin.points[1] + componentLocation.y);
+              const x = matchingPin.points[0] + componentLocation.x;
+              const y = matchingPin.points[1] + componentLocation.y;
+              wireRoute.push(x);
+              wireRoute.push(y);
+              const shortPath = ComponentLoader.getShortPathDir(
+                [x, y],
+                [compWidth, compHeight],
+                [componentLocation.x, componentLocation.y]
+              );
+              console.log("shortPath: ", shortPath[0], shortPath[1]);
             }
+
+            // wireRoute.splice(
+            //   wireRoute.length - 2,
+            //   0,
+            //   shortPath[0],
+            //   shortPath[1]
+            // );
             // TODO: push what ever the points to make the route smooth..
           });
+
           // console.log("wireRoute: ", wireRoute);
           // const lastX = wireRoute[wireRoute.length - 2];
           // const lastY = wireRoute[wireRoute.length - 1];
