@@ -148,7 +148,7 @@ export class ComponentLoader {
 
           Object.keys(connection).forEach((device) => {
             const pin = connection[device];
-            // console.log(device, pin);
+            console.log(device, pin);
 
             const pinMap = config.components.find(
               (comp: DroppedComponent) => comp.id === device
@@ -159,16 +159,23 @@ export class ComponentLoader {
             );
 
             // Find matching pin id in pinMap array
+            const compHeight = componentLocation.image.height;
+            const compWidth = componentLocation.image.width;
             const matchingPin = pinMap.find((p: any) => p.id === pin);
+
             if (matchingPin) {
               wireNames[key] = pin;
               wireRoute.push(matchingPin.points[0] + componentLocation.x);
               wireRoute.push(matchingPin.points[1] + componentLocation.y);
-              // console.log(pin, matchingPin.points);
             }
+            // TODO: push what ever the points to make the route smooth..
           });
-          // TODO: push what ever the points to make the route smooth..
-          console.log("pins", wireNames[key]);
+          // console.log("wireRoute: ", wireRoute);
+          // const lastX = wireRoute[wireRoute.length - 2];
+          // const lastY = wireRoute[wireRoute.length - 1];
+          // wireRoute.splice(wireRoute.length - 2, 0, lastX, lastY + 20);
+          // wireRoute.push(lastX - 10, lastY);
+
           compWiring.push({
             id: `wire-${key}`,
             points: wireRoute,
@@ -176,7 +183,7 @@ export class ComponentLoader {
           });
         });
 
-        console.log(compWiring);
+        // console.log(compWiring);
       }
 
       // Flatten pin wires array and set wires
