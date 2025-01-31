@@ -93,6 +93,51 @@ export function findPath(
     return [start, [x1, midY], [x2, midY], end];
   }
 
+  // Try going around the device bounds
+  for (const bound of bounds) {
+    const [bx1, by1, bx2, by2] = bound;
+
+    // Try going above the device
+    const topY = by1 - 20;
+    if (
+      !intersectsBounds(x1, y1, x1, topY) &&
+      !intersectsBounds(x1, topY, x2, topY) &&
+      !intersectsBounds(x2, topY, x2, y2)
+    ) {
+      return [start, [x1, topY], [x2, topY], end];
+    }
+
+    // Try going below the device
+    const bottomY = by2 + 20;
+    if (
+      !intersectsBounds(x1, y1, x1, bottomY) &&
+      !intersectsBounds(x1, bottomY, x2, bottomY) &&
+      !intersectsBounds(x2, bottomY, x2, y2)
+    ) {
+      return [start, [x1, bottomY], [x2, bottomY], end];
+    }
+
+    // Try going left of the device
+    const leftX = bx1 - 20;
+    if (
+      !intersectsBounds(x1, y1, leftX, y1) &&
+      !intersectsBounds(leftX, y1, leftX, y2) &&
+      !intersectsBounds(leftX, y2, x2, y2)
+    ) {
+      return [start, [leftX, y1], [leftX, y2], end];
+    }
+
+    // Try going right of the device
+    const rightX = bx2 + 20;
+    if (
+      !intersectsBounds(x1, y1, rightX, y1) &&
+      !intersectsBounds(rightX, y1, rightX, y2) &&
+      !intersectsBounds(rightX, y2, x2, y2)
+    ) {
+      return [start, [rightX, y1], [rightX, y2], end];
+    }
+  }
+
   // If no path found, return empty array
   return [];
 }
@@ -349,10 +394,7 @@ export class ComponentLoader {
           const [endX, endY] = [wire.points[4], wire.points[5]];
           const path = findPath([startX, startY], [endX, endY], deviceBounds);
           if (path.length > 0) {
-            // Update wire points with the found path
             const wirePath = path.flat();
-            // wirePath.splice(0, 2);
-            // wirePath.splice(-2, 2);
             wirePath.forEach((point) => {
               wire.points.splice(wire.points.length - 4, 0, point);
             });
@@ -360,12 +402,6 @@ export class ComponentLoader {
           console.log(wire.points);
         });
       }
-
-      // findPath(
-      //   start: [number, number],
-      //   end: [number, number],
-      //   bounds: number[][]
-      // );
 
       // Flatten pin wires array and set wires
       const allPinWires = [...compWiring.flat(), ...pinWires.flat()];
