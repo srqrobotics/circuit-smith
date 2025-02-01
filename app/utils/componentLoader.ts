@@ -142,6 +142,175 @@ export function findPath(
   return [];
 }
 
+function shiftOverlappingPaths(paths: Wire[], bounds: number[][]): Wire[] {
+  const modifiedPaths = [...paths];
+  const MIN_SHIFT = 5;
+  const MAX_SHIFT = 15;
+  const BOUNDARY_MARGIN = 20; // Distance to shift outside boundaries
+
+  // Track overlapping lines at each position
+  const overlapCounts = new Map<string, number>();
+
+  // Compare each path with every other path
+  for (let i = 0; i < modifiedPaths.length; i++) {
+    for (let j = i + 1; j < modifiedPaths.length; j++) {
+      const path1 = modifiedPaths[i].points;
+      const path2 = modifiedPaths[j].points;
+
+      // Skip if both paths end at the same points (same pin connections)
+      if (
+        (path1[0] === path2[0] && path1[1] === path2[1]) ||
+        (path1[path1.length - 2] === path2[path2.length - 2] &&
+          path1[path1.length - 1] === path2[path2.length - 1])
+      ) {
+        continue;
+      }
+
+      // Check each line segment in path1 against each in path2
+      for (let p1 = 0; p1 < path1.length - 2; p1 += 2) {
+        for (let p2 = 0; p2 < path2.length - 2; p2 += 2) {
+          const x1 = path1[p1];
+          const y1 = path1[p1 + 1];
+          const x2 = path1[p1 + 2];
+          const y2 = path1[p1 + 3];
+
+          const x3 = path2[p2];
+          const y3 = path2[p2 + 1];
+          const x4 = path2[p2 + 2];
+          const y4 = path2[p2 + 3];
+
+          // Calculate shift amount based on available space
+          const getShiftAmount = (count: number, space: number) => {
+            const baseShift = Math.min(
+              Math.max(space / (count + 1), MIN_SHIFT),
+              MAX_SHIFT
+            );
+            return baseShift * (count - 1);
+          };
+
+          // Check if points are overlapping
+          if (x1 === x3 && y1 === y3) {
+            const key = `${x1},${y1}`;
+            const count = (overlapCounts.get(key) || 1) + 1;
+            overlapCounts.set(key, count);
+            // Calculate shift based on available space
+            const shift = getShiftAmount(count, BOUNDARY_MARGIN);
+            path1[p1] += shift;
+            path1[p1 + 1] += shift;
+          }
+
+          // Check if lines are exactly vertical (x coordinates equal)
+          if (x1 === x2 && x3 === x4 && x1 === x3) {
+            // Vertical lines overlap
+            const minY1 = Math.min(y1, y2);
+            const maxY1 = Math.max(y1, y2);
+            const minY2 = Math.min(y3, y4);
+            const maxY2 = Math.max(y3, y4);
+
+            if (!(maxY1 < minY2 || minY1 > maxY2)) {
+              const key = `v${x1}`;
+              const count = (overlapCounts.get(key) || 1) + 1;
+              overlapCounts.set(key, count);
+
+              // Find nearest boundary edge and determine if we should shift left or right
+              let nearestBoundaryX = x1;
+              let minDistance = Infinity;
+              let shiftDirection = 1; // 1 for right, -1 for left
+              let availableSpace = Infinity;
+
+              for (const bound of bounds) {
+                const [bx1, by1, bx2, by2] = bound;
+                const distToLeft = Math.abs(x1 - (bx1 - BOUNDARY_MARGIN));
+                const distToRight = Math.abs(x1 - (bx2 + BOUNDARY_MARGIN));
+
+                if (distToLeft < minDistance) {
+                  minDistance = distToLeft;
+                  nearestBoundaryX = bx1 - BOUNDARY_MARGIN;
+                  shiftDirection = -1; // Shift further left
+                  availableSpace = distToLeft;
+                }
+                if (distToRight < minDistance) {
+                  minDistance = distToRight;
+                  nearestBoundaryX = bx2 + BOUNDARY_MARGIN;
+                  shiftDirection = 1; // Shift further right
+                  availableSpace = distToRight;
+                }
+              }
+
+              // Calculate shift based on available space
+              const shift =
+                getShiftAmount(count, availableSpace) * shiftDirection;
+              nearestBoundaryX += shift;
+
+              // Shift path1 to nearest boundary while maintaining start/end x coordinates
+              for (let k = p1; k <= p1 + 2; k += 2) {
+                // Only shift intermediate points, preserve endpoints
+                if (k > 0 && k < path1.length - 2) {
+                  path1[k] = nearestBoundaryX;
+                }
+              }
+            }
+          }
+          // Check if lines are exactly horizontal (y coordinates equal)
+          else if (y1 === y2 && y3 === y4 && y1 === y3) {
+            // Horizontal lines overlap
+            const minX1 = Math.min(x1, x2);
+            const maxX1 = Math.max(x1, x2);
+            const minX2 = Math.min(x3, x4);
+            const maxX2 = Math.max(x3, x4);
+
+            if (!(maxX1 < minX2 || minX1 > maxX2)) {
+              const key = `h${y1}`;
+              const count = (overlapCounts.get(key) || 1) + 1;
+              overlapCounts.set(key, count);
+
+              // Find nearest boundary edge and determine if we should shift up or down
+              let nearestBoundaryY = y1;
+              let minDistance = Infinity;
+              let shiftDirection = 1; // 1 for down, -1 for up
+              let availableSpace = Infinity;
+
+              for (const bound of bounds) {
+                const [bx1, by1, bx2, by2] = bound;
+                const distToTop = Math.abs(y1 - (by1 - BOUNDARY_MARGIN));
+                const distToBottom = Math.abs(y1 - (by2 + BOUNDARY_MARGIN));
+
+                if (distToTop < minDistance) {
+                  minDistance = distToTop;
+                  nearestBoundaryY = by1 - BOUNDARY_MARGIN;
+                  shiftDirection = -1; // Shift further up
+                  availableSpace = distToTop;
+                }
+                if (distToBottom < minDistance) {
+                  minDistance = distToBottom;
+                  nearestBoundaryY = by2 + BOUNDARY_MARGIN;
+                  shiftDirection = 1; // Shift further down
+                  availableSpace = distToBottom;
+                }
+              }
+
+              // Calculate shift based on available space
+              const shift =
+                getShiftAmount(count, availableSpace) * shiftDirection;
+              nearestBoundaryY += shift;
+
+              // Shift path1 to nearest boundary while maintaining start/end y coordinates
+              for (let k = p1 + 1; k <= p1 + 3; k += 2) {
+                // Only shift intermediate points, preserve endpoints
+                if (k > 1 && k < path1.length - 1) {
+                  path1[k] = nearestBoundaryY;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return modifiedPaths;
+}
+
 export class ComponentLoader {
   private static colorIndex = 0;
 
@@ -401,13 +570,20 @@ export class ComponentLoader {
           }
           console.log(wire.points);
         });
-      }
 
-      // Flatten pin wires array and set wires
-      const allPinWires = [...compWiring.flat(), ...pinWires.flat()];
-      if (allPinWires.length > 0) {
-        // setWires(compWiring.flat());
-        setWires(allPinWires);
+        const newWiring = shiftOverlappingPaths(compWiring, deviceBounds);
+        const finalWiring = shiftOverlappingPaths(newWiring, deviceBounds);
+
+        // Flatten pin wires array and set wires
+        const allPinWires = [
+          // ...compWiring.flat(),
+          ...finalWiring.flat(),
+          ...pinWires.flat(),
+        ];
+        if (allPinWires.length > 0) {
+          // setWires(compWiring.flat());
+          setWires(allPinWires);
+        }
       }
     } catch (error) {
       console.error("Failed to load initial components:", error);
