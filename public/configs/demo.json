@@ -3,8 +3,8 @@
     {
       "id": "mcu",
       "name": "Arduino",
-      "x": 500,
-      "y": 250,
+      "x": 700,
+      "y": 500,
       "rotation": 0,
       "image": {
         "src": "/packages/Microcontrollers/Arduino/arduino-mega.png",
@@ -16,7 +16,7 @@
       }
     },
     {
-      "id": "ultrasonic-SR04",
+      "id": "ultrasonic-SR04-1",
       "name": "Ultrasonic SR04",
       "x": 200,
       "y": 50,
@@ -30,11 +30,76 @@
         "src": "/packages/Modules/ultrasonic-SR04.json"
       }
     },
+
+    {
+      "id": "ultrasonic-SR04-2",
+      "name": "Ultrasonic SR04",
+      "x": 692,
+      "y": 50,
+      "rotation": 0,
+      "image": {
+        "src": "/packages/Modules/ultrasonic-SR04.png",
+        "width": 0,
+        "height": 0
+      },
+      "pin-map": {
+        "src": "/packages/Modules/ultrasonic-SR04.json"
+      }
+    },
+
+    {
+      "id": "ultrasonic-SR04-3",
+      "name": "Ultrasonic SR04",
+      "x": 100,
+      "y": 200,
+      "rotation": 0,
+      "image": {
+        "src": "/packages/Modules/ultrasonic-SR04.png",
+        "width": 0,
+        "height": 0
+      },
+      "pin-map": {
+        "src": "/packages/Modules/ultrasonic-SR04.json"
+      }
+    },
+
+    {
+      "id": "ultrasonic-SR04-4",
+      "name": "Ultrasonic SR04",
+      "x": 300,
+      "y": 200,
+      "rotation": 0,
+      "image": {
+        "src": "/packages/Modules/ultrasonic-SR04.png",
+        "width": 0,
+        "height": 0
+      },
+      "pin-map": {
+        "src": "/packages/Modules/ultrasonic-SR04.json"
+      }
+    },
+
+    {
+      "id": "ultrasonic-SR04-5",
+      "name": "Ultrasonic SR04",
+      "x": 500,
+      "y": 200,
+      "rotation": 0,
+      "image": {
+        "src": "/packages/Modules/ultrasonic-SR04.png",
+        "width": 0,
+        "height": 0
+      },
+      "pin-map": {
+        "src": "/packages/Modules/ultrasonic-SR04.json"
+      }
+    },
+
     {
       "id": "servo-SG90",
       "name": "Servo SG90",
-      "x": 800,
-      "y": 300,
+      "x": 1000,
+      "y": 400,
       "rotation": 0,
       "image": {
         "src": "/packages/Modules/servo-SG90.png",
@@ -48,12 +113,33 @@
   ],
   
   "wire": [
-    {"mcu": "5V", "ultrasonic-SR04":"5V"},
-    {"mcu": "D4", "ultrasonic-SR04":"ECHO"},
-    {"mcu": "D5", "ultrasonic-SR04":"TRIG"},
-    {"mcu": "GND-1", "ultrasonic-SR04":"GND"},
+    {"mcu": "5V", "ultrasonic-SR04-1":"5V"},
+    {"mcu": "D16", "ultrasonic-SR04-1":"ECHO"},
+    {"mcu": "D17", "ultrasonic-SR04-1":"TRIG"},
+    {"mcu": "GND-1", "ultrasonic-SR04-1":"GND"},
+
+    {"mcu": "5V", "ultrasonic-SR04-2":"5V"},
+    {"mcu": "D39", "ultrasonic-SR04-2":"ECHO"},
+    {"mcu": "D37", "ultrasonic-SR04-2":"TRIG"},
+    {"mcu": "GND-1", "ultrasonic-SR04-2":"GND"},
+
+    {"mcu": "5V", "ultrasonic-SR04-3":"5V"},
+    {"mcu": "D8", "ultrasonic-SR04-3":"ECHO"},
+    {"mcu": "D9", "ultrasonic-SR04-3":"TRIG"},
+    {"mcu": "GND-1", "ultrasonic-SR04-3":"GND"},
+
+    {"mcu": "5V", "ultrasonic-SR04-4":"5V"},
+    {"mcu": "D10", "ultrasonic-SR04-4":"ECHO"},
+    {"mcu": "D11", "ultrasonic-SR04-4":"TRIG"},
+    {"mcu": "GND-1", "ultrasonic-SR04-4":"GND"},
+
+    {"mcu": "5V", "ultrasonic-SR04-5":"5V"},
+    {"mcu": "D12", "ultrasonic-SR04-5":"ECHO"},
+    {"mcu": "D13", "ultrasonic-SR04-5":"TRIG"},
+    {"mcu": "GND-1", "ultrasonic-SR04-5":"GND"},
+
     {"mcu": "5V", "servo-SG90":"5V"},
-    {"mcu": "D8", "servo-SG90":"POS"},
+    {"mcu": "D53", "servo-SG90":"POS"},
     {"mcu": "GND-1", "servo-SG90":"GND"}
   ]
 } 

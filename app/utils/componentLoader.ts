@@ -8,6 +8,13 @@ interface PinMapData {
   };
 }
 
+interface GroundSymbol extends DroppedComponent {
+  pinMap: PinMapData;
+  type: string;
+  name: string;
+  rotation: number;
+}
+
 export const wireColor = {
   red: "#ff0000",
   black: "#000000",
@@ -422,13 +429,35 @@ export class ComponentLoader {
     return [shortest_x, shortest_y];
   }
 
+  static async createGroundSymbol(x: number, y: number): Promise<GroundSymbol> {
+    const response = await fetch("/packages/Power/GND.json");
+    const groundData = await response.json();
+
+    const img = await preloadImage("/packages/Power/GND.png");
+
+    return {
+      id: `ground-${Math.random().toString(36).substr(2, 9)}`,
+      x,
+      y,
+      name: "GND",
+      rotation: 0,
+      image: {
+        src: "/packages/Power/GND.png",
+        width: img.naturalWidth,
+        height: img.naturalHeight,
+      },
+      pinMap: groundData,
+      type: "ground",
+    };
+  }
+
   static processDeviceConnections = (
     device: string,
     connection: any,
     config: any,
     key: string,
     wireRoute: number[],
-    wireNames: { [key: string]: string }
+    wireNameMap: { [key: string]: string }
   ) => {
     const pin = connection[device];
 
@@ -444,7 +473,7 @@ export class ComponentLoader {
     const matchingPin = pinMap.find((p: any) => p.id === pin);
 
     if (matchingPin) {
-      wireNames[key] = pin;
+      wireNameMap[key] = pin;
       const x = matchingPin.points[0] + component.x;
       const y = matchingPin.points[1] + component.y;
       wireRoute.push(x);
@@ -468,32 +497,152 @@ export class ComponentLoader {
     }
   };
 
-  static processWireConnections = (config: any, compWiring: Wire[]) => {
-    Object.keys(config.wire).forEach((key) => {
+  static processWireConnections = async (
+    config: any,
+    compWiring: Wire[],
+    setComponents: React.Dispatch<React.SetStateAction<DroppedComponent[]>>
+  ) => {
+    // First pass: Process non-power wires
+    for (const key of Object.keys(config.wire)) {
+      const connection = config.wire[key];
+      const powerPins = Object.values(connection).filter(
+        (pin: unknown) =>
+          typeof pin === "string" && (pin.includes("GND") || pin.includes("5V"))
+      );
+      const isPowerConnection = powerPins.length > 0;
+
+      if (!isPowerConnection) {
+        // Process normal connections as before
+        const wireRoute: number[] = [];
+        const wireNameMap: { [key: string]: string } = {};
+
+        for (const device of Object.keys(connection)) {
+          ComponentLoader.processDeviceConnections(
+            device,
+            connection,
+            config,
+            key,
+            wireRoute,
+            wireNameMap
+          );
+        }
+
+        compWiring.push({
+          id: `wire-${key}`,
+          points: wireRoute,
+          color: ComponentLoader.getWireColor(wireNameMap[key]),
+        });
+      }
+    }
+
+    // Second pass: Process power pins
+    const processedPowerPins = new Map<string, Set<string>>();
+
+    for (const key of Object.keys(config.wire)) {
       const connection = config.wire[key];
 
-      const wireRoute: number[] = [];
-      const wireNames: { [key: string]: string } = {};
+      for (const device of Object.keys(connection)) {
+        const pinName = connection[device];
 
-      Object.keys(connection).forEach((device) => {
-        ComponentLoader.processDeviceConnections(
-          device,
-          connection,
-          config,
-          key,
-          wireRoute,
-          wireNames
-        );
-      });
+        if (pinName.includes("GND") || pinName.includes("5V")) {
+          if (!processedPowerPins.has(device)) {
+            processedPowerPins.set(device, new Set());
+          }
+          const devicePins = processedPowerPins.get(device)!;
+          const baseName = pinName.includes("GND") ? "GND" : "5V";
 
-      console.log("wireRoute: ", wireRoute);
+          if (!devicePins.has(baseName)) {
+            devicePins.add(baseName);
+            const wireRoute: number[] = [];
+            const wireNameMap: { [key: string]: string } = {};
 
-      compWiring.push({
-        id: `wire-${key}`,
-        points: wireRoute,
-        color: ComponentLoader.getWireColor(wireNames[key]),
-      });
-    });
+            // Get component info
+            const component = config.components.find(
+              (comp: DroppedComponent) => comp.id === device
+            );
+
+            ComponentLoader.processDeviceConnections(
+              device,
+              { [device]: pinName },
+              config,
+              key,
+              wireRoute,
+              wireNameMap
+            );
+
+            if (wireRoute.length >= 2) {
+              const lastX = wireRoute[wireRoute.length - 2];
+              const lastY = wireRoute[wireRoute.length - 1];
+
+              // Get path to edge of component
+              const shortPath = ComponentLoader.getShortPathDir(
+                [lastX, lastY],
+                [component.image.width, component.image.height],
+                [component.x, component.y]
+              );
+
+              // Add path to edge
+              const edgeX = lastX + shortPath[0];
+              const edgeY = lastY + shortPath[1];
+
+              // Get device bounds for path finding
+              const deviceBounds = ComponentLoader.getDeviceBounds(
+                config.components
+              );
+
+              if (pinName.includes("GND")) {
+                // Ground extends downward
+                const targetY = edgeY + 20;
+                const path = findPath(
+                  [edgeX, edgeY],
+                  [edgeX, targetY],
+                  deviceBounds
+                );
+                if (path.length > 0) {
+                  wireRoute.push(...path.flat());
+                } else {
+                  wireRoute.push(edgeX, edgeY, edgeX, targetY);
+                }
+              } else {
+                // 5V extends to closest top corner
+                const topEdge = component.y;
+                const leftEdge = component.x;
+                const rightEdge = component.x + component.image.width;
+
+                // Determine closest top corner
+                const distToLeftCorner = Math.abs(lastX - leftEdge);
+                const distToRightCorner = Math.abs(lastX - rightEdge);
+                const targetX =
+                  distToLeftCorner < distToRightCorner
+                    ? leftEdge - 10
+                    : rightEdge + 10;
+                const targetY = topEdge - 20;
+
+                // Find path to target point
+                const path = findPath(
+                  [edgeX, edgeY],
+                  [targetX, targetY],
+                  deviceBounds
+                );
+
+                if (path.length > 0) {
+                  wireRoute.push(...path.flat());
+                } else {
+                  // Fallback to L-shaped route if no path found
+                  wireRoute.push(targetX, edgeY, targetX, targetY);
+                }
+              }
+
+              compWiring.push({
+                id: `wire-${key}-${device}`,
+                points: wireRoute,
+                color: ComponentLoader.getWireColor(baseName),
+              });
+            }
+          }
+        }
+      }
+    }
   };
 
   static async loadInitialComponents(
@@ -549,7 +698,11 @@ export class ComponentLoader {
       const compWiring: Wire[] = [];
 
       if (config.wire) {
-        ComponentLoader.processWireConnections(config, compWiring);
+        await ComponentLoader.processWireConnections(
+          config,
+          compWiring,
+          setComponents
+        );
         console.log("compWiring: ", compWiring);
       }
 
@@ -564,9 +717,7 @@ export class ComponentLoader {
           const path = findPath([startX, startY], [endX, endY], deviceBounds);
           if (path.length > 0) {
             const wirePath = path.flat();
-            wirePath.forEach((point) => {
-              wire.points.splice(wire.points.length - 4, 0, point);
-            });
+            wire.points.splice(wire.points.length - 4, 0, ...wirePath);
           }
           console.log(wire.points);
         });
@@ -575,13 +726,8 @@ export class ComponentLoader {
         const finalWiring = shiftOverlappingPaths(newWiring, deviceBounds);
 
         // Flatten pin wires array and set wires
-        const allPinWires = [
-          // ...compWiring.flat(),
-          ...finalWiring.flat(),
-          ...pinWires.flat(),
-        ];
+        const allPinWires = [...finalWiring.flat(), ...pinWires.flat()];
         if (allPinWires.length > 0) {
-          // setWires(compWiring.flat());
           setWires(allPinWires);
         }
       }
