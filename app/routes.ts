@@ -17,4 +17,9 @@ export default [
     file: "routes/api.packages.ts",
     loader: "routes/api.packages.ts",
   },
+  {
+    path: "api/save-config",
+    file: "routes/api.save-config.ts",
+    action: "routes/api.save-config.ts",
+  },
 ] satisfies RouteConfig;

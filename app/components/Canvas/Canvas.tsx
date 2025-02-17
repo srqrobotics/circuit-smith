@@ -95,10 +95,12 @@ export default function Canvas() {
   };
 
   const handleDragEnd = (e: any) => {
-    setPosition({
-      x: e.target.x(),
-      y: e.target.y(),
-    });
+    if (e.target === e.target.getStage() && !isDraggingComponent) {
+      setPosition({
+        x: e.target.x(),
+        y: e.target.y(),
+      });
+    }
   };
 
   const handleDrop = async (e: React.DragEvent) => {
@@ -180,7 +182,7 @@ export default function Canvas() {
             scaleY={scale}
             x={position.x}
             y={position.y}
-            draggable={isCtrlPressed && !isDraggingComponent}
+            draggable={!isDraggingComponent && !isCtrlPressed}
             onWheel={handleWheel}
             onDragEnd={handleDragEnd}
             onMouseMove={handleMouseMove}
@@ -231,12 +233,27 @@ export default function Canvas() {
                         width={component.image.width}
                         height={component.image.height}
                         rotation={component.rotation}
-                        draggable
+                        draggable={isCtrlPressed}
                         onDragStart={(e) => {
+                          if (!isCtrlPressed) {
+                            e.evt.preventDefault();
+                            return;
+                          }
                           e.evt.stopPropagation();
                           setIsDraggingComponent(true);
                         }}
+                        onDragMove={(e) => {
+                          if (!isCtrlPressed) {
+                            e.evt.preventDefault();
+                            return;
+                          }
+                          e.evt.stopPropagation();
+                        }}
                         onDragEnd={(e) => {
+                          if (!isCtrlPressed) {
+                            e.evt.preventDefault();
+                            return;
+                          }
                           e.evt.stopPropagation();
                           setIsDraggingComponent(false);
                           const pos = e.target.position();

@@ -592,7 +592,7 @@ export class ComponentLoader {
 
               if (pinName.includes("GND")) {
                 // Ground extends downward
-                const targetY = edgeY + 20;
+                const targetY = edgeY + 30;
                 const path = findPath(
                   [edgeX, edgeY],
                   [edgeX, targetY],
@@ -733,6 +733,105 @@ export class ComponentLoader {
       }
     } catch (error) {
       console.error("Failed to load initial components:", error);
+    }
+  }
+
+  static async updateComponentPosition(
+    componentId: string,
+    x: number,
+    y: number
+  ) {
+    try {
+      // Get the current configuration file path
+      const configFiles = [
+        "/configs/demo.json",
+        "/configs/arduino-fix.json",
+        "/configs/arduino-uno.json",
+        "/configs/template.json",
+      ];
+
+      // Search through config files to find the component
+      for (const configFile of configFiles) {
+        console.log(`Checking file: ${configFile}`);
+
+        try {
+          const response = await fetch(configFile);
+          if (!response.ok) {
+            console.log(
+              `Skipping ${configFile} - not found or not accessible (${response.status})`
+            );
+            continue;
+          }
+
+          const config = await response.json();
+          console.log(`Loaded config from ${configFile}:`, config);
+
+          // Find the component in the current config
+          const componentIndex = config.components.findIndex(
+            (c: any) => c.id === componentId
+          );
+
+          if (componentIndex !== -1) {
+            console.log(
+              `Found component ${componentId} in ${configFile} at index ${componentIndex}`
+            );
+            console.log("Original position:", {
+              x: config.components[componentIndex].x,
+              y: config.components[componentIndex].y,
+            });
+
+            // Update the component's position
+            config.components[componentIndex].x = x;
+            config.components[componentIndex].y = y;
+
+            console.log("New position:", { x, y });
+
+            // Save the updated config back to the file
+            const saveResponse = await fetch(`/api/save-config`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                file: configFile,
+                content: config,
+              }),
+            });
+
+            const responseText = await saveResponse.text();
+            console.log(`Save response for ${configFile}:`, {
+              status: saveResponse.status,
+              ok: saveResponse.ok,
+              text: responseText,
+            });
+
+            if (!saveResponse.ok) {
+              throw new Error(
+                `Failed to save config: ${saveResponse.statusText}. Details: ${responseText}`
+              );
+            }
+
+            try {
+              const result = JSON.parse(responseText);
+              console.log("Save response parsed:", result);
+            } catch (e) {
+              console.log(
+                "Could not parse save response as JSON:",
+                responseText
+              );
+            }
+
+            break; // Exit loop once component is found and updated
+          } else {
+            console.log(`Component ${componentId} not found in ${configFile}`);
+          }
+        } catch (error) {
+          console.error(`Error processing ${configFile}:`, error);
+        }
+      }
+    } catch (error) {
+      console.error("Error updating component position:", error);
+      throw error;
     }
   }
 }
