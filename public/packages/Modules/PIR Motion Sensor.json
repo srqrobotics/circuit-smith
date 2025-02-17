@@ -1,37 +1,38 @@
 {
-    "name": "SG90 Servo",
-    "type": "Servo",
+    "name": "PIR Motion Sensor",
+    "type": "Motion Sensor",
     "digital-pins": {
         "id": [
-            "GND",
             "5V",
-            "POS"
+            "Data",
+            "Gnd"
         ],
         "reloc": [
             {
-                "id": "GND",
-                "points": [
-                    9,
-                    93
-                ]
-            },
-            {
                 "id": "5V",
                 "points": [
-                    9,
-                    80
+                    79,
+                    196
                 ]
             },
             {
-                "id": "POS",
+                "id": "Data",
                 "points": [
-                    9,
-                    67
+                    100,
+                    196
+                ]
+            },
+            {
+                "id": "Gnd",
+                "points": [
+                    121,
+                    196
                 ]
             }
         ]
     },
     "specs": {
+        "Sensor": "HC-SR501",
         "voltage": "5V"
     }
 }
