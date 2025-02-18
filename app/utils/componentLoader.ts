@@ -149,7 +149,10 @@ export function findPath(
   return [];
 }
 
-function shiftOverlappingPaths(paths: Wire[], bounds: number[][]): Wire[] {
+export function shiftOverlappingPaths(
+  paths: Wire[],
+  bounds: number[][]
+): Wire[] {
   const modifiedPaths = [...paths];
   const MIN_SHIFT = 5;
   const MAX_SHIFT = 15;
@@ -320,6 +323,8 @@ function shiftOverlappingPaths(paths: Wire[], bounds: number[][]): Wire[] {
 
 export class ComponentLoader {
   private static colorIndex = 0;
+  private static allPinWires: Wire[] = []; // Class variable to store all pin wires
+  private static finalWiring: Wire[] = []; // Class variable to store final wiring
 
   static getDeviceBounds(components: DroppedComponent[]): number[][] {
     const bounds: number[][] = [];
@@ -651,7 +656,7 @@ export class ComponentLoader {
     >,
     setComponents: React.Dispatch<React.SetStateAction<DroppedComponent[]>>,
     setWires: React.Dispatch<React.SetStateAction<Wire[]>>
-  ) {
+  ): Promise<any> {
     try {
       const response = await fetch("/configs/demo.json");
       const config = await response.json();
@@ -706,6 +711,9 @@ export class ComponentLoader {
         console.log("compWiring: ", compWiring);
       }
 
+      // Store all pin wires in the class variable
+      this.allPinWires = [...pinWires.flat(), ...compWiring];
+
       if (config.components) {
         const deviceBounds = ComponentLoader.getDeviceBounds(config.components);
         console.log("deviceBounds: ", deviceBounds);
@@ -725,15 +733,28 @@ export class ComponentLoader {
         const newWiring = shiftOverlappingPaths(compWiring, deviceBounds);
         const finalWiring = shiftOverlappingPaths(newWiring, deviceBounds);
 
-        // Flatten pin wires array and set wires
-        const allPinWires = [...finalWiring.flat(), ...pinWires.flat()];
-        if (allPinWires.length > 0) {
-          setWires(allPinWires);
-        }
+        // Store final wiring in the class variable
+        this.finalWiring = finalWiring;
+
+        // Set wires state
+        // setWires(this.finalWiring);
       }
+
+      return config; // Return the loaded config
     } catch (error) {
       console.error("Failed to load initial components:", error);
+      throw error; // Rethrow the error for handling in the calling function
     }
+  }
+
+  // Method to access all pin wires
+  static getAllPinWires(): Wire[] {
+    return this.allPinWires;
+  }
+
+  // Method to access final wiring
+  static getFinalWiring(): Wire[] {
+    return this.finalWiring;
   }
 
   static async updateComponentPosition(
