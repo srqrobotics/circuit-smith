@@ -10,6 +10,7 @@ import {
   shiftOverlappingPaths,
 } from "~/utils/componentLoader";
 import { useCoordinates } from "~/contexts/CoordinateContext";
+import BottomPanel from "~/components/BottomPanel/BottomPanel";
 
 export default function Canvas() {
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
@@ -36,6 +37,9 @@ export default function Canvas() {
   const [draggedComponentId, setDraggedComponentId] = useState<string | null>(
     null
   ); // New state for dragged component ID
+  const [hoveredComponentName, setHoveredComponentName] = useState<
+    string | null
+  >(null); // New state for hovered component name
 
   useEffect(() => {
     setIsMounted(true);
@@ -112,24 +116,33 @@ export default function Canvas() {
 
   const handleDragStart = (e: any) => {
     setIsDraggingComponent(true);
-    const componentId = e.target.id(); // Get the ID of the dragged component
-    setDraggedComponentId(componentId); // Store the ID of the dragged component
-    console.log("Dragging Component ID:", componentId); // Log the ID
+    // const componentId = e.target.id(); // Get the ID of the dragged component
+    setDraggedComponentId(hoveredComponentName); // Store the ID of the dragged component
+    console.log("Dragging Component ID:", hoveredComponentName); // Log the ID
   };
 
   const handleDragEnd = async (e: any) => {
-    if (e.target === e.target.getStage() && !isDraggingComponent) {
+    // console.log("Drag End Event Triggered");
+    // console.log("Is Dragging Component:", isDraggingComponent);
+
+    // Log the current components state
+    console.log("Current Components State:", components);
+    // console.log("target:", e.target);
+
+    if (isDraggingComponent) {
       const pos = {
         x: e.target.x(),
         y: e.target.y(),
       };
+      console.log(pos.x, pos.y);
 
       // Find the component being dragged using the stored ID
       const draggedComponent = components.find(
         (c) => c.id === draggedComponentId
       );
-      console.log("Dragged Component ID:", draggedComponentId);
-      console.log("Dragged Component:", draggedComponent);
+
+      console.log("Component ID:", draggedComponentId);
+      console.log("Component:", draggedComponent);
 
       if (draggedComponent) {
         // Log the name of the dragged component
@@ -168,11 +181,13 @@ export default function Canvas() {
         // Update the wires state with the new wiring
         setWires(compWiring);
       } else {
-        console.error("No component found for the dragged ID.");
+        console.log("No component found for the dragged ID.");
       }
-    } else {
-      console.log("Drag event ignored due to isDraggingComponent state.");
     }
+
+    // Reset dragging state
+    setIsDraggingComponent(false); // Ensure dragging state is reset
+    setDraggedComponentId(null); // Clear the dragged component ID
   };
 
   const handleDrop = async (e: React.DragEvent) => {
@@ -232,6 +247,17 @@ export default function Canvas() {
     };
     setMousePosition(scaledPosition);
     setCoordinates(scaledPosition);
+
+    // Check if a component is hovered
+    const hoveredComponent = components.find(
+      (component) =>
+        scaledPosition.x >= component.x &&
+        scaledPosition.x <= component.x + component.image.width &&
+        scaledPosition.y >= component.y &&
+        scaledPosition.y <= component.y + component.image.height
+    );
+
+    setHoveredComponentName(hoveredComponent ? hoveredComponent.name : null); // Update hovered component name
   };
 
   // Route Wiring Button
@@ -418,6 +444,7 @@ export default function Canvas() {
           </Stage>
         )}
       </div>
+      <BottomPanel hoveredComponentName={hoveredComponentName} />
     </div>
   );
 }

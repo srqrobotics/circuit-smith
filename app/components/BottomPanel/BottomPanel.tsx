@@ -1,7 +1,13 @@
 import React from "react";
 import { useCoordinates } from "~/contexts/CoordinateContext";
 
-export default function BottomPanel() {
+interface BottomPanelProps {
+  hoveredComponentName: string | null;
+}
+
+export default function BottomPanel({
+  hoveredComponentName,
+}: BottomPanelProps) {
   const { coordinates } = useCoordinates();
 
   return (
@@ -15,6 +21,11 @@ export default function BottomPanel() {
         <div className="text-gray-600 dark:text-gray-400">
           Mouse Position - X: {coordinates.x}, Y: {coordinates.y}
         </div>
+        {hoveredComponentName && (
+          <div className="text-gray-600 dark:text-gray-400">
+            Component ID: {hoveredComponentName}
+          </div>
+        )}
       </div>
     </div>
   );
