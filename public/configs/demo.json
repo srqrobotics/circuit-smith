@@ -3,24 +3,83 @@
     {
       "id": "mcu",
       "name": "Arduino",
-      "x": 400,
-      "y": 200,
+      "x": 1159,
+      "y": 276,
       "rotation": 0,
       "image": {
-        "src": "/packages/Microcontrollers/Arduino/arduino-uno.png",
+        "src": "/packages/Microcontrollers/Arduino/Arduino-Mega.png",
         "width": 0,
         "height": 0
       },
       "pin-map": {
-        "src": "/packages/Microcontrollers/Arduino/arduino-uno.json"
+        "src": "/packages/Microcontrollers/Arduino/Arduino-Mega.json"
       }
     },
-
     {
-      "id": "Module",
-      "name": "Module",
-      "x": 600,
-      "y": 100,
+      "id": "DHT22",
+      "name": "DHT22",
+      "x": 909,
+      "y": 498,
+      "rotation": 0,
+      "image": {
+        "src": "/packages/Modules/DHT22.png",
+        "width": 0,
+        "height": 0
+      },
+      "pin-map": {
+        "src": "/packages/Modules/DHT22.json"
+      }
+    },
+    {
+      "id": "LCD",
+      "name": "LCD",
+      "x": 2138,
+      "y": 333,
+      "rotation": 0,
+      "image": {
+        "src": "/packages/Modules/I2C LCD.png",
+        "width": 0,
+        "height": 0
+      },
+      "pin-map": {
+        "src": "/packages/Modules/I2C LCD.json"
+      }
+    },
+    {
+      "id": "LDR",
+      "name": "LDR",
+      "x": 654,
+      "y": 419,
+      "rotation": 0,
+      "image": {
+        "src": "/packages/Modules/LDR Light Sensor Module.png",
+        "width": 0,
+        "height": 0
+      },
+      "pin-map": {
+        "src": "/packages/Modules/LDR Light Sensor Module.json"
+      }
+    },
+    {
+      "id": "PIR",
+      "name": "PIR",
+      "x": 311,
+      "y": 481,
+      "rotation": 0,
+      "image": {
+        "src": "/packages/Modules/PIR Motion Sensor.png",
+        "width": 0,
+        "height": 0
+      },
+      "pin-map": {
+        "src": "/packages/Modules/PIR Motion Sensor.json"
+      }
+    },
+    {
+      "id": "servo-SG90",
+      "name": "servo",
+      "x": 2241,
+      "y": 1252,
       "rotation": 0,
       "image": {
         "src": "/packages/Modules/servo-SG90.png",
@@ -31,12 +90,11 @@
         "src": "/packages/Modules/servo-SG90.json"
       }
     },
-
     {
       "id": "ultrasonic-SR04",
-      "name": "ultrasonic-SR04",
-      "x": 0,
-      "y": 0,
+      "name": "ultrasonic",
+      "x": 2150,
+      "y": 650,
       "rotation": 0,
       "image": {
         "src": "/packages/Modules/ultrasonic-SR04.png",
@@ -48,11 +106,22 @@
       }
     }
   ],
-  
   "wire": [
-    {"mcu": "5V", "ultrasonic-SR04":"5V"},
-    {"mcu": "D8", "ultrasonic-SR04":"ECHO"},
-    {"mcu": "D7", "ultrasonic-SR04":"TRIG"},
-    {"mcu": "GND-1", "ultrasonic-SR04":"GND"}
+    {
+      "mcu": "5V",
+      "ultrasonic-SR04": "5V"
+    },
+    {
+      "mcu": "D8",
+      "ultrasonic-SR04": "ECHO"
+    },
+    {
+      "mcu": "D7",
+      "ultrasonic-SR04": "TRIG"
+    },
+    {
+      "mcu": "GND-1",
+      "ultrasonic-SR04": "GND"
+    }
   ]
-} 
+}
