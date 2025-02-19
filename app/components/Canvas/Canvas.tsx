@@ -9,6 +9,7 @@ import {
   findPath,
   shiftOverlappingPaths,
 } from "~/utils/componentLoader";
+import { preloadImage } from "~/utils/imageLoader";
 import { useCoordinates } from "~/contexts/CoordinateContext";
 import BottomPanel from "~/components/BottomPanel/BottomPanel";
 
@@ -224,12 +225,28 @@ export default function Canvas() {
 
   // Route Wiring Button
   const handleRouting = async () => {
+    const response = await fetch("/configs/demo.json");
+    const config = await response.json();
+
     if (!config) {
       console.error("Config is not loaded yet.");
       return; // Prevent routing if config is not available
     }
 
     setIsRouting(true);
+
+    // Load pin mappings
+    const pinWirePromises = config.components.map(async (component: any) => {
+      if (component["pin-map"]?.src) {
+        const pinMapResponse = await fetch(component["pin-map"].src);
+        component.pinMap = await pinMapResponse.json();
+        return ComponentLoader.locatePins(component);
+      }
+      return [];
+    });
+
+    // Wait for all promises to resolve
+    const [pinWires] = await Promise.all([Promise.all(pinWirePromises)]);
 
     const updatedConfig = await ComponentLoader.loadInitialComponents(
       setLoadedImages,
@@ -260,9 +277,9 @@ export default function Canvas() {
 
       const newWiring = shiftOverlappingPaths(compWiring, deviceBounds);
       const finalWiring = shiftOverlappingPaths(newWiring, deviceBounds);
-
+      const fullWiring = [...pinWires.flat(), ...finalWiring];
       // Update the wires state with the new wiring
-      setWires(finalWiring);
+      setWires(fullWiring);
     }
 
     setIsRouting(false);

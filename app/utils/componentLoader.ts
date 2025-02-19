@@ -735,9 +735,10 @@ export class ComponentLoader {
 
         // Store final wiring in the class variable
         this.finalWiring = finalWiring;
+        const fullWiring = [...pinWires.flat(), ...finalWiring];
 
         // Set wires state
-        // setWires(this.finalWiring);
+        // setWires(fullWiring);
       }
 
       return config; // Return the loaded config
