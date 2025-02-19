@@ -119,32 +119,31 @@ export default function Canvas() {
     // const componentId = e.target.id(); // Get the ID of the dragged component
     const componentId = hoveredComponentName;
     setDraggedComponentId(componentId); // Store the ID of the dragged component
-    console.log("Dragging Component ID:", componentId); // Log the ID
+    // console.log("Dragging Component ID:", componentId); // Log the ID
   };
 
   const handleDragEnd = async (e: any) => {
     // Log the current components state
-    console.log("Current Components State:", components);
+    // console.log("Current Components State:", components);
 
     if (isDraggingComponent) {
       const pos = {
         x: Math.round(e.target.x()), // Round to nearest integer
         y: Math.round(e.target.y()), // Round to nearest integer
       };
-      console.log(pos.x, pos.y);
+      // console.log(pos.x, pos.y);
 
       // Find the component being dragged using the stored ID
       const draggedComponent = components.find(
         (c) => c.name === hoveredComponentName
       );
 
-      console.log("Component ID:", draggedComponentId);
-      console.log("Component:", draggedComponent);
+      // console.log("Component ID:", draggedComponentId);
+      // console.log("Component:", draggedComponent);
 
       if (draggedComponent) {
-        // Log the name of the dragged component
-        console.log("Dragged Component Name:", draggedComponent.name); // Log the component name
-        console.log("Dropped Location:", pos);
+        // console.log("Dragged Component Name:", draggedComponent.name);
+        // console.log("Dropped Location:", pos);
 
         // Update the component's position in state
         setComponents((prev) =>
@@ -159,48 +158,8 @@ export default function Canvas() {
           pos.x,
           pos.y
         );
-
-        // // Refresh the loaded components to get updated pin positions
-        // const updatedConfig = await ComponentLoader.loadInitialComponents(
-        //   setLoadedImages,
-        //   setComponents,
-        //   setWires
-        // );
-
-        // // Recalculate wiring based on new pin positions
-        // const compWiring: Wire[] = [];
-        // await ComponentLoader.processWireConnections(
-        //   updatedConfig,
-        //   compWiring,
-        //   setComponents
-        // );
-
-        // if (config.components) {
-        //   const deviceBounds = ComponentLoader.getDeviceBounds(
-        //     config.components
-        //   );
-        //   console.log("deviceBounds: ", deviceBounds);
-
-        //   // Process each wire to find valid paths around components
-        //   compWiring.forEach((wire) => {
-        //     const [startX, startY] = [wire.points[2], wire.points[3]];
-        //     const [endX, endY] = [wire.points[4], wire.points[5]];
-        //     const path = findPath([startX, startY], [endX, endY], deviceBounds);
-        //     if (path.length > 0) {
-        //       const wirePath = path.flat();
-        //       wire.points.splice(wire.points.length - 4, 0, ...wirePath);
-        //     }
-        //     console.log(wire.points);
-        //   });
-
-        //   const newWiring = shiftOverlappingPaths(compWiring, deviceBounds);
-        //   const finalWiring = shiftOverlappingPaths(newWiring, deviceBounds);
-
-        //   // Set wires state
-        //   setWires(finalWiring);
-        // }
       } else {
-        console.log("No component found for the dragged ID.");
+        console.error("No component found for the dragged ID.");
       }
     }
 
@@ -302,12 +261,9 @@ export default function Canvas() {
       setComponents
     );
 
-    // Retrieve the final wiring from the ComponentLoader
-    // const finalWiring = ComponentLoader.getFinalWiring();
-
     if (config.components) {
       const deviceBounds = ComponentLoader.getDeviceBounds(config.components);
-      console.log("deviceBounds: ", deviceBounds);
+      // console.log("deviceBounds: ", deviceBounds);
 
       // Process each wire to find valid paths around components
       compWiring.forEach((wire) => {
@@ -318,18 +274,15 @@ export default function Canvas() {
           const wirePath = path.flat();
           wire.points.splice(wire.points.length - 4, 0, ...wirePath);
         }
-        console.log(wire.points);
+        // console.log(wire.points);
       });
 
       const newWiring = shiftOverlappingPaths(compWiring, deviceBounds);
       const finalWiring = shiftOverlappingPaths(newWiring, deviceBounds);
 
-      // Store final wiring in the class variable
-      // this.finalWiring = finalWiring;
-
       // Update the wires state with the new wiring
       setWires(finalWiring);
-      console.log("Final Wiring: ", finalWiring); // You can use this as needed
+      // console.log("Final Wiring: ", finalWiring); // You can use this as needed
     }
 
     setIsRouting(false);
