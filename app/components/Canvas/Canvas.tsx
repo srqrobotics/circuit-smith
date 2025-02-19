@@ -127,87 +127,87 @@ export default function Canvas() {
     console.log("Current Components State:", components);
 
     if (isDraggingComponent) {
-        const pos = {
-            x: Math.round(e.target.x()), // Round to nearest integer
-            y: Math.round(e.target.y()), // Round to nearest integer
-        };
-        console.log(pos.x, pos.y);
+      const pos = {
+        x: Math.round(e.target.x()), // Round to nearest integer
+        y: Math.round(e.target.y()), // Round to nearest integer
+      };
+      console.log(pos.x, pos.y);
 
-        // Find the component being dragged using the stored ID
-        const draggedComponent = components.find(
-            (c) => c.name === hoveredComponentName
+      // Find the component being dragged using the stored ID
+      const draggedComponent = components.find(
+        (c) => c.name === hoveredComponentName
+      );
+
+      console.log("Component ID:", draggedComponentId);
+      console.log("Component:", draggedComponent);
+
+      if (draggedComponent) {
+        // Log the name of the dragged component
+        console.log("Dragged Component Name:", draggedComponent.name); // Log the component name
+        console.log("Dropped Location:", pos);
+
+        // Update the component's position in state
+        setComponents((prev) =>
+          prev.map((c) =>
+            c.id === draggedComponent.id ? { ...c, x: pos.x, y: pos.y } : c
+          )
         );
 
-        console.log("Component ID:", draggedComponentId);
-        console.log("Component:", draggedComponent);
+        // Update the component position in the configuration
+        await ComponentLoader.updateComponentPosition(
+          draggedComponent.id,
+          pos.x,
+          pos.y
+        );
 
-        if (draggedComponent) {
-            // Log the name of the dragged component
-            console.log("Dragged Component Name:", draggedComponent.name); // Log the component name
-            console.log("Dropped Location:", pos);
+        // // Refresh the loaded components to get updated pin positions
+        // const updatedConfig = await ComponentLoader.loadInitialComponents(
+        //   setLoadedImages,
+        //   setComponents,
+        //   setWires
+        // );
 
-            // Update the component's position in state
-            setComponents((prev) =>
-                prev.map((c) =>
-                    c.id === draggedComponent.id ? { ...c, x: pos.x, y: pos.y } : c
-                )
-            );
+        // // Recalculate wiring based on new pin positions
+        // const compWiring: Wire[] = [];
+        // await ComponentLoader.processWireConnections(
+        //   updatedConfig,
+        //   compWiring,
+        //   setComponents
+        // );
 
-            // Update the component position in the configuration
-            await ComponentLoader.updateComponentPosition(
-                draggedComponent.id,
-                pos.x,
-                pos.y
-            );
+        // if (config.components) {
+        //   const deviceBounds = ComponentLoader.getDeviceBounds(
+        //     config.components
+        //   );
+        //   console.log("deviceBounds: ", deviceBounds);
 
-            // Refresh the loaded components to get updated pin positions
-            const updatedConfig = await ComponentLoader.loadInitialComponents(
-                setLoadedImages,
-                setComponents,
-                setWires
-            );
+        //   // Process each wire to find valid paths around components
+        //   compWiring.forEach((wire) => {
+        //     const [startX, startY] = [wire.points[2], wire.points[3]];
+        //     const [endX, endY] = [wire.points[4], wire.points[5]];
+        //     const path = findPath([startX, startY], [endX, endY], deviceBounds);
+        //     if (path.length > 0) {
+        //       const wirePath = path.flat();
+        //       wire.points.splice(wire.points.length - 4, 0, ...wirePath);
+        //     }
+        //     console.log(wire.points);
+        //   });
 
-            // Recalculate wiring based on new pin positions
-            const compWiring: Wire[] = [];
-            await ComponentLoader.processWireConnections(
-                updatedConfig,
-                compWiring,
-                setComponents
-            );
+        //   const newWiring = shiftOverlappingPaths(compWiring, deviceBounds);
+        //   const finalWiring = shiftOverlappingPaths(newWiring, deviceBounds);
 
-            if (config.components) {
-                const deviceBounds = ComponentLoader.getDeviceBounds(
-                    config.components
-                );
-                console.log("deviceBounds: ", deviceBounds);
-
-                // Process each wire to find valid paths around components
-                compWiring.forEach((wire) => {
-                    const [startX, startY] = [wire.points[2], wire.points[3]];
-                    const [endX, endY] = [wire.points[4], wire.points[5]];
-                    const path = findPath([startX, startY], [endX, endY], deviceBounds);
-                    if (path.length > 0) {
-                        const wirePath = path.flat();
-                        wire.points.splice(wire.points.length - 4, 0, ...wirePath);
-                    }
-                    console.log(wire.points);
-                });
-
-                const newWiring = shiftOverlappingPaths(compWiring, deviceBounds);
-                const finalWiring = shiftOverlappingPaths(newWiring, deviceBounds);
-
-                // Set wires state
-                setWires(finalWiring);
-            }
-        } else {
-            console.log("No component found for the dragged ID.");
-        }
+        //   // Set wires state
+        //   setWires(finalWiring);
+        // }
+      } else {
+        console.log("No component found for the dragged ID.");
+      }
     }
 
     // Reset dragging state
     setIsDraggingComponent(false); // Ensure dragging state is reset
     setDraggedComponentId(null); // Clear the dragged component ID
-};
+  };
 
   const handleDrop = async (e: React.DragEvent) => {
     e.preventDefault();
@@ -287,11 +287,17 @@ export default function Canvas() {
     }
 
     setIsRouting(true);
-    const compWiring: Wire[] = [];
+
+    const updatedConfig = await ComponentLoader.loadInitialComponents(
+      setLoadedImages,
+      setComponents,
+      setWires
+    );
 
     // Call the routing logic here
+    const compWiring: Wire[] = [];
     await ComponentLoader.processWireConnections(
-      config,
+      updatedConfig,
       compWiring,
       setComponents
     );

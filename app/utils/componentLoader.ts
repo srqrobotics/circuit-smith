@@ -737,7 +737,7 @@ export class ComponentLoader {
         this.finalWiring = finalWiring;
 
         // Set wires state
-        setWires(this.finalWiring);
+        // setWires(this.finalWiring);
       }
 
       return config; // Return the loaded config
