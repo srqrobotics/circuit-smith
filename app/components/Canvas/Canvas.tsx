@@ -241,7 +241,10 @@ export default function Canvas() {
       return; // Prevent routing if config is not available
     }
 
-    // setIsRouting(true); // Set routing to true when starting
+    setIsRouting(true); // Set routing to true when starting
+
+    // Reset the wire color index to start from the beginning
+    ComponentLoader.colorIndex = 0; // Ensure colorIndex is reset here
 
     // Load pin mappings
     const pinWirePromises = config.components.map(async (component: any) => {
@@ -282,9 +285,6 @@ export default function Canvas() {
           wire.points.splice(wire.points.length - 4, 0, ...wirePath);
         }
       });
-
-      // Reset the wire color index to start from the beginning
-      ComponentLoader.colorIndex = 0;
 
       const newWiring = shiftOverlappingPaths(compWiring, deviceBounds);
       const finalWiring = shiftOverlappingPaths(newWiring, deviceBounds);

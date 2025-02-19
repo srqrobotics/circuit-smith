@@ -390,11 +390,8 @@ export class ComponentLoader {
         const availableColors = Object.entries(wireColor)
           .filter(([key]) => key !== "red" && key !== "black")
           .map(([_, value]) => value);
-        color =
-          availableColors[
-            (this.colorIndex =
-              ((this.colorIndex || 0) + 1) % availableColors.length)
-          ];
+        color = availableColors[this.colorIndex];
+        this.colorIndex = (this.colorIndex + 1) % availableColors.length;
     }
 
     return `${color}`;
