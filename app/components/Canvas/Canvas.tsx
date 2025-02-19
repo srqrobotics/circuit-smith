@@ -117,78 +117,97 @@ export default function Canvas() {
   const handleDragStart = (e: any) => {
     setIsDraggingComponent(true);
     // const componentId = e.target.id(); // Get the ID of the dragged component
-    setDraggedComponentId(hoveredComponentName); // Store the ID of the dragged component
-    console.log("Dragging Component ID:", hoveredComponentName); // Log the ID
+    const componentId = hoveredComponentName;
+    setDraggedComponentId(componentId); // Store the ID of the dragged component
+    console.log("Dragging Component ID:", componentId); // Log the ID
   };
 
   const handleDragEnd = async (e: any) => {
-    // console.log("Drag End Event Triggered");
-    // console.log("Is Dragging Component:", isDraggingComponent);
-
     // Log the current components state
     console.log("Current Components State:", components);
-    // console.log("target:", e.target);
 
     if (isDraggingComponent) {
-      const pos = {
-        x: e.target.x(),
-        y: e.target.y(),
-      };
-      console.log(pos.x, pos.y);
+        const pos = {
+            x: Math.round(e.target.x()), // Round to nearest integer
+            y: Math.round(e.target.y()), // Round to nearest integer
+        };
+        console.log(pos.x, pos.y);
 
-      // Find the component being dragged using the stored ID
-      const draggedComponent = components.find(
-        (c) => c.id === draggedComponentId
-      );
-
-      console.log("Component ID:", draggedComponentId);
-      console.log("Component:", draggedComponent);
-
-      if (draggedComponent) {
-        // Log the name of the dragged component
-        console.log("Dragged Component Name:", draggedComponent.name); // Log the component name
-        console.log("Dropped Location:", pos);
-
-        // Update the component's position in state
-        setComponents((prev) =>
-          prev.map((c) =>
-            c.id === draggedComponent.id ? { ...c, x: pos.x, y: pos.y } : c
-          )
+        // Find the component being dragged using the stored ID
+        const draggedComponent = components.find(
+            (c) => c.name === hoveredComponentName
         );
 
-        // Update the component position in the configuration
-        await ComponentLoader.updateComponentPosition(
-          draggedComponent.id,
-          pos.x,
-          pos.y
-        );
+        console.log("Component ID:", draggedComponentId);
+        console.log("Component:", draggedComponent);
 
-        // Refresh the loaded components to get updated pin positions
-        const updatedConfig = await ComponentLoader.loadInitialComponents(
-          setLoadedImages,
-          setComponents,
-          setWires
-        );
+        if (draggedComponent) {
+            // Log the name of the dragged component
+            console.log("Dragged Component Name:", draggedComponent.name); // Log the component name
+            console.log("Dropped Location:", pos);
 
-        // Recalculate wiring based on new pin positions
-        const compWiring: Wire[] = [];
-        await ComponentLoader.processWireConnections(
-          updatedConfig,
-          compWiring,
-          setComponents
-        );
+            // Update the component's position in state
+            setComponents((prev) =>
+                prev.map((c) =>
+                    c.id === draggedComponent.id ? { ...c, x: pos.x, y: pos.y } : c
+                )
+            );
 
-        // Update the wires state with the new wiring
-        setWires(compWiring);
-      } else {
-        console.log("No component found for the dragged ID.");
-      }
+            // Update the component position in the configuration
+            await ComponentLoader.updateComponentPosition(
+                draggedComponent.id,
+                pos.x,
+                pos.y
+            );
+
+            // Refresh the loaded components to get updated pin positions
+            const updatedConfig = await ComponentLoader.loadInitialComponents(
+                setLoadedImages,
+                setComponents,
+                setWires
+            );
+
+            // Recalculate wiring based on new pin positions
+            const compWiring: Wire[] = [];
+            await ComponentLoader.processWireConnections(
+                updatedConfig,
+                compWiring,
+                setComponents
+            );
+
+            if (config.components) {
+                const deviceBounds = ComponentLoader.getDeviceBounds(
+                    config.components
+                );
+                console.log("deviceBounds: ", deviceBounds);
+
+                // Process each wire to find valid paths around components
+                compWiring.forEach((wire) => {
+                    const [startX, startY] = [wire.points[2], wire.points[3]];
+                    const [endX, endY] = [wire.points[4], wire.points[5]];
+                    const path = findPath([startX, startY], [endX, endY], deviceBounds);
+                    if (path.length > 0) {
+                        const wirePath = path.flat();
+                        wire.points.splice(wire.points.length - 4, 0, ...wirePath);
+                    }
+                    console.log(wire.points);
+                });
+
+                const newWiring = shiftOverlappingPaths(compWiring, deviceBounds);
+                const finalWiring = shiftOverlappingPaths(newWiring, deviceBounds);
+
+                // Set wires state
+                setWires(finalWiring);
+            }
+        } else {
+            console.log("No component found for the dragged ID.");
+        }
     }
 
     // Reset dragging state
     setIsDraggingComponent(false); // Ensure dragging state is reset
     setDraggedComponentId(null); // Clear the dragged component ID
-  };
+};
 
   const handleDrop = async (e: React.DragEvent) => {
     e.preventDefault();
