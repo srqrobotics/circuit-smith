@@ -116,35 +116,23 @@ export default function Canvas() {
 
   const handleDragStart = (e: any) => {
     setIsDraggingComponent(true);
-    // const componentId = e.target.id(); // Get the ID of the dragged component
     const componentId = hoveredComponentName;
     setDraggedComponentId(componentId); // Store the ID of the dragged component
-    // console.log("Dragging Component ID:", componentId); // Log the ID
   };
 
   const handleDragEnd = async (e: any) => {
-    // Log the current components state
-    // console.log("Current Components State:", components);
-
     if (isDraggingComponent) {
       const pos = {
         x: Math.round(e.target.x()), // Round to nearest integer
         y: Math.round(e.target.y()), // Round to nearest integer
       };
-      // console.log(pos.x, pos.y);
 
       // Find the component being dragged using the stored ID
       const draggedComponent = components.find(
         (c) => c.name === hoveredComponentName
       );
 
-      // console.log("Component ID:", draggedComponentId);
-      // console.log("Component:", draggedComponent);
-
       if (draggedComponent) {
-        // console.log("Dragged Component Name:", draggedComponent.name);
-        // console.log("Dropped Location:", pos);
-
         // Update the component's position in state
         setComponents((prev) =>
           prev.map((c) =>
@@ -194,10 +182,6 @@ export default function Canvas() {
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
   };
-
-  const gridSize = 20;
-  const numLinesX = Math.ceil(dimensions.width / gridSize);
-  const numLinesY = Math.ceil(dimensions.height / gridSize);
 
   const wireDrawingHandlers = handleWireDrawing(
     isDrawingWire,
@@ -263,8 +247,6 @@ export default function Canvas() {
 
     if (config.components) {
       const deviceBounds = ComponentLoader.getDeviceBounds(config.components);
-      // console.log("deviceBounds: ", deviceBounds);
-
       // Process each wire to find valid paths around components
       compWiring.forEach((wire) => {
         const [startX, startY] = [wire.points[2], wire.points[3]];
@@ -274,7 +256,6 @@ export default function Canvas() {
           const wirePath = path.flat();
           wire.points.splice(wire.points.length - 4, 0, ...wirePath);
         }
-        // console.log(wire.points);
       });
 
       const newWiring = shiftOverlappingPaths(compWiring, deviceBounds);
@@ -282,7 +263,6 @@ export default function Canvas() {
 
       // Update the wires state with the new wiring
       setWires(finalWiring);
-      // console.log("Final Wiring: ", finalWiring); // You can use this as needed
     }
 
     setIsRouting(false);
@@ -326,32 +306,6 @@ export default function Canvas() {
           >
             <Layer>
               <Group>
-                {/* Grid lines */}
-                {Array.from({ length: 50 }, (_, i) => (
-                  <React.Fragment key={`grid-${i}`}>
-                    <Line
-                      points={[
-                        i * gridSize,
-                        0,
-                        i * gridSize,
-                        numLinesY * gridSize,
-                      ]}
-                      stroke={isDarkMode ? "#374151" : "#ddd"}
-                      strokeWidth={0.5}
-                    />
-                    <Line
-                      points={[
-                        0,
-                        i * gridSize,
-                        numLinesX * gridSize,
-                        i * gridSize,
-                      ]}
-                      stroke={isDarkMode ? "#374151" : "#ddd"}
-                      strokeWidth={0.5}
-                    />
-                  </React.Fragment>
-                ))}
-
                 {/* Dropped Components - Render these first */}
                 {components.map(
                   (component) =>
