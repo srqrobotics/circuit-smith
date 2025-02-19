@@ -41,6 +41,7 @@ export default function Canvas() {
   const [hoveredComponentName, setHoveredComponentName] = useState<
     string | null
   >(null); // New state for hovered component name
+  const [isDraggingWires, setIsDraggingWires] = useState(false); // New state for wire visibility
 
   useEffect(() => {
     setIsMounted(true);
@@ -117,6 +118,8 @@ export default function Canvas() {
 
   const handleDragStart = (e: any) => {
     setIsDraggingComponent(true);
+    setIsDraggingWires(true); // Hide wires during drag
+    setWires([]); // Clear all wires when dragging starts
     const componentId = hoveredComponentName;
     setDraggedComponentId(componentId); // Store the ID of the dragged component
   };
@@ -147,6 +150,11 @@ export default function Canvas() {
           pos.x,
           pos.y
         );
+
+        if (isRouting) {
+          // Call the startRouting function instead of handleRouting
+          await startRouting();
+        }
       } else {
         console.error("No component found for the dragged ID.");
       }
@@ -155,6 +163,7 @@ export default function Canvas() {
     // Reset dragging state
     setIsDraggingComponent(false); // Ensure dragging state is reset
     setDraggedComponentId(null); // Clear the dragged component ID
+    setIsDraggingWires(false); // Show wires again after drag ends
   };
 
   const handleDrop = async (e: React.DragEvent) => {
@@ -223,8 +232,7 @@ export default function Canvas() {
     setHoveredComponentName(hoveredComponent ? hoveredComponent.name : null); // Update hovered component name
   };
 
-  // Route Wiring Button
-  const handleRouting = async () => {
+  const startRouting = async () => {
     const response = await fetch("/configs/demo.json");
     const config = await response.json();
 
@@ -233,7 +241,7 @@ export default function Canvas() {
       return; // Prevent routing if config is not available
     }
 
-    setIsRouting(true);
+    // setIsRouting(true); // Set routing to true when starting
 
     // Load pin mappings
     const pinWirePromises = config.components.map(async (component: any) => {
@@ -275,24 +283,40 @@ export default function Canvas() {
         }
       });
 
+      // Reset the wire color index to start from the beginning
+      ComponentLoader.colorIndex = 0;
+
       const newWiring = shiftOverlappingPaths(compWiring, deviceBounds);
       const finalWiring = shiftOverlappingPaths(newWiring, deviceBounds);
       const fullWiring = [...pinWires.flat(), ...finalWiring];
       // Update the wires state with the new wiring
       setWires(fullWiring);
     }
+  };
 
-    setIsRouting(false);
+  const handleRoutingToggle = async () => {
+    if (isRouting) {
+      // If currently routing, stop routing
+      setIsRouting(false);
+      // You can add any additional logic here to handle stopping routing if needed
+    } else {
+      // If not routing, start routing
+      setIsRouting(true); // Set routing to true when starting
+      await startRouting(); // Call the new startRouting function
+    }
   };
 
   return (
     <div className="flex-1 flex flex-col min-h-0">
       <div className="h-10 border-b border-gray-200 dark:border-gray-700 flex items-center px-4 bg-white dark:bg-gray-800">
         <button
-          onClick={handleRouting}
-          className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-gray-900 dark:text-gray-100 text-sm"
+          onClick={handleRoutingToggle}
+          className={`p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-gray-900 dark:text-gray-100 text-sm ${
+            isRouting ? "bg-gray-200" : ""
+          }`} // Optional: Add a background color when routing is active
         >
-          Route Wires
+          {isRouting ? "Stop Routing" : "Route Wires"}{" "}
+          {/* Toggle button text */}
         </button>
       </div>
       <div
@@ -352,37 +376,38 @@ export default function Canvas() {
                     )
                 )}
 
-                {/* Wires with Pin Labels */}
-                {wires.map((wire) => (
-                  <React.Fragment key={wire.id}>
-                    <Line
-                      points={wire.points}
-                      stroke={wire.color}
-                      strokeWidth={2}
-                      lineJoin="round"
-                      lineCap="round"
-                      cornerRadius={10}
-                      onMouseEnter={() => setHoveredWireId(wire.id)}
-                      onMouseLeave={() => setHoveredWireId(null)}
-                    />
-                    {hoveredWireId === wire.id && (
-                      <Text
-                        x={wire.points[0] + 5}
-                        y={wire.points[1] - 5}
-                        text={wire.id}
-                        fontSize={8}
-                        fill={wire.color}
-                        fontFamily="monospace"
+                {/* Conditionally render wires based on dragging state */}
+                {!isDraggingWires &&
+                  wires.map((wire) => (
+                    <React.Fragment key={wire.id}>
+                      <Line
+                        points={wire.points}
+                        stroke={wire.color}
+                        strokeWidth={6}
+                        lineJoin="round"
+                        lineCap="round"
+                        cornerRadius={10}
+                        onMouseEnter={() => setHoveredWireId(wire.id)}
+                        onMouseLeave={() => setHoveredWireId(null)}
                       />
-                    )}
-                  </React.Fragment>
-                ))}
+                      {hoveredWireId === wire.id && (
+                        <Text
+                          x={wire.points[0] + 5}
+                          y={wire.points[1] - 5}
+                          text={wire.id}
+                          fontSize={8}
+                          fill={wire.color}
+                          fontFamily="monospace"
+                        />
+                      )}
+                    </React.Fragment>
+                  ))}
 
                 {isDrawingWire && currentWire.length >= 2 && (
                   <Line
                     points={currentWire}
                     stroke={wireColor}
-                    strokeWidth={2}
+                    strokeWidth={6}
                     lineJoin="round"
                     lineCap="round"
                     cornerRadius={10}

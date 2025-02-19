@@ -16,8 +16,6 @@ interface GroundSymbol extends DroppedComponent {
 }
 
 export const wireColor = {
-  red: "#ff0000",
-  black: "#000000",
   blue: "#0000ff",
   orange: "#ffa500",
   green: "#00ff00",
@@ -28,6 +26,8 @@ export const wireColor = {
   violet: "#8a2be2",
   rose: "#ff007f",
   aqua: "#00ffff",
+  red: "#ff0000",
+  black: "#000000",
 } as const;
 
 export function findPath(
@@ -322,7 +322,7 @@ export function shiftOverlappingPaths(
 }
 
 export class ComponentLoader {
-  private static colorIndex = 0;
+  public static colorIndex = 0;
   private static allPinWires: Wire[] = []; // Class variable to store all pin wires
   private static finalWiring: Wire[] = []; // Class variable to store final wiring
 
