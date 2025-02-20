@@ -18,8 +18,8 @@
     {
       "id": "DHT22",
       "name": "DHT22",
-      "x": 909,
-      "y": 498,
+      "x": 1763,
+      "y": 408,
       "rotation": 0,
       "image": {
         "src": "/packages/Modules/DHT22.png",
@@ -33,8 +33,8 @@
     {
       "id": "LCD",
       "name": "LCD",
-      "x": 2138,
-      "y": 333,
+      "x": 2519,
+      "y": 915,
       "rotation": 0,
       "image": {
         "src": "/packages/Modules/I2C LCD.png",
@@ -48,8 +48,8 @@
     {
       "id": "LDR",
       "name": "LDR",
-      "x": 654,
-      "y": 419,
+      "x": 736,
+      "y": 440,
       "rotation": 0,
       "image": {
         "src": "/packages/Modules/LDR Light Sensor Module.png",
@@ -78,8 +78,8 @@
     {
       "id": "servo-SG90",
       "name": "servo",
-      "x": 2241,
-      "y": 1252,
+      "x": 2246,
+      "y": 1276,
       "rotation": 0,
       "image": {
         "src": "/packages/Modules/servo-SG90.png",
@@ -93,8 +93,8 @@
     {
       "id": "ultrasonic-SR04",
       "name": "ultrasonic",
-      "x": 2150,
-      "y": 650,
+      "x": 1940,
+      "y": 614,
       "rotation": 0,
       "image": {
         "src": "/packages/Modules/ultrasonic-SR04.png",
@@ -109,14 +109,82 @@
   "wire": [
     {
       "mcu": "5V",
-      "ultrasonic-SR04": "5V"
+      "DHT22": "5V"
     },
     {
       "mcu": "D8",
+      "DHT22": "DATA"
+    },
+    {
+      "mcu": "GND-1",
+      "DHT22": "GND"
+    },
+    {
+      "mcu": "5V",
+      "LCD": "5V"
+    },
+    {
+      "mcu": "D20",
+      "LCD": "SDA"
+    },
+    {
+      "mcu": "D21",
+      "LCD": "SCL"
+    },
+    {
+      "mcu": "GND-1",
+      "LCD": "GND"
+    },
+    {
+      "mcu": "5V",
+      "LDR": "5V"
+    },
+    {
+      "mcu": "A0",
+      "LDR": "A0"
+    },
+    {
+      "mcu": "D51",
+      "LDR": "D0"
+    },
+    {
+      "mcu": "GND-1",
+      "LDR": "GND"
+    },
+    {
+      "mcu": "5V",
+      "PIR": "5V"
+    },
+    {
+      "mcu": "D53",
+      "PIR": "DATA"
+    },
+    {
+      "mcu": "GND-1",
+      "PIR": "GND"
+    },
+    {
+      "mcu": "5V",
+      "servo-SG90": "5V"
+    },
+    {
+      "mcu": "D49",
+      "servo-SG90": "POS"
+    },
+    {
+      "mcu": "GND-1",
+      "servo-SG90": "GND"
+    },
+    {
+      "mcu": "5V",
+      "ultrasonic-SR04": "5V"
+    },
+    {
+      "mcu": "D14",
       "ultrasonic-SR04": "ECHO"
     },
     {
-      "mcu": "D7",
+      "mcu": "D15",
       "ultrasonic-SR04": "TRIG"
     },
     {

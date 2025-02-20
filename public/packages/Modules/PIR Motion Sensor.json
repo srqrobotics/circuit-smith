@@ -4,8 +4,8 @@
     "digital-pins": {
         "id": [
             "5V",
-            "Data",
-            "Gnd"
+            "DATA",
+            "GND"
         ],
         "reloc": [
             {
@@ -16,14 +16,14 @@
                 ]
             },
             {
-                "id": "Data",
+                "id": "DATA",
                 "points": [
                     100,
                     196
                 ]
             },
             {
-                "id": "Gnd",
+                "id": "GND",
                 "points": [
                     121,
                     196
