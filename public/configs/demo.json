@@ -1,195 +1,89 @@
 {
-  "components": [
-    {
-      "id": "mcu",
-      "name": "Arduino",
-      "x": 1085,
-      "y": 383,
-      "rotation": 0,
-      "image": {
-        "src": "/packages/Microcontrollers/Arduino/ArduinoMega.png",
-        "width": 0,
-        "height": 0
-      },
-      "pin-map": {
-        "src": "/packages/Microcontrollers/Arduino/ArduinoMega.json"
-      }
-    },
-    {
-      "id": "DHT22",
-      "name": "DHT22",
-      "x": 1973,
-      "y": 336,
-      "rotation": 0,
-      "image": {
-        "src": "/packages/Modules/DHT22.png",
-        "width": 0,
-        "height": 0
-      },
-      "pin-map": {
-        "src": "/packages/Modules/DHT22.json"
-      }
-    },
-    {
-      "id": "LCD",
-      "name": "LCD",
-      "x": 2181,
-      "y": 793,
-      "rotation": 0,
-      "image": {
-        "src": "/packages/Modules/I2C_LCD.png",
-        "width": 0,
-        "height": 0
-      },
-      "pin-map": {
-        "src": "/packages/Modules/I2C_LCD.json"
-      }
-    },
-    {
-      "id": "LDR",
-      "name": "LDR",
-      "x": 570,
-      "y": 449,
-      "rotation": 0,
-      "image": {
-        "src": "/packages/Modules/LDR_Sensor.png",
-        "width": 0,
-        "height": 0
-      },
-      "pin-map": {
-        "src": "/packages/Modules/LDR_Sensor.json"
-      }
-    },
-    {
-      "id": "PIR",
-      "name": "PIR",
-      "x": 832,
-      "y": 482,
-      "rotation": 0,
-      "image": {
-        "src": "/packages/Modules/PIR_Sensor.png",
-        "width": 0,
-        "height": 0
-      },
-      "pin-map": {
-        "src": "/packages/Modules/PIR_Sensor.json"
-      }
-    },
-    {
-      "id": "servo-SG90",
-      "name": "servo",
-      "x": 2246,
-      "y": 1276,
-      "rotation": 0,
-      "image": {
-        "src": "/packages/Modules/servo_SG90.png",
-        "width": 0,
-        "height": 0
-      },
-      "pin-map": {
-        "src": "/packages/Modules/servo_SG90.json"
-      }
-    },
-    {
-      "id": "ultrasonic-SR04",
-      "name": "ultrasonic",
-      "x": 2610,
-      "y": 443,
-      "rotation": 0,
-      "image": {
-        "src": "/packages/Modules/ultrasonic_SR04.png",
-        "width": 0,
-        "height": 0
-      },
-      "pin-map": {
-        "src": "/packages/Modules/ultrasonic_SR04.json"
-      }
-    }
-  ],
+  "components": ["ArduinoMega", "DHT22", "I2C_LCD", "LDR_Sensor", "PIR_Sensor", "servo_SG90", "ultrasonic_SR04"],
   "wire": [
     {
-      "mcu": "5V",
+      "ArduinoMega": "5V",
       "DHT22": "5V"
     },
     {
-      "mcu": "D8",
+      "ArduinoMega": "D8",
       "DHT22": "DATA"
     },
     {
-      "mcu": "GND-1",
+      "ArduinoMega": "GND-1",
       "DHT22": "GND"
     },
     {
-      "mcu": "5V",
-      "LCD": "5V"
+      "ArduinoMega": "5V",
+      "I2C_LCD": "5V"
     },
     {
-      "mcu": "D20",
-      "LCD": "SDA"
+      "ArduinoMega": "D20",
+      "I2C_LCD": "SDA"
     },
     {
-      "mcu": "D21",
-      "LCD": "SCL"
+      "ArduinoMega": "D21",
+      "I2C_LCD": "SCL"
     },
     {
-      "mcu": "GND-1",
-      "LCD": "GND"
+      "ArduinoMega": "GND-1",
+      "I2C_LCD": "GND"
     },
     {
-      "mcu": "5V",
-      "LDR": "5V"
+      "ArduinoMega": "5V",
+      "LDR_Sensor": "5V"
     },
     {
-      "mcu": "A0",
-      "LDR": "A0"
+      "ArduinoMega": "A0",
+      "LDR_Sensor": "A0"
     },
     {
-      "mcu": "D51",
-      "LDR": "D0"
+      "ArduinoMega": "D51",
+      "LDR_Sensor": "D0"
     },
     {
-      "mcu": "GND-1",
-      "LDR": "GND"
+      "ArduinoMega": "GND-1",
+      "LDR_Sensor": "GND"
     },
     {
-      "mcu": "5V",
-      "PIR": "5V"
+      "ArduinoMega": "5V",
+      "PIR_Sensor": "5V"
     },
     {
-      "mcu": "D53",
-      "PIR": "DATA"
+      "ArduinoMega": "D53",
+      "PIR_Sensor": "DATA"
     },
     {
-      "mcu": "GND-1",
-      "PIR": "GND"
+      "ArduinoMega": "GND-1",
+      "PIR_Sensor": "GND"
     },
     {
-      "mcu": "5V",
-      "servo-SG90": "5V"
+      "ArduinoMega": "5V",
+      "servo_SG90": "5V"
     },
     {
-      "mcu": "D49",
-      "servo-SG90": "POS"
+      "ArduinoMega": "D49",
+      "servo_SG90": "POS"
     },
     {
-      "mcu": "GND-1",
-      "servo-SG90": "GND"
+      "ArduinoMega": "GND-1",
+      "servo_SG90": "GND"
     },
     {
-      "mcu": "5V",
-      "ultrasonic-SR04": "5V"
+      "ArduinoMega": "5V",
+      "ultrasonic_SR04": "5V"
     },
     {
-      "mcu": "D14",
-      "ultrasonic-SR04": "ECHO"
+      "ArduinoMega": "D14",
+      "ultrasonic_SR04": "ECHO"
     },
     {
-      "mcu": "D15",
-      "ultrasonic-SR04": "TRIG"
+      "ArduinoMega": "D15",
+      "ultrasonic_SR04": "TRIG"
     },
     {
-      "mcu": "GND-1",
-      "ultrasonic-SR04": "GND"
+      "ArduinoMega": "GND-1",
+      "ultrasonic_SR04": "GND"
     }
   ]
 }

@@ -1,5 +1,111 @@
 {
-  "components": ["ArduinoMega", "DHT22", "I2C_LCD", "LDR_Sensor", "PIR_Sensor", "servo_SG90", "ultrasonic_SR04"],
+  "components": [
+    {
+      "id": "ArduinoMega",
+      "name": "Arduino",
+      "x": 1085,
+      "y": 383,
+      "rotation": 0,
+      "image": {
+        "src": "/packages/Microcontrollers/Arduino/ArduinoMega.png",
+        "width": 0,
+        "height": 0
+      },
+      "pin-map": {
+        "src": "/packages/Microcontrollers/Arduino/ArduinoMega.json"
+      }
+    },
+    {
+      "id": "DHT22",
+      "name": "DHT22",
+      "x": 1973,
+      "y": 336,
+      "rotation": 0,
+      "image": {
+        "src": "/packages/Modules/DHT22.png",
+        "width": 0,
+        "height": 0
+      },
+      "pin-map": {
+        "src": "/packages/Modules/DHT22.json"
+      }
+    },
+    {
+      "id": "I2C_LCD",
+      "name": "LCD",
+      "x": 2181,
+      "y": 793,
+      "rotation": 0,
+      "image": {
+        "src": "/packages/Modules/I2C_LCD.png",
+        "width": 0,
+        "height": 0
+      },
+      "pin-map": {
+        "src": "/packages/Modules/I2C_LCD.json"
+      }
+    },
+    {
+      "id": "LDR_Sensor",
+      "name": "LDR",
+      "x": 570,
+      "y": 449,
+      "rotation": 0,
+      "image": {
+        "src": "/packages/Modules/LDR_Sensor.png",
+        "width": 0,
+        "height": 0
+      },
+      "pin-map": {
+        "src": "/packages/Modules/LDR_Sensor.json"
+      }
+    },
+    {
+      "id": "PIR_Sensor",
+      "name": "PIR",
+      "x": 832,
+      "y": 482,
+      "rotation": 0,
+      "image": {
+        "src": "/packages/Modules/PIR_Sensor.png",
+        "width": 0,
+        "height": 0
+      },
+      "pin-map": {
+        "src": "/packages/Modules/PIR_Sensor.json"
+      }
+    },
+    {
+      "id": "servo_SG90",
+      "name": "servo",
+      "x": 2246,
+      "y": 1276,
+      "rotation": 0,
+      "image": {
+        "src": "/packages/Modules/servo_SG90.png",
+        "width": 0,
+        "height": 0
+      },
+      "pin-map": {
+        "src": "/packages/Modules/servo_SG90.json"
+      }
+    },
+    {
+      "id": "ultrasonic_SR04",
+      "name": "ultrasonic",
+      "x": 2610,
+      "y": 443,
+      "rotation": 0,
+      "image": {
+        "src": "/packages/Modules/ultrasonic_SR04.png",
+        "width": 0,
+        "height": 0
+      },
+      "pin-map": {
+        "src": "/packages/Modules/ultrasonic_SR04.json"
+      }
+    }
+  ],
   "wire": [
     {
       "ArduinoMega": "5V",
