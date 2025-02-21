@@ -3,23 +3,23 @@
     {
       "id": "mcu",
       "name": "Arduino",
-      "x": 1159,
-      "y": 276,
+      "x": 1085,
+      "y": 383,
       "rotation": 0,
       "image": {
-        "src": "/packages/Microcontrollers/Arduino/Arduino-Mega.png",
+        "src": "/packages/Microcontrollers/Arduino/ArduinoMega.png",
         "width": 0,
         "height": 0
       },
       "pin-map": {
-        "src": "/packages/Microcontrollers/Arduino/Arduino-Mega.json"
+        "src": "/packages/Microcontrollers/Arduino/ArduinoMega.json"
       }
     },
     {
       "id": "DHT22",
       "name": "DHT22",
-      "x": 1763,
-      "y": 408,
+      "x": 1973,
+      "y": 336,
       "rotation": 0,
       "image": {
         "src": "/packages/Modules/DHT22.png",
@@ -33,46 +33,46 @@
     {
       "id": "LCD",
       "name": "LCD",
-      "x": 2519,
-      "y": 915,
+      "x": 2181,
+      "y": 793,
       "rotation": 0,
       "image": {
-        "src": "/packages/Modules/I2C LCD.png",
+        "src": "/packages/Modules/I2C_LCD.png",
         "width": 0,
         "height": 0
       },
       "pin-map": {
-        "src": "/packages/Modules/I2C LCD.json"
+        "src": "/packages/Modules/I2C_LCD.json"
       }
     },
     {
       "id": "LDR",
       "name": "LDR",
-      "x": 736,
-      "y": 440,
+      "x": 570,
+      "y": 449,
       "rotation": 0,
       "image": {
-        "src": "/packages/Modules/LDR Light Sensor Module.png",
+        "src": "/packages/Modules/LDR_Sensor.png",
         "width": 0,
         "height": 0
       },
       "pin-map": {
-        "src": "/packages/Modules/LDR Light Sensor Module.json"
+        "src": "/packages/Modules/LDR_Sensor.json"
       }
     },
     {
       "id": "PIR",
       "name": "PIR",
-      "x": 311,
-      "y": 481,
+      "x": 832,
+      "y": 482,
       "rotation": 0,
       "image": {
-        "src": "/packages/Modules/PIR Motion Sensor.png",
+        "src": "/packages/Modules/PIR_Sensor.png",
         "width": 0,
         "height": 0
       },
       "pin-map": {
-        "src": "/packages/Modules/PIR Motion Sensor.json"
+        "src": "/packages/Modules/PIR_Sensor.json"
       }
     },
     {
@@ -82,27 +82,27 @@
       "y": 1276,
       "rotation": 0,
       "image": {
-        "src": "/packages/Modules/servo-SG90.png",
+        "src": "/packages/Modules/servo_SG90.png",
         "width": 0,
         "height": 0
       },
       "pin-map": {
-        "src": "/packages/Modules/servo-SG90.json"
+        "src": "/packages/Modules/servo_SG90.json"
       }
     },
     {
       "id": "ultrasonic-SR04",
       "name": "ultrasonic",
-      "x": 1940,
-      "y": 614,
+      "x": 2610,
+      "y": 443,
       "rotation": 0,
       "image": {
-        "src": "/packages/Modules/ultrasonic-SR04.png",
+        "src": "/packages/Modules/ultrasonic_SR04.png",
         "width": 0,
         "height": 0
       },
       "pin-map": {
-        "src": "/packages/Modules/ultrasonic-SR04.json"
+        "src": "/packages/Modules/ultrasonic_SR04.json"
       }
     }
   ],

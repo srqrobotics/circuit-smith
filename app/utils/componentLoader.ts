@@ -655,8 +655,18 @@ export class ComponentLoader {
     setWires: React.Dispatch<React.SetStateAction<Wire[]>>
   ): Promise<any> {
     try {
-      const response = await fetch("/configs/demo.json");
+      let response = await fetch("/configs/demo.json");
       const config = await response.json();
+
+      response = await fetch("/packages/devBible.json");
+      const dev_boards = await response.json();
+
+      response = await fetch("/packages/sensorBible.json");
+      const sensors = await response.json();
+
+      console.log("config", config);
+      console.log("dev_boards", dev_boards);
+      console.log("sensors", sensors);
 
       // Load pin mappings
       const pinWirePromises = config.components.map(async (component: any) => {
