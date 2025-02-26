@@ -247,7 +247,7 @@ export default function Canvas() {
     ComponentLoader.colorIndex = 0; // Ensure colorIndex is reset here
 
     // Load pin mappings
-    const pinWirePromises = config.components.map(async (component: any) => {
+    const pinWirePromises = components.map(async (component: any) => {
       if (component["pin-map"]?.src) {
         const pinMapResponse = await fetch(component["pin-map"].src);
         component.pinMap = await pinMapResponse.json();
@@ -269,12 +269,13 @@ export default function Canvas() {
     const compWiring: Wire[] = [];
     await ComponentLoader.processWireConnections(
       updatedConfig,
+      components,
       compWiring,
       setComponents
     );
 
-    if (config.components) {
-      const deviceBounds = ComponentLoader.getDeviceBounds(config.components);
+    if (components) {
+      const deviceBounds = ComponentLoader.getDeviceBounds(components);
       // Process each wire to find valid paths around components
       compWiring.forEach((wire) => {
         const [startX, startY] = [wire.points[2], wire.points[3]];

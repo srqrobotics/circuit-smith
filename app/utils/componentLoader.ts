@@ -328,14 +328,22 @@ export class ComponentLoader {
 
   static getDeviceBounds(components: DroppedComponent[]): number[][] {
     const bounds: number[][] = [];
+    console.log("getDeviceBounds:", components);
     components.forEach((component: DroppedComponent) => {
-      const componentBounds = [
-        component.x,
-        component.y,
-        component.x + component.image.width,
-        component.y + component.image.height,
-      ];
-      bounds.push(componentBounds);
+      // Check if the component has an image property
+      if (component.image) {
+        const componentBounds = [
+          component.x,
+          component.y,
+          component.x + component.image.width,
+          component.y + component.image.height,
+        ];
+        bounds.push(componentBounds);
+      } else {
+        console.warn(
+          `Component ${component.id} does not have an image property.`
+        );
+      }
     });
     return bounds;
   }
@@ -456,21 +464,25 @@ export class ComponentLoader {
   static processDeviceConnections = (
     device: string,
     connection: any,
-    config: any,
+    components: any,
     key: string,
     wireRoute: number[],
     wireNameMap: { [key: string]: string }
   ) => {
     const pin = connection[device];
 
-    const pinMap = config.components.find(
-      (comp: DroppedComponent) => comp.id === device
-    ).pinMap["digital-pins"]["reloc"];
-
-    const component = config.components.find(
+    // Find the component in the config
+    const component = components.find(
       (comp: DroppedComponent) => comp.id === device
     );
 
+    // Check if the component exists and has a pinMap
+    if (!component || !component.pinMap) {
+      console.error(`Component ${device} not found or missing pinMap.`);
+      return; // Exit if the component is not found or pinMap is missing
+    }
+
+    const pinMap = component.pinMap["digital-pins"]["reloc"];
     const componentSize = [component.image.width, component.image.height];
     const matchingPin = pinMap.find((p: any) => p.id === pin);
 
@@ -501,6 +513,7 @@ export class ComponentLoader {
 
   static processWireConnections = async (
     config: any,
+    components: any,
     compWiring: Wire[],
     setComponents: React.Dispatch<React.SetStateAction<DroppedComponent[]>>
   ) => {
@@ -522,7 +535,7 @@ export class ComponentLoader {
           ComponentLoader.processDeviceConnections(
             device,
             connection,
-            config,
+            components,
             key,
             wireRoute,
             wireNameMap
@@ -539,6 +552,8 @@ export class ComponentLoader {
 
     // Second pass: Process power pins
     const processedPowerPins = new Map<string, Set<string>>();
+    // Get device bounds for path finding
+    const deviceBounds = ComponentLoader.getDeviceBounds(components);
 
     for (const key of Object.keys(config.wire)) {
       const connection = config.wire[key];
@@ -559,14 +574,14 @@ export class ComponentLoader {
             const wireNameMap: { [key: string]: string } = {};
 
             // Get component info
-            const component = config.components.find(
+            const component = components.find(
               (comp: DroppedComponent) => comp.id === device
             );
 
             ComponentLoader.processDeviceConnections(
               device,
               { [device]: pinName },
-              config,
+              components,
               key,
               wireRoute,
               wireNameMap
@@ -586,11 +601,6 @@ export class ComponentLoader {
               // Add path to edge
               const edgeX = lastX + shortPath[0];
               const edgeY = lastY + shortPath[1];
-
-              // Get device bounds for path finding
-              const deviceBounds = ComponentLoader.getDeviceBounds(
-                config.components
-              );
 
               if (pinName.includes("GND")) {
                 // Ground extends downward
@@ -664,12 +674,17 @@ export class ComponentLoader {
       response = await fetch("/packages/sensorBible.json");
       const sensors = await response.json();
 
-      console.log("config", config);
-      console.log("dev_boards", dev_boards);
-      console.log("sensors", sensors);
+      const components_list = [...dev_boards.components, ...sensors.components];
+      console.log("components", components_list);
+      console.log("components", config.components);
+
+      const components = components_list.filter((component: any) =>
+        config.components.includes(component.id)
+      );
+      console.log("Selected components:", components);
 
       // Load pin mappings
-      const pinWirePromises = config.components.map(async (component: any) => {
+      const pinWirePromises = components.map(async (component: any) => {
         if (component["pin-map"]?.src) {
           const pinMapResponse = await fetch(component["pin-map"].src);
           component.pinMap = await pinMapResponse.json();
@@ -679,8 +694,9 @@ export class ComponentLoader {
       });
 
       // Load images
-      const imageLoadPromises = config.components.map(
+      const imageLoadPromises = components.map(
         async (component: DroppedComponent) => {
+          console.log(component.image.src);
           const img = await preloadImage(component.image.src);
           component.image.width = img.naturalWidth;
           component.image.height = img.naturalHeight;
@@ -703,7 +719,7 @@ export class ComponentLoader {
         return newImages;
       });
 
-      setComponents(config.components);
+      setComponents(components);
 
       // Process wire configurations from config
       console.log("loading wireConnections");
@@ -712,6 +728,7 @@ export class ComponentLoader {
       if (config.wire) {
         await ComponentLoader.processWireConnections(
           config,
+          components,
           compWiring,
           setComponents
         );
@@ -721,8 +738,8 @@ export class ComponentLoader {
       // Store all pin wires in the class variable
       this.allPinWires = [...pinWires.flat(), ...compWiring];
 
-      if (config.components) {
-        const deviceBounds = ComponentLoader.getDeviceBounds(config.components);
+      if (components) {
+        const deviceBounds = ComponentLoader.getDeviceBounds(components);
         console.log("deviceBounds: ", deviceBounds);
 
         // Process each wire to find valid paths around components
@@ -772,12 +789,7 @@ export class ComponentLoader {
   ) {
     try {
       // Get the current configuration file path
-      const configFiles = [
-        "/configs/demo.json",
-        "/configs/arduino-fix.json",
-        "/configs/arduino-uno.json",
-        "/configs/template.json",
-      ];
+      const configFiles = ["/configs/demo.json"];
 
       // Search through config files to find the component
       for (const configFile of configFiles) {
