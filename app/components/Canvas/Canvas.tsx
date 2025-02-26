@@ -233,10 +233,10 @@ export default function Canvas() {
   };
 
   const startRouting = async () => {
-    const response = await fetch("/configs/demo.json");
-    const config = await response.json();
+    const response = await fetch("/configs/demo.editor.json");
+    const components = await response.json();
 
-    if (!config) {
+    if (!components) {
       console.error("Config is not loaded yet.");
       return; // Prevent routing if config is not available
     }

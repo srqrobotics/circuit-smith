@@ -667,30 +667,30 @@ export class ComponentLoader {
       let response = await fetch("/configs/demo.json");
       const config = await response.json();
 
-      response = await fetch("/packages/devBible.json");
-      const dev_boards = await response.json();
+      response = await fetch("/configs/demo.editor.json");
+      const components = await response.json();
 
-      response = await fetch("/packages/sensorBible.json");
-      const sensors = await response.json();
+      if (components.length === 0) {
+        response = await fetch("/packages/devBible.json");
+        const dev_boards = await response.json();
 
-      const components_list = [...dev_boards.components, ...sensors.components];
-      console.log("components", components_list);
-      console.log("components", config.components);
+        response = await fetch("/packages/sensorBible.json");
+        const sensors = await response.json();
 
-      const components = components_list.filter((component: any) =>
-        config.components.includes(component.id)
-      );
-      console.log("Selected components:", components);
+        const components_list = [
+          ...dev_boards.components,
+          ...sensors.components,
+        ];
+        console.log("components", components_list);
+        console.log("components", config.components);
 
-      // Load pin mappings
-      const pinWirePromises = components.map(async (component: any) => {
-        if (component["pin-map"]?.src) {
-          const pinMapResponse = await fetch(component["pin-map"].src);
-          component.pinMap = await pinMapResponse.json();
-          return ComponentLoader.locatePins(component);
-        }
-        return [];
-      });
+        const components = components_list.filter((component: any) =>
+          config.components.includes(component.id)
+        );
+        console.log("Selected components:", components);
+
+        backupComponentsToJson(components, "configs/demo.editor.json"); // Specify the file name for backup
+      }
 
       // Load images
       const imageLoadPromises = components.map(
@@ -702,6 +702,16 @@ export class ComponentLoader {
           return { src: component.image.src, img };
         }
       );
+
+      // Load pin mappings
+      const pinWirePromises = components.map(async (component: any) => {
+        if (component["pin-map"]?.src) {
+          const pinMapResponse = await fetch(component["pin-map"].src);
+          component.pinMap = await pinMapResponse.json();
+          return ComponentLoader.locatePins(component);
+        }
+        return [];
+      });
 
       // Wait for all promises to resolve
       const [pinWires, loadedImgs] = await Promise.all([
@@ -788,7 +798,7 @@ export class ComponentLoader {
   ) {
     try {
       // Get the current configuration file path
-      const configFiles = ["/configs/demo.json"];
+      const configFiles = ["/configs/demo.editor.json"];
 
       // Search through config files to find the component
       for (const configFile of configFiles) {
@@ -807,7 +817,7 @@ export class ComponentLoader {
           console.log(`Loaded config from ${configFile}:`, config);
 
           // Find the component in the current config
-          const componentIndex = config.components.findIndex(
+          const componentIndex = config.findIndex(
             (c: any) => c.id === componentId
           );
 
@@ -816,50 +826,50 @@ export class ComponentLoader {
               `Found component ${componentId} in ${configFile} at index ${componentIndex}`
             );
             console.log("Original position:", {
-              x: config.components[componentIndex].x,
-              y: config.components[componentIndex].y,
+              x: config[componentIndex].x,
+              y: config[componentIndex].y,
             });
 
             // Update the component's position
-            config.components[componentIndex].x = x;
-            config.components[componentIndex].y = y;
+            config[componentIndex].x = x;
+            config[componentIndex].y = y;
 
             console.log("New position:", { x, y });
 
-            // // Save the updated config back to the file
-            // const saveResponse = await fetch(`/api/save-config`, {
-            //   method: "POST",
-            //   headers: {
-            //     "Content-Type": "application/json",
-            //   },
-            //   body: JSON.stringify({
-            //     file: configFile,
-            //     content: config,
-            //   }),
-            // });
+            // Save the updated config back to the file
+            const saveResponse = await fetch(`/api/save-config`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                file: configFile,
+                content: config,
+              }),
+            });
 
-            // const responseText = await saveResponse.text();
-            // console.log(`Save response for ${configFile}:`, {
-            //   status: saveResponse.status,
-            //   ok: saveResponse.ok,
-            //   text: responseText,
-            // });
+            const responseText = await saveResponse.text();
+            console.log(`Save response for ${configFile}:`, {
+              status: saveResponse.status,
+              ok: saveResponse.ok,
+              text: responseText,
+            });
 
-            // if (!saveResponse.ok) {
-            //   throw new Error(
-            //     `Failed to save config: ${saveResponse.statusText}. Details: ${responseText}`
-            //   );
-            // }
+            if (!saveResponse.ok) {
+              throw new Error(
+                `Failed to save config: ${saveResponse.statusText}. Details: ${responseText}`
+              );
+            }
 
-            // try {
-            //   const result = JSON.parse(responseText);
-            //   console.log("Save response parsed:", result);
-            // } catch (e) {
-            //   console.log(
-            //     "Could not parse save response as JSON:",
-            //     responseText
-            //   );
-            // }
+            try {
+              const result = JSON.parse(responseText);
+              console.log("Save response parsed:", result);
+            } catch (e) {
+              console.log(
+                "Could not parse save response as JSON:",
+                responseText
+              );
+            }
 
             break; // Exit loop once component is found and updated
           } else {
@@ -873,5 +883,59 @@ export class ComponentLoader {
       console.error("Error updating component position:", error);
       throw error;
     }
+  }
+}
+
+// Function to back up components to a JSON file
+async function backupComponentsToJson(
+  components: any[],
+  filePath: string
+): Promise<void> {
+  console.log(`Checking file: ${filePath}`);
+
+  const response = await fetch(filePath);
+  if (!response.ok) {
+    console.log(
+      `Skipping ${filePath} - not found or not accessible (${response.status})`
+    );
+  }
+
+  const config = await response.json();
+  console.log(`Loaded config from ${filePath}:`, config);
+
+  if (!(config.length === 0)) {
+    return;
+  }
+
+  // Save the updated config back to the file
+  const saveResponse = await fetch(`/api/save-config`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      file: filePath,
+      content: components,
+    }),
+  });
+
+  const responseText = await saveResponse.text();
+  console.log(`Save response for ${filePath}:`, {
+    status: saveResponse.status,
+    ok: saveResponse.ok,
+    text: responseText,
+  });
+
+  if (!saveResponse.ok) {
+    throw new Error(
+      `Failed to save config: ${saveResponse.statusText}. Details: ${responseText}`
+    );
+  }
+
+  try {
+    const result = JSON.parse(responseText);
+    console.log("Save response parsed:", result);
+  } catch (e) {
+    console.log("Could not parse save response as JSON:", responseText);
   }
 }
