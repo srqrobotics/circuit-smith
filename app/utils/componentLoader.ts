@@ -328,7 +328,6 @@ export class ComponentLoader {
 
   static getDeviceBounds(components: DroppedComponent[]): number[][] {
     const bounds: number[][] = [];
-    console.log("getDeviceBounds:", components);
     components.forEach((component: DroppedComponent) => {
       // Check if the component has an image property
       if (component.image) {
@@ -740,7 +739,7 @@ export class ComponentLoader {
 
       if (components) {
         const deviceBounds = ComponentLoader.getDeviceBounds(components);
-        console.log("deviceBounds: ", deviceBounds);
+        // console.log("deviceBounds: ", deviceBounds);
 
         // Process each wire to find valid paths around components
         compWiring.forEach((wire) => {
@@ -827,40 +826,40 @@ export class ComponentLoader {
 
             console.log("New position:", { x, y });
 
-            // Save the updated config back to the file
-            const saveResponse = await fetch(`/api/save-config`, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                file: configFile,
-                content: config,
-              }),
-            });
+            // // Save the updated config back to the file
+            // const saveResponse = await fetch(`/api/save-config`, {
+            //   method: "POST",
+            //   headers: {
+            //     "Content-Type": "application/json",
+            //   },
+            //   body: JSON.stringify({
+            //     file: configFile,
+            //     content: config,
+            //   }),
+            // });
 
-            const responseText = await saveResponse.text();
-            console.log(`Save response for ${configFile}:`, {
-              status: saveResponse.status,
-              ok: saveResponse.ok,
-              text: responseText,
-            });
+            // const responseText = await saveResponse.text();
+            // console.log(`Save response for ${configFile}:`, {
+            //   status: saveResponse.status,
+            //   ok: saveResponse.ok,
+            //   text: responseText,
+            // });
 
-            if (!saveResponse.ok) {
-              throw new Error(
-                `Failed to save config: ${saveResponse.statusText}. Details: ${responseText}`
-              );
-            }
+            // if (!saveResponse.ok) {
+            //   throw new Error(
+            //     `Failed to save config: ${saveResponse.statusText}. Details: ${responseText}`
+            //   );
+            // }
 
-            try {
-              const result = JSON.parse(responseText);
-              console.log("Save response parsed:", result);
-            } catch (e) {
-              console.log(
-                "Could not parse save response as JSON:",
-                responseText
-              );
-            }
+            // try {
+            //   const result = JSON.parse(responseText);
+            //   console.log("Save response parsed:", result);
+            // } catch (e) {
+            //   console.log(
+            //     "Could not parse save response as JSON:",
+            //     responseText
+            //   );
+            // }
 
             break; // Exit loop once component is found and updated
           } else {
