@@ -764,8 +764,8 @@
   {
     "id": "PIR_Sensor",
     "name": "PIR_Sensor",
-    "x": 454,
-    "y": 358,
+    "x": 456,
+    "y": 434,
     "rotation": 0,
     "image": {
       "src": "/packages/Modules/PIR_Sensor.png",
