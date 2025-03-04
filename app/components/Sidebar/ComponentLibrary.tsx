@@ -26,6 +26,9 @@ export default function ComponentLibrary() {
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
     new Set()
   );
+  const [selectedComponents, setSelectedComponents] = useState<Set<string>>(
+    new Set()
+  );
   const fetcher = useFetcher();
 
   useEffect(() => {
@@ -66,7 +69,7 @@ export default function ComponentLibrary() {
             console.log("Loaded component data:", data);
 
             const componentItem: ComponentItem = {
-              id: item.path,
+              id: item.name.replace(".json", ""),
               name: data.name || item.name.replace(".json", ""),
               path: item.path,
               icon: "🔲",
@@ -80,7 +83,7 @@ export default function ComponentLibrary() {
               error
             );
             items.push({
-              id: item.path,
+              id: item.name.replace(".json", ""),
               name: item.name.replace(".json", ""),
               path: item.path,
               icon: "🔲",
@@ -147,34 +150,31 @@ export default function ComponentLibrary() {
             {category.items.length > 0 && (
               <div className="ml-4" style={{ paddingLeft: `${depth}rem` }}>
                 {category.items.map((item) => (
-                  <div
-                    key={item.id}
-                    className="px-4 py-1 flex items-center hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer text-gray-900 dark:text-gray-100 text-sm"
-                    draggable
-                    onDragStart={(e) => {
-                      const dragData = {
-                        id: item.id,
-                        name: item.name,
-                        image: item.image,
-                      };
-                      console.log("Component data before drag:", item);
-                      console.log("Drag data being set:", dragData);
-                      e.dataTransfer.setData(
-                        "component",
-                        JSON.stringify(dragData)
-                      );
-                    }}
-                  >
-                    {item.image ? (
-                      <img
-                        src={item.image.src}
-                        alt={item.name}
-                        className="w-6 h-6 mr-2 object-contain"
-                      />
-                    ) : (
-                      <span className="mr-2">{item.icon}</span>
-                    )}
-                    <span>{item.name}</span>
+                  <div key={item.id} className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id={item.name.replace(".json", "")}
+                      checked={selectedComponents.has(
+                        item.name.replace(".json", "")
+                      )}
+                      onChange={() => {
+                        setSelectedComponents((prev) => {
+                          const next = new Set(prev);
+                          if (next.has(item.name.replace(".json", ""))) {
+                            next.delete(item.name.replace(".json", ""));
+                          } else {
+                            next.add(item.name.replace(".json", ""));
+                          }
+                          return next;
+                        });
+                      }}
+                    />
+                    <label
+                      htmlFor={item.name.replace(".json", "")}
+                      className="ml-2"
+                    >
+                      {item.name.replace(".json", "")}
+                    </label>
                   </div>
                 ))}
               </div>
@@ -219,9 +219,22 @@ export default function ComponentLibrary() {
               No components found
             </div>
           ) : (
-            categories.map((category) => (
-              <CategoryItem key={category.name} category={category} />
-            ))
+            <>
+              {categories.map((category) => (
+                <CategoryItem key={category.name} category={category} />
+              ))}
+              <button
+                className="mt-2 w-full px-4 py-2 bg-blue-500 text-white rounded"
+                onClick={() => {
+                  console.log(
+                    "Selected Components:",
+                    Array.from(selectedComponents)
+                  );
+                }}
+              >
+                Log Selected Components
+              </button>
+            </>
           )}
         </div>
       )}
