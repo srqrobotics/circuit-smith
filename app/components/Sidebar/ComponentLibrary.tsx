@@ -169,7 +169,7 @@ export default function ComponentLibrary() {
 
       // Attempt to parse the response as JSON
       const responseText = await response.text(); // Get the raw response text
-      console.log("Raw response:", responseText); // Log the raw response for debugging
+      // console.log("Raw response:", responseText); // Log the raw response for debugging
 
       const responseJSON = JSON.parse(responseText); // Try to parse the response;
 
@@ -206,10 +206,6 @@ export default function ComponentLibrary() {
 
   const handleFetchSecondPrompt = async () => {
     try {
-      console.log("Components:", selectedComponents);
-      // console.log("Selected Application:", selectedApp);
-      // console.log("Applications List:", applicationsList);
-
       // Find the selected application in the applicationsList
       const foundApp = applicationsList.applications.find(
         (app) => app.name === selectedApp
@@ -231,13 +227,21 @@ export default function ComponentLibrary() {
         "wire": [
           {
             "ArduinoBoard": "Pin",
-            "Component": "Pin"
+            "Component-1": "Pin"
+          },
+          {
+            "ArduinoBoard": "Pin",
+            "Component-2": "Pin"
           }
         ]
       }
+
+      Additionally, provide Arduino code that initializes the components, reads data (if applicable), processes it, and executes necessary actions.
+      Use appropriate libraries and ensure the code is structured with comments explaining each section.
+      Make sure all pin names are in full capital letters.
       `;
 
-      console.log("Prompt:", prompt);
+      // console.log("Prompt:", prompt);
       const response = await fetch(
         "https://api.openai.com/v1/chat/completions",
         {
@@ -261,7 +265,17 @@ export default function ComponentLibrary() {
       const data = await response.json();
 
       const raw_msg = data.choices[0].message.content;
-      console.log("response:", raw_msg);
+      // console.log("response:", raw_msg);
+
+      // Separate JSON and C++ code
+      const jsonMatch = raw_msg.match(/```json\s*([\s\S]*?)```/);
+      const cppMatch = raw_msg.match(/```cpp\s*([\s\S]*?)```/);
+
+      const jsonString = jsonMatch ? jsonMatch[1].trim() : null;
+      const cppString = cppMatch ? cppMatch[1].trim() : null;
+
+      console.log("Extracted JSON:\n", jsonString);
+      console.log("Extracted C++ Code:\n", cppString);
 
       // Handle the response as needed
     } catch (error) {
