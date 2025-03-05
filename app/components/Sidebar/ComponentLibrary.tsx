@@ -58,7 +58,8 @@ export default function ComponentLibrary() {
 
       for (const item of dir.children || []) {
         if (item.type === "directory") {
-          children.push(await processDirectory(item));
+          const childCategory = await processDirectory(item);
+          children.push(childCategory);
         } else if (item.type === "file" && item.name.endsWith(".json")) {
           try {
             console.log("Loading component data for:", item.path);
@@ -143,7 +144,13 @@ export default function ComponentLibrary() {
             </span>
             {category.name}
           </span>
-          <span className="text-xs text-gray-500">{category.items.length}</span>
+          <span className="text-xs text-gray-500">
+            {category.items.length +
+              (category.children?.reduce(
+                (acc, child) => acc + child.items.length,
+                0
+              ) || 0)}
+          </span>
         </button>
         {expandedCategories.has(category.name) && (
           <>
