@@ -24,6 +24,7 @@ interface ComponentCategory {
 interface ApplicationChoice {
   id: number;
   name: string;
+  description: string;
 }
 
 export default function ComponentLibrary() {
@@ -38,6 +39,9 @@ export default function ComponentLibrary() {
   const [appChoices, setAppChoices] = useState<string[]>([]);
   const [showAppChoices, setShowAppChoices] = useState(false);
   const [selectedApp, setSelectedApp] = useState<string | null>(null);
+  const [applicationsList, setApplicationsList] = useState<{
+    applications: ApplicationChoice[];
+  }>({ applications: [] });
   const fetcher = useFetcher();
 
   useEffect(() => {
@@ -158,22 +162,110 @@ export default function ComponentLibrary() {
         }
       );
 
+      // Check if the response is OK (status in the range 200-299)
       if (!response.ok) {
-        throw new Error("Network response was not ok");
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const res = await response.json();
-      const applications = res.choices[0].message.content;
-      const applicationsList = JSON.parse(applications).applications;
+      // Attempt to parse the response as JSON
+      const responseText = await response.text(); // Get the raw response text
+      console.log("Raw response:", responseText); // Log the raw response for debugging
 
-      // console.log("applications:", applicationsList);
+      const responseJSON = JSON.parse(responseText); // Try to parse the response;
 
-      setAppChoices(
-        applicationsList.map((choice: ApplicationChoice) => choice.name)
-      ); // Map to an array of strings
-      setShowAppChoices(true);
+      try {
+        const raw_msg = responseJSON.choices[0].message.content;
+        // console.log("Raw response:", raw_msg);
+        const msg = raw_msg.replace(/^```json\s*|\s*```$/g, ""); // Remove the ```json and ``` wrapping
+        // console.log("New response:", msg);
+
+        const applications = JSON.parse(msg);
+        applicationsList.applications = applications.applications;
+        setApplicationsList(applicationsList);
+        // console.log("setApplicationsList: ", applicationsList);
+
+        // Check if the data has the expected structure
+        if (applicationsList.applications) {
+          setAppChoices(
+            applicationsList.applications.map(
+              (choice: ApplicationChoice) => choice.name
+            )
+          ); // Map to an array of strings
+          setShowAppChoices(true);
+        } else {
+          console.error("Unexpected response structure:", applicationsList);
+        }
+      } catch (error) {
+        console.error("Error parsing JSON:", error);
+        // Fallback: Create a default structure if parsing fails
+      }
     } catch (error) {
       console.error("Error fetching application choices:", error);
+    }
+  };
+
+  const handleFetchSecondPrompt = async () => {
+    try {
+      console.log("Components:", selectedComponents);
+      // console.log("Selected Application:", selectedApp);
+      // console.log("Applications List:", applicationsList);
+
+      // Find the selected application in the applicationsList
+      const foundApp = applicationsList.applications.find(
+        (app) => app.name === selectedApp
+      );
+
+      console.log("Found Application:", foundApp);
+
+      const prompt = `
+      Generate a JSON file containing wiring configurations and an Arduino code snippet for an Arduino-based project. The project should include the following components: \n\n
+
+      -${Array.from(selectedComponents).join(", \n-")}\n\n
+
+      The application of this project is: ${foundApp?.name}. ${foundApp?.description}. 
+
+      The JSON file should follow this format:
+
+      {
+        "components": ["List of components used"],
+        "wire": [
+          {
+            "ArduinoBoard": "Pin",
+            "Component": "Pin"
+          }
+        ]
+      }
+      `;
+
+      console.log("Prompt:", prompt);
+      const response = await fetch(
+        "https://api.openai.com/v1/chat/completions",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: API_KEY, // Replace with your actual API key
+          },
+          body: JSON.stringify({
+            model: "gpt-4o-mini",
+            messages: [
+              {
+                role: "user",
+                content: prompt,
+              },
+            ],
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      const raw_msg = data.choices[0].message.content;
+      console.log("response:", raw_msg);
+
+      // Handle the response as needed
+    } catch (error) {
+      console.error("Error fetching second prompt:", error);
     }
   };
 
@@ -273,7 +365,7 @@ export default function ComponentLibrary() {
         </span>
       </button>
       {isExpanded && (
-        <div className="py-2">
+        <div className="py-2 max-h-60 overflow-y-auto">
           {fetcher.state === "loading" ? (
             <div className="px-4 text-sm text-gray-500">
               Loading components...
@@ -311,6 +403,12 @@ export default function ComponentLibrary() {
                       </label>
                     </div>
                   ))}
+                  <button
+                    className="mt-2 w-full px-4 py-2 bg-green-500 text-white rounded"
+                    onClick={handleFetchSecondPrompt}
+                  >
+                    Fetch Second Prompt
+                  </button>
                 </div>
               )}
             </>
