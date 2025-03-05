@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useFetcher } from "react-router";
 import type { FileSystemItem } from "~/types/files";
+import { API_KEY } from "../../config/config"; // Adjust the path as necessary
 
 interface ComponentItem {
   id: string;
@@ -20,6 +21,11 @@ interface ComponentCategory {
   children?: ComponentCategory[];
 }
 
+interface ApplicationChoice {
+  id: number;
+  name: string;
+}
+
 export default function ComponentLibrary() {
   const [isExpanded, setIsExpanded] = useState(true);
   const [categories, setCategories] = useState<ComponentCategory[]>([]);
@@ -29,6 +35,9 @@ export default function ComponentLibrary() {
   const [selectedComponents, setSelectedComponents] = useState<Set<string>>(
     new Set()
   );
+  const [appChoices, setAppChoices] = useState<string[]>([]);
+  const [showAppChoices, setShowAppChoices] = useState(false);
+  const [selectedApp, setSelectedApp] = useState<string | null>(null);
   const fetcher = useFetcher();
 
   useEffect(() => {
@@ -118,6 +127,54 @@ export default function ComponentLibrary() {
       }
       return next;
     });
+  };
+
+  const handleLogSelectedComponents = async () => {
+    try {
+      // Simulated API response
+      console.log("Selected components:", selectedComponents);
+
+      const applicationsPrompt = `Based on the following electronic components:\n\n${Array.from(selectedComponents).join(", ")}\n\nGenerate a list of five possible project applications that can be built using these components. Each application should have a short description of its purpose.\n\nThe response should be in the following JSON format:\n\n{\n  "applications": [\n    {\n      "name": "Application Name",\n      "description": "Brief description of how the system works"\n    }\n  ]\n}\n\nThe generated applications should be practical, relevant, and make effective use of the given components.`;
+
+      // console.log("Generated applications prompt:", applicationsPrompt);
+
+      const response = await fetch(
+        "https://api.openai.com/v1/chat/completions",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: API_KEY, // Replace with your actual API key
+          },
+          body: JSON.stringify({
+            model: "gpt-4o-mini",
+            messages: [
+              {
+                role: "user",
+                content: applicationsPrompt,
+              },
+            ],
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+
+      const res = await response.json();
+      const applications = res.choices[0].message.content;
+      const applicationsList = JSON.parse(applications).applications;
+
+      // console.log("applications:", applicationsList);
+
+      setAppChoices(
+        applicationsList.map((choice: ApplicationChoice) => choice.name)
+      ); // Map to an array of strings
+      setShowAppChoices(true);
+    } catch (error) {
+      console.error("Error fetching application choices:", error);
+    }
   };
 
   const CategoryItem = ({
@@ -232,15 +289,30 @@ export default function ComponentLibrary() {
               ))}
               <button
                 className="mt-2 w-full px-4 py-2 bg-blue-500 text-white rounded"
-                onClick={() => {
-                  console.log(
-                    "Selected Components:",
-                    Array.from(selectedComponents)
-                  );
-                }}
+                onClick={handleLogSelectedComponents}
               >
                 Log Selected Components
               </button>
+              {showAppChoices && (
+                <div className="mt-2">
+                  <h3 className="font-semibold">Select an Application:</h3>
+                  {appChoices.map((app) => (
+                    <div key={app} className="flex items-center">
+                      <input
+                        type="radio"
+                        id={app}
+                        name="appChoices"
+                        value={app}
+                        checked={selectedApp === app}
+                        onChange={() => setSelectedApp(app)}
+                      />
+                      <label htmlFor={app} className="ml-2">
+                        {app}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              )}
             </>
           )}
         </div>
