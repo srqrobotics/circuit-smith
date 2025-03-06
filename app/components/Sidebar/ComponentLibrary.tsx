@@ -379,7 +379,7 @@ export default function ComponentLibrary() {
         </span>
       </button>
       {isExpanded && (
-        <div className="py-2 max-h-60 overflow-y-auto">
+        <div className="py-2 overflow-y-auto">
           {fetcher.state === "loading" ? (
             <div className="px-4 text-sm text-gray-500">
               Loading components...
