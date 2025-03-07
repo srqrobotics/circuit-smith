@@ -43,6 +43,7 @@ export default function ComponentLibrary() {
     applications: ApplicationChoice[];
   }>({ applications: [] });
   const fetcher = useFetcher();
+  const [selectedFile, setSelectedFile] = useState<string | null>(null);
 
   useEffect(() => {
     fetcher.load("/api/packages");
@@ -131,6 +132,45 @@ export default function ComponentLibrary() {
       }
       return next;
     });
+  };
+
+  const saveConfig = async (
+    filePath: string,
+    content: string
+  ): Promise<void> => {
+    // Replace literal \n with actual newlines and wrap each element in backticks
+    const formattedContent = content.split("\n");
+
+    const saveResponse = await fetch(`/api/save-config`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        file: filePath,
+        content: formattedContent,
+      }),
+    });
+
+    const responseText = await saveResponse.text();
+    console.log(`Save response for ${filePath}:`, {
+      status: saveResponse.status,
+      ok: saveResponse.ok,
+      text: responseText,
+    });
+
+    if (!saveResponse.ok) {
+      throw new Error(
+        `Failed to save config: ${saveResponse.statusText}. Details: ${responseText}`
+      );
+    }
+
+    try {
+      const result = JSON.parse(responseText);
+      console.log("Save response parsed:", result);
+    } catch (e) {
+      console.log("Could not parse save response as JSON:", responseText);
+    }
   };
 
   const handleLogSelectedComponents = async () => {
@@ -276,6 +316,9 @@ export default function ComponentLibrary() {
 
       console.log("Extracted JSON:\n", jsonString);
       console.log("Extracted C++ Code:\n", cppString);
+
+      // Save the updated config back to the file
+      await saveConfig("projects/defaultCode.ino", cppString);
 
       // Handle the response as needed
     } catch (error) {

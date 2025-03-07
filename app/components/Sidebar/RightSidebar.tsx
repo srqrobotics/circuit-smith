@@ -8,7 +8,7 @@ export default function RightSidebar() {
     null
   );
   const [isMounted, setIsMounted] = useState(false);
-  const { selectedFile } = useFile();
+  const { selectedFile, setSelectedFile } = useFile();
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -18,30 +18,43 @@ export default function RightSidebar() {
     });
   }, []);
 
-  useEffect(() => {
-    async function loadFileContent() {
-      setIsLoading(true);
-      try {
-        if (selectedFile) {
-          const response = await fetch(
-            `/api/file-content?path=${encodeURIComponent(selectedFile)}`
-          );
-          const data = await response.json();
-          if (data.content !== undefined) {
-            setCode(data.content);
-          }
-        } else {
-          const response = await fetch("/projects/defaultCode.txt");
-          const text = await response.text();
-          setCode(text);
+  async function loadFileContent() {
+    setIsLoading(true);
+    try {
+      if (selectedFile) {
+        const response = await fetch(
+          `/api/file-content?path=${encodeURIComponent(selectedFile)}`
+        );
+        const data = await response.json();
+        if (data.content !== undefined) {
+          setCode(data.content);
         }
-      } catch (error) {
-        console.error("Error loading file:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
+      } else {
+        const response = await fetch("/projects/defaultCode.ino");
+        const text = await response.text();
+        // console.log("text: \n", text);
+        let modText = text.replace(/^\[|\]$/g, "");
+        const lines = modText.split("\n");
+        const modifiedLines = lines
+          .map((line) => line.slice(3, -2))
+          .map((line) => line.replace(/\\"/g, '"'));
 
+        modifiedLines.forEach((line, index) => {
+          console.log(`Modified Line ${index + 1}: ${line}`);
+        });
+        modifiedLines.push("}"); // Add closing brace to the end of modifiedLines
+
+        const mergedLines = modifiedLines.join("\n");
+        setCode(mergedLines);
+      }
+    } catch (error) {
+      console.error("Error loading file:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  useEffect(() => {
     loadFileContent();
   }, [selectedFile]);
 
@@ -52,7 +65,7 @@ export default function RightSidebar() {
   };
 
   const getFileName = () => {
-    if (!selectedFile) return "defaultCode.txt";
+    if (!selectedFile) return "defaultCode.ino";
     const parts = selectedFile.split("/");
     return parts[parts.length - 1];
   };

@@ -1,4 +1,4 @@
-// folder/defaultCode.txt
+// folder/defaultCode.ino
 
 #include <Arduino.h>
 
