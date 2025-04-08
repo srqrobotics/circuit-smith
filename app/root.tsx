@@ -11,6 +11,8 @@ import stylesheet from "./app.css?url";
 import Layout from "./components/Layout/Layout";
 import { FileProvider } from "./contexts/FileContext";
 import { CoordinateProvider } from "./contexts/CoordinateContext";
+import { ThemeProvider } from "./contexts/ThemeContext";
+import { AutoRoutingProvider } from "~/contexts/AutoRoutingContext";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -28,15 +30,23 @@ export const links: Route.LinksFunction = () => [
 
 export function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta />
         <Links />
       </head>
-      <body>
-        {children}
+      <body className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+        <ThemeProvider>
+          <FileProvider>
+            <CoordinateProvider>
+              <AutoRoutingProvider>
+                <Layout />
+              </AutoRoutingProvider>
+            </CoordinateProvider>
+          </FileProvider>
+        </ThemeProvider>
         <ScrollRestoration />
         <Scripts />
       </body>
@@ -49,7 +59,9 @@ export default function App() {
     <RootLayout>
       <FileProvider>
         <CoordinateProvider>
-          <Layout />
+          <AutoRoutingProvider>
+            <Layout />
+          </AutoRoutingProvider>
         </CoordinateProvider>
       </FileProvider>
     </RootLayout>

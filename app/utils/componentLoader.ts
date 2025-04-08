@@ -321,6 +321,22 @@ export function shiftOverlappingPaths(
   return modifiedPaths;
 }
 
+function matchComponents(
+  components: { id: string }[],
+  configComponents: { id: string }[]
+): boolean {
+  const componentArray: {}[] = [];
+  components.forEach((component) => componentArray.push(component.id));
+
+  // Check if arrays have equal lengths
+  if (componentArray.length !== configComponents.length) {
+    return false;
+  }
+
+  // Ensure each element in configComponents exists in componentArray
+  return configComponents.every((item) => componentArray.includes(item));
+}
+
 export class ComponentLoader {
   public static colorIndex = 0;
   private static allPinWires: Wire[] = []; // Class variable to store all pin wires
@@ -670,7 +686,9 @@ export class ComponentLoader {
       response = await fetch("/configs/demo.editor.json");
       const components = await response.json();
 
-      if (components.length === 0) {
+      if (!matchComponents(components, config.components)) {
+        console.log("new config loading...");
+
         response = await fetch("/packages/devBible.json");
         const dev_boards = await response.json();
 
@@ -689,7 +707,7 @@ export class ComponentLoader {
         );
         console.log("Selected components:", components);
 
-        backupComponentsToJson(components, "configs/demo.editor.json"); // Specify the file name for backup
+        backupComponentsToJson(components, "/configs/demo.editor.json"); // Specify the file name for backup
       }
 
       // Load images
@@ -903,9 +921,9 @@ async function backupComponentsToJson(
   const config = await response.json();
   console.log(`Loaded config from ${filePath}:`, config);
 
-  if (!(config.length === 0)) {
-    return;
-  }
+  // if (!(config.length === 0)) {
+  //   return;
+  // }
 
   // Save the updated config back to the file
   const saveResponse = await fetch(`/api/save-config`, {

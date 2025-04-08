@@ -2,8 +2,8 @@
   {
     "id": "ArduinoMega",
     "name": "ArduinoMega",
-    "x": 1159,
-    "y": 276,
+    "x": 1287,
+    "y": 83,
     "rotation": 0,
     "image": {
       "src": "/packages/Microcontrollers/Arduino/ArduinoMega.png",
@@ -719,8 +719,8 @@
   {
     "id": "DHT22",
     "name": "DHT22",
-    "x": 1763,
-    "y": 408,
+    "x": 1956,
+    "y": 430,
     "rotation": 0,
     "image": {
       "src": "/packages/Modules/DHT22.png",
@@ -734,8 +734,8 @@
   {
     "id": "I2C_LCD",
     "name": "I2C_LCD",
-    "x": 2519,
-    "y": 915,
+    "x": 2583,
+    "y": 1054,
     "rotation": 0,
     "image": {
       "src": "/packages/Modules/I2C_LCD.png",
@@ -749,8 +749,8 @@
   {
     "id": "LDR_Sensor",
     "name": "LDR_Sensor",
-    "x": 845,
-    "y": 392,
+    "x": 679,
+    "y": 138,
     "rotation": 0,
     "image": {
       "src": "/packages/Modules/LDR_Sensor.png",
@@ -764,8 +764,8 @@
   {
     "id": "PIR_Sensor",
     "name": "PIR_Sensor",
-    "x": 456,
-    "y": 434,
+    "x": 272,
+    "y": 111,
     "rotation": 0,
     "image": {
       "src": "/packages/Modules/PIR_Sensor.png",
@@ -794,8 +794,8 @@
   {
     "id": "ultrasonic_SR04",
     "name": "ultrasonic_SR04",
-    "x": 1940,
-    "y": 614,
+    "x": 2316,
+    "y": 489,
     "rotation": 0,
     "image": {
       "src": "/packages/Modules/ultrasonic_SR04.png",

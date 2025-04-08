@@ -139,7 +139,6 @@ export default function ComponentLibrary() {
     content: string
   ): Promise<void> => {
     // Replace literal \n with actual newlines and wrap each element in backticks
-    const formattedContent = content.split("\n");
 
     const saveResponse = await fetch(`/api/save-config`, {
       method: "POST",
@@ -148,7 +147,7 @@ export default function ComponentLibrary() {
       },
       body: JSON.stringify({
         file: filePath,
-        content: formattedContent,
+        content: content,
       }),
     });
 
@@ -178,7 +177,26 @@ export default function ComponentLibrary() {
       // Simulated API response
       console.log("Selected components:", selectedComponents);
 
-      const applicationsPrompt = `Based on the following electronic components:\n\n${Array.from(selectedComponents).join(", ")}\n\nGenerate a list of five possible project applications that can be built using these components. Each application should have a short description of its purpose.\n\nThe response should be in the following JSON format:\n\n{\n  "applications": [\n    {\n      "name": "Application Name",\n      "description": "Brief description of how the system works"\n    }\n  ]\n}\n\nThe generated applications should be practical, relevant, and make effective use of the given components.`;
+      const applicationsPrompt = `
+      Based on the following electronic components:
+      
+      ${Array.from(selectedComponents).join(", ")}
+      
+      Generate a list of five possible project applications that can be built using these components. Each application should have a short description of its purpose.
+      
+      The response should be in the following JSON format:
+      
+      {
+        "applications": [
+            {
+              "name": "Application Name",
+              "description": "Brief description of how the system works"
+            }
+        ]
+      }
+      
+      The generated applications should be practical, relevant, and make effective use of the given components.
+      `;
 
       // console.log("Generated applications prompt:", applicationsPrompt);
 
@@ -253,14 +271,15 @@ export default function ComponentLibrary() {
 
       console.log("Found Application:", foundApp);
 
+      console.log("pins:", Array.from(selectedComponents).join(", \n-"));
+
       const prompt = `
-      Generate a JSON file containing wiring configurations and an Arduino code snippet for an Arduino-based project. The project should include the following components: \n\n
+      Generate a JSON file containing wiring configurations and an Arduino code snippet for an Arduino-based project. The project should include the following components: \n
 
-      -${Array.from(selectedComponents).join(", \n-")}\n\n
+      \n-${Array.from(selectedComponents).join(", \n-")}\n
 
-      The application of this project is: ${foundApp?.name}. ${foundApp?.description}. 
-
-      The JSON file should follow this format:
+      \nThe application of this project is: ${foundApp?.name}. ${foundApp?.description}. 
+      \nThe JSON file should follow this format:
 
       {
         "components": ["List of components used"],
@@ -279,9 +298,14 @@ export default function ComponentLibrary() {
       Additionally, provide Arduino code that initializes the components, reads data (if applicable), processes it, and executes necessary actions.
       Use appropriate libraries and ensure the code is structured with comments explaining each section.
       Make sure all pin names are in full capital letters.
+      Make sure to use the given component names for the JSON file. Make sure to use the given component name for the wiring connection reference as well.
+      Make sure to add 5V and GND connections for all modules with development board. Do not use VCC for the modules, instead use 5V as the pin name.
+      Make sure to use D1, D2 etc. for digital pins in the development board.
+      Make sure to use A0, A1 etc. for analog pins in the development board.
       `;
 
       // console.log("Prompt:", prompt);
+
       const response = await fetch(
         "https://api.openai.com/v1/chat/completions",
         {
@@ -318,7 +342,10 @@ export default function ComponentLibrary() {
       console.log("Extracted C++ Code:\n", cppString);
 
       // Save the updated config back to the file
-      await saveConfig("projects/defaultCode.ino", cppString);
+      const fcppString = cppString.split("\n");
+      await saveConfig("projects/defaultCode.ino", fcppString);
+
+      await saveConfig("configs/demo.json", JSON.parse(jsonString));
 
       // Handle the response as needed
     } catch (error) {

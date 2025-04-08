@@ -11,7 +11,7 @@ import {
 } from "~/utils/componentLoader";
 import { preloadImage } from "~/utils/imageLoader";
 import { useCoordinates } from "~/contexts/CoordinateContext";
-import BottomPanel from "~/components/BottomPanel/BottomPanel";
+import { useAutoRouting } from "~/contexts/AutoRoutingContext";
 
 export default function Canvas() {
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
@@ -27,22 +27,31 @@ export default function Canvas() {
   const [wires, setWires] = useState<Wire[]>([]);
   const [isDrawingWire, setIsDrawingWire] = useState(false);
   const [currentWire, setCurrentWire] = useState<number[]>([]);
-  const [wireColor, setWireColor] = useState("#ff0000"); // Default red wire
+  const [wireColor, setWireColor] = useState("#ff0000");
   const stageRef = useRef<any>(null);
   const [isCtrlPressed, setIsCtrlPressed] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const { setCoordinates } = useCoordinates();
   const [hoveredWireId, setHoveredWireId] = useState<string | null>(null);
   const [isRouting, setIsRouting] = useState(false);
-  const [config, setConfig] = useState<any>(null); // State variable for config
+  const { autoRoutingEnabled } = useAutoRouting();
+  const [config, setConfig] = useState<any>(null);
   const [draggedComponentId, setDraggedComponentId] = useState<string | null>(
     null
-  ); // New state for dragged component ID
+  );
   const [hoveredComponentName, setHoveredComponentName] = useState<
     string | null
-  >(null); // New state for hovered component name
-  const [isDraggingWires, setIsDraggingWires] = useState(false); // New state for wire visibility
+  >(null);
+  const [isDraggingWires, setIsDraggingWires] = useState(false);
+  const routingInProgress = useRef(false);
+  const componentsRef = useRef<DroppedComponent[]>([]);
 
+  // Keep componentsRef in sync with components state
+  useEffect(() => {
+    componentsRef.current = components;
+  }, [components]);
+
+  // Initialize canvas and load components
   useEffect(() => {
     setIsMounted(true);
     const updateDimensions = () => {
@@ -58,24 +67,30 @@ export default function Canvas() {
     updateDimensions();
     window.addEventListener("resize", updateDimensions);
 
-    // Load initial components without routing
-    ComponentLoader.loadInitialComponents(
-      setLoadedImages,
-      setComponents,
-      setWires // This should only set the wires if needed, not for routing
-    )
-      .then((loadedConfig) => {
-        setConfig(loadedConfig); // Set the config state
-      })
-      .catch((error) => {
-        console.error("Error loading components:", error);
-      });
+    // Load initial components
+    const initializeCanvas = async () => {
+      try {
+        const loadedConfig = await ComponentLoader.loadInitialComponents(
+          setLoadedImages,
+          setComponents,
+          setWires
+        );
+        setConfig(loadedConfig);
+
+        // Don't start routing automatically - wait for user to enable it
+      } catch (error) {
+        console.error("Error initializing canvas:", error);
+      }
+    };
+
+    initializeCanvas();
 
     return () => {
       window.removeEventListener("resize", updateDimensions);
     };
   }, []);
 
+  // Handle keyboard events
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Control") setIsCtrlPressed(true);
@@ -118,20 +133,19 @@ export default function Canvas() {
 
   const handleDragStart = (e: any) => {
     setIsDraggingComponent(true);
-    setIsDraggingWires(true); // Hide wires during drag
-    setWires([]); // Clear all wires when dragging starts
+    setIsDraggingWires(true);
+    setWires([]);
     const componentId = hoveredComponentName;
-    setDraggedComponentId(componentId); // Store the ID of the dragged component
+    setDraggedComponentId(componentId);
   };
 
   const handleDragEnd = async (e: any) => {
     if (isDraggingComponent) {
       const pos = {
-        x: Math.round(e.target.x()), // Round to nearest integer
-        y: Math.round(e.target.y()), // Round to nearest integer
+        x: Math.round(e.target.x()),
+        y: Math.round(e.target.y()),
       };
 
-      // Find the component being dragged using the stored ID
       const draggedComponent = components.find(
         (c) => c.name === hoveredComponentName
       );
@@ -151,60 +165,18 @@ export default function Canvas() {
           pos.y
         );
 
-        if (isRouting) {
-          // Call the startRouting function instead of handleRouting
+        // Only recalculate routing if auto-routing is enabled
+        if (autoRoutingEnabled) {
+          // Force a complete re-routing of all components
           await startRouting();
         }
-      } else {
-        console.error("No component found for the dragged ID.");
       }
     }
 
-    // Reset dragging state
-    setIsDraggingComponent(false); // Ensure dragging state is reset
-    setDraggedComponentId(null); // Clear the dragged component ID
-    setIsDraggingWires(false); // Show wires again after drag ends
+    setIsDraggingComponent(false);
+    setDraggedComponentId(null);
+    setIsDraggingWires(false);
   };
-
-  const handleDrop = async (e: React.DragEvent) => {
-    e.preventDefault();
-    const stage = e.currentTarget.getElementsByTagName("canvas")[0];
-    if (!stage) return;
-
-    const stageRect = stage.getBoundingClientRect();
-    const componentData = JSON.parse(e.dataTransfer.getData("component"));
-
-    const stageP = {
-      x: (e.clientX - stageRect.left - position.x) / scale,
-      y: (e.clientY - stageRect.top - position.y) / scale,
-    };
-
-    // await loadComponent(
-    //   componentData,
-    //   stageP,
-    //   scale,
-    //   loadedImages,
-    //   setLoadedImages,
-    //   setComponents
-    // );
-  };
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-  };
-
-  const wireDrawingHandlers = handleWireDrawing(
-    isDrawingWire,
-    currentWire,
-    wireColor,
-    setWires,
-    setIsDrawingWire,
-    setCurrentWire,
-    () => {
-      const stage = stageRef.current;
-      return stage ? stage.getPointerPosition() : { x: 0, y: 0 };
-    }
-  );
 
   const handleMouseMove = (e: Konva.KonvaEventObject<MouseEvent>) => {
     const stage = e.target.getStage();
@@ -220,7 +192,6 @@ export default function Canvas() {
     setMousePosition(scaledPosition);
     setCoordinates(scaledPosition);
 
-    // Check if a component is hovered
     const hoveredComponent = components.find(
       (component) =>
         scaledPosition.x >= component.x &&
@@ -229,197 +200,142 @@ export default function Canvas() {
         scaledPosition.y <= component.y + component.image.height
     );
 
-    setHoveredComponentName(hoveredComponent ? hoveredComponent.name : null); // Update hovered component name
+    setHoveredComponentName(hoveredComponent ? hoveredComponent.name : null);
   };
 
   const startRouting = async () => {
-    const response = await fetch("/configs/demo.editor.json");
-    const components = await response.json();
-
-    if (!components) {
-      console.error("Config is not loaded yet.");
-      return; // Prevent routing if config is not available
+    // Prevent multiple routing operations from running simultaneously
+    if (routingInProgress.current) {
+      console.log("Routing already in progress, skipping...");
+      return;
     }
 
-    setIsRouting(true); // Set routing to true when starting
+    if (!config) {
+      console.error("Config is not loaded yet.");
+      return;
+    }
 
-    // Reset the wire color index to start from the beginning
-    ComponentLoader.colorIndex = 0; // Ensure colorIndex is reset here
+    routingInProgress.current = true;
+    setIsRouting(true);
+    ComponentLoader.colorIndex = 0;
 
-    // Load pin mappings
-    const pinWirePromises = components.map(async (component: any) => {
-      if (component["pin-map"]?.src) {
-        const pinMapResponse = await fetch(component["pin-map"].src);
-        component.pinMap = await pinMapResponse.json();
-        return ComponentLoader.locatePins(component);
-      }
-      return [];
-    });
+    try {
+      // Get the current component positions from the ref
+      const currentComponents = componentsRef.current;
+      console.log(
+        "Starting routing with current components:",
+        currentComponents
+      );
 
-    // Wait for all promises to resolve
-    const [pinWires] = await Promise.all([Promise.all(pinWirePromises)]);
+      // Clear any existing wires
+      setWires([]);
 
-    const updatedConfig = await ComponentLoader.loadInitialComponents(
-      setLoadedImages,
-      setComponents,
-      setWires
-    );
+      // Create a new array for wire connections
+      const compWiring: Wire[] = [];
 
-    // Call the routing logic here
-    const compWiring: Wire[] = [];
-    await ComponentLoader.processWireConnections(
-      updatedConfig,
-      components,
-      compWiring,
-      setComponents
-    );
+      // Get device bounds for path finding using current component positions
+      const bounds = ComponentLoader.getDeviceBounds(currentComponents);
 
-    if (components) {
-      const deviceBounds = ComponentLoader.getDeviceBounds(components);
+      // Process wire connections with the current component positions
+      await ComponentLoader.processWireConnections(
+        config,
+        currentComponents,
+        compWiring,
+        setComponents
+      );
+
       // Process each wire to find valid paths around components
       compWiring.forEach((wire) => {
-        const [startX, startY] = [wire.points[2], wire.points[3]];
-        const [endX, endY] = [wire.points[4], wire.points[5]];
-        const path = findPath([startX, startY], [endX, endY], deviceBounds);
-        if (path.length > 0) {
-          const wirePath = path.flat();
-          wire.points.splice(wire.points.length - 4, 0, ...wirePath);
+        if (wire.points.length >= 6) {
+          const [startX, startY] = [wire.points[2], wire.points[3]];
+          const [endX, endY] = [wire.points[4], wire.points[5]];
+          const path = findPath([startX, startY], [endX, endY], bounds);
+          if (path.length > 0) {
+            const wirePath = path.flat();
+            wire.points.splice(wire.points.length - 4, 0, ...wirePath);
+          }
         }
       });
 
-      const newWiring = shiftOverlappingPaths(compWiring, deviceBounds);
-      const finalWiring = shiftOverlappingPaths(newWiring, deviceBounds);
-      const fullWiring = [...pinWires.flat(), ...finalWiring];
-      // Update the wires state with the new wiring
-      setWires(fullWiring);
+      // Shift overlapping paths
+      const newWiring = shiftOverlappingPaths(compWiring, bounds);
+      const finalWires = shiftOverlappingPaths(newWiring, bounds);
+
+      console.log("Routing complete, setting wires:", finalWires);
+      setWires(finalWires);
+    } catch (error) {
+      console.error("Error during routing:", error);
+    } finally {
+      setIsRouting(false);
+      routingInProgress.current = false;
     }
   };
 
-  const handleRoutingToggle = async () => {
-    if (isRouting) {
-      // If currently routing, stop routing
-      setIsRouting(false);
-      // You can add any additional logic here to handle stopping routing if needed
+  // Add a useEffect to handle auto-routing state changes
+  useEffect(() => {
+    if (autoRoutingEnabled) {
+      console.log("Auto-routing enabled, starting routing...");
+      startRouting();
     } else {
-      // If not routing, start routing
-      setIsRouting(true); // Set routing to true when starting
-      await startRouting(); // Call the new startRouting function
+      console.log("Auto-routing disabled, clearing wires...");
+      setWires([]);
     }
-  };
+  }, [autoRoutingEnabled]);
 
   return (
-    <div className="flex-1 flex flex-col min-h-0">
-      <div className="h-10 border-b border-gray-200 dark:border-gray-700 flex items-center px-4 bg-white dark:bg-gray-800">
-        <button
-          onClick={handleRoutingToggle}
-          className={`p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-gray-900 dark:text-gray-100 text-sm ${
-            isRouting ? "bg-gray-200" : ""
-          }`} // Optional: Add a background color when routing is active
-        >
-          {isRouting ? "Stop Routing" : "Route Wires"}{" "}
-          {/* Toggle button text */}
-        </button>
-      </div>
-      <div
-        id="canvas-container"
-        className="flex-1 relative bg-white dark:bg-gray-800"
-        onDrop={handleDrop}
-        onDragOver={handleDragOver}
+    <div id="canvas-container" className="w-full h-full">
+      <Stage
+        width={dimensions.width}
+        height={dimensions.height}
+        onWheel={handleWheel}
+        scaleX={scale}
+        scaleY={scale}
+        x={position.x}
+        y={position.y}
+        ref={stageRef}
+        onMouseMove={handleMouseMove}
+        draggable={!isDraggingComponent}
+        onDragEnd={(e) => {
+          if (!isDraggingComponent) {
+            setPosition({
+              x: e.target.x(),
+              y: e.target.y(),
+            });
+          }
+        }}
       >
-        {isMounted && (
-          <Stage
-            ref={stageRef}
-            width={dimensions.width}
-            height={dimensions.height}
-            scaleX={scale}
-            scaleY={scale}
-            x={position.x}
-            y={position.y}
-            draggable={!isDraggingComponent}
-            onWheel={handleWheel}
-            onDragEnd={handleDragEnd}
-            onMouseMove={handleMouseMove}
-            onMouseDown={(e) => {
-              if (e.target === e.target.getStage()) {
-                wireDrawingHandlers.startDrawing(e);
-              }
-            }}
-            onMouseUp={wireDrawingHandlers.finishDrawing}
-          >
-            <Layer>
-              <Group>
-                {/* Dropped Components - Render these first */}
-                {components.map(
-                  (component) =>
-                    loadedImages[component.image.src] && (
-                      <Image
-                        key={component.id}
-                        image={loadedImages[component.image.src]}
-                        x={component.x}
-                        y={component.y}
-                        width={component.image.width}
-                        height={component.image.height}
-                        rotation={component.rotation}
-                        draggable={isCtrlPressed}
-                        onDragStart={handleDragStart} // Add drag start handler
-                        onDragEnd={handleDragEnd}
-                        onTransform={(e) => {
-                          const node = e.target;
-                          setComponents((prev) =>
-                            prev.map((c) =>
-                              c.id === component.id
-                                ? { ...c, rotation: node.rotation() }
-                                : c
-                            )
-                          );
-                        }}
-                      />
-                    )
-                )}
+        <Layer>
+          {/* Render components */}
+          {components.map((component) => (
+            <Group
+              key={component.id}
+              x={component.x}
+              y={component.y}
+              draggable={isCtrlPressed}
+              onDragStart={handleDragStart}
+              onDragEnd={handleDragEnd}
+            >
+              <Image
+                image={loadedImages[component.image.src]}
+                width={component.image.width}
+                height={component.image.height}
+              />
+            </Group>
+          ))}
 
-                {/* Conditionally render wires based on dragging state */}
-                {!isDraggingWires &&
-                  wires.map((wire) => (
-                    <React.Fragment key={wire.id}>
-                      <Line
-                        points={wire.points}
-                        stroke={wire.color}
-                        strokeWidth={6}
-                        lineJoin="round"
-                        lineCap="round"
-                        cornerRadius={10}
-                        onMouseEnter={() => setHoveredWireId(wire.id)}
-                        onMouseLeave={() => setHoveredWireId(null)}
-                      />
-                      {hoveredWireId === wire.id && (
-                        <Text
-                          x={wire.points[0] + 5}
-                          y={wire.points[1] - 5}
-                          text={wire.id}
-                          fontSize={8}
-                          fill={wire.color}
-                          fontFamily="monospace"
-                        />
-                      )}
-                    </React.Fragment>
-                  ))}
-
-                {isDrawingWire && currentWire.length >= 2 && (
-                  <Line
-                    points={currentWire}
-                    stroke={wireColor}
-                    strokeWidth={6}
-                    lineJoin="round"
-                    lineCap="round"
-                    cornerRadius={10}
-                  />
-                )}
-              </Group>
-            </Layer>
-          </Stage>
-        )}
-      </div>
-      <BottomPanel hoveredComponentName={hoveredComponentName} />
+          {/* Render wires - using straight lines instead of curved ones */}
+          {!isDraggingWires &&
+            wires.map((wire, i) => (
+              <Line
+                key={i}
+                points={wire.points}
+                stroke={wire.color}
+                strokeWidth={2}
+                tension={0} // Set tension to 0 for straight lines
+              />
+            ))}
+        </Layer>
+      </Stage>
     </div>
   );
 }
