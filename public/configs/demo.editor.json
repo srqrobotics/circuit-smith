@@ -749,8 +749,8 @@
   {
     "id": "LDR_Sensor",
     "name": "LDR_Sensor",
-    "x": 679,
-    "y": 138,
+    "x": 773,
+    "y": 92,
     "rotation": 0,
     "image": {
       "src": "/packages/Modules/LDR_Sensor.png",

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import SearchBar from "./SearchBar";
-import ComponentLibrary from "./ComponentLibrary";
+import ComponentsSidebar from "./ComponentsSidebar";
 import FileExplorer from "./FileExplorer";
 
 export default function LeftSidebar() {
@@ -28,7 +28,7 @@ export default function LeftSidebar() {
       <div className="flex-1 overflow-hidden flex flex-col min-h-0">
         {activeTab === "components" ? (
           <div className="flex-1 h-full">
-            <ComponentLibrary />
+            <ComponentsSidebar />
           </div>
         ) : (
           <FileExplorer />
