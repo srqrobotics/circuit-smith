@@ -1,38 +1,22 @@
-import React, { useState } from "react";
-import SearchBar from "./SearchBar";
+import React from "react";
 import ComponentsSidebar from "./ComponentsSidebar";
-import FileExplorer from "./FileExplorer";
+import { FaMicrochip } from "react-icons/fa";
 
 export default function LeftSidebar() {
-  const [activeTab, setActiveTab] = useState<"components" | "files">(
-    "components"
-  );
-
   return (
-    <div className="w-64 border-r border-gray-200 dark:border-gray-700 flex flex-col bg-white dark:bg-gray-800 min-h-0">
-      <SearchBar />
-      <div className="flex space-x-2">
-        <button
-          className={`flex-1 py-2 ${activeTab === "components" ? "bg-gray-200" : ""}`}
-          onClick={() => setActiveTab("components")}
-        >
-          Components
-        </button>
-        <button
-          className={`flex-1 py-2 ${activeTab === "files" ? "bg-gray-200" : ""}`}
-          onClick={() => setActiveTab("files")}
-        >
-          Files
+    <div className="flex flex-col h-full w-full">
+      {/* Tab Navigation */}
+      <div className="flex border-b border-gray-200 dark:border-gray-700">
+        <button className="flex-1 py-2 flex items-center justify-center bg-gray-200 dark:bg-gray-700">
+          <FaMicrochip />
         </button>
       </div>
-      <div className="flex-1 overflow-hidden flex flex-col min-h-0">
-        {activeTab === "components" ? (
-          <div className="flex-1 h-full">
-            <ComponentsSidebar />
-          </div>
-        ) : (
-          <FileExplorer />
-        )}
+
+      {/* Component Content */}
+      <div className="flex-1 overflow-y-auto w-full h-full">
+        <div className="w-full h-full">
+          <ComponentsSidebar />
+        </div>
       </div>
     </div>
   );

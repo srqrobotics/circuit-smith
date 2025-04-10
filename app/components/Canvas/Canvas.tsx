@@ -55,7 +55,7 @@ export default function Canvas() {
   useEffect(() => {
     setIsMounted(true);
     const updateDimensions = () => {
-      const container = document.getElementById("canvas-container");
+      const container = document.querySelector('.flex-1.h-full.relative.overflow-hidden');
       if (container) {
         setDimensions({
           width: container.clientWidth,
@@ -66,6 +66,11 @@ export default function Canvas() {
 
     updateDimensions();
     window.addEventListener("resize", updateDimensions);
+    const resizeObserver = new ResizeObserver(updateDimensions);
+    const container = document.querySelector('.flex-1.h-full.relative.overflow-hidden');
+    if (container) {
+      resizeObserver.observe(container);
+    }
 
     // Load initial components
     const initializeCanvas = async () => {
@@ -76,8 +81,6 @@ export default function Canvas() {
           setWires
         );
         setConfig(loadedConfig);
-
-        // Don't start routing automatically - wait for user to enable it
       } catch (error) {
         console.error("Error initializing canvas:", error);
       }
@@ -87,6 +90,7 @@ export default function Canvas() {
 
     return () => {
       window.removeEventListener("resize", updateDimensions);
+      resizeObserver.disconnect();
     };
   }, []);
 
@@ -283,26 +287,18 @@ export default function Canvas() {
   }, [autoRoutingEnabled]);
 
   return (
-    <div id="canvas-container" className="w-full h-full">
+    <div className="w-full h-full bg-gray-50 dark:bg-gray-800">
       <Stage
         width={dimensions.width}
         height={dimensions.height}
         onWheel={handleWheel}
-        scaleX={scale}
-        scaleY={scale}
-        x={position.x}
-        y={position.y}
-        ref={stageRef}
         onMouseMove={handleMouseMove}
         draggable={!isDraggingComponent}
-        onDragEnd={(e) => {
-          if (!isDraggingComponent) {
-            setPosition({
-              x: e.target.x(),
-              y: e.target.y(),
-            });
-          }
-        }}
+        x={position.x}
+        y={position.y}
+        scaleX={scale}
+        scaleY={scale}
+        ref={stageRef}
       >
         <Layer>
           {/* Render components */}

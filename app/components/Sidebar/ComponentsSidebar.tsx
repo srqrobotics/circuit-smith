@@ -3,6 +3,7 @@ import { useFetcher } from "react-router";
 import type { FileSystemItem } from "~/types/files";
 import ComponentItem from "./ComponentItem";
 import { API_KEY } from "../../config/config"; // Adjust the path as necessary
+import { useComponents } from "~/contexts/ComponentContext";
 
 interface ComponentItemType {
   id: string;
@@ -35,9 +36,8 @@ export default function ComponentsSidebar() {
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
     new Set()
   );
-  const [selectedComponents, setSelectedComponents] = useState<Set<string>>(
-    new Set()
-  );
+  const { selectedComponents, addSelectedComponent, removeSelectedComponent } =
+    useComponents();
   const [isLoading, setIsLoading] = useState(true);
   const [appChoices, setAppChoices] = useState<string[]>([]);
   const [showAppChoices, setShowAppChoices] = useState(false);
@@ -192,15 +192,11 @@ export default function ComponentsSidebar() {
   };
 
   const toggleComponentSelection = (componentId: string) => {
-    setSelectedComponents((prev) => {
-      const next = new Set(prev);
-      if (next.has(componentId)) {
-        next.delete(componentId);
-      } else {
-        next.add(componentId);
-      }
-      return next;
-    });
+    if (selectedComponents.includes(componentId)) {
+      removeSelectedComponent(componentId);
+    } else {
+      addSelectedComponent(componentId);
+    }
   };
 
   // Flatten categories for search
@@ -461,11 +457,11 @@ export default function ComponentsSidebar() {
           <>
             {category.items.length > 0 && (
               <div className="ml-4" style={{ paddingLeft: `${depth}rem` }}>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="flex flex-col space-y-2">
                   {category.items.map((item) => (
                     <div
                       key={item.id}
-                      className={`cursor-pointer ${selectedComponents.has(item.id) ? "ring-2 ring-green-500" : ""}`}
+                      className={`cursor-pointer ${selectedComponents.includes(item.id) ? "ring-2 ring-green-500" : ""}`}
                       onClick={() => toggleComponentSelection(item.id)}
                     >
                       <ComponentItem
@@ -492,114 +488,65 @@ export default function ComponentsSidebar() {
   };
 
   return (
-    <div className="w-80 border-l border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex flex-col">
-      <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="font-semibold text-gray-900 dark:text-gray-100">
-            Components
-          </h2>
-          <select
-            className="text-sm border rounded px-2 py-1 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-          >
-            <option>Basic</option>
-            <option>Advanced</option>
-          </select>
-        </div>
-        <div className="relative">
-          <input
-            type="text"
-            placeholder="Search components..."
-            className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          <span className="absolute right-3 top-2.5 text-gray-400 dark:text-gray-500">
-            🔍
-          </span>
-        </div>
+    <div className="flex flex-col h-full w-full">
+      {/* Search Bar */}
+      <div className="p-2 border-b border-gray-200 dark:border-gray-700">
+        <input
+          type="text"
+          placeholder="Search components..."
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
       </div>
-      <div className="flex-1 overflow-y-auto p-4">
+
+      {/* Category Selection */}
+      <div className="p-2 border-b border-gray-200 dark:border-gray-700">
+        <select
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+        >
+          {categories.map((cat) => (
+            <option key={cat.name} value={cat.name}>
+              {cat.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Components List */}
+      <div className="flex-1 overflow-y-auto p-2">
         {isLoading ? (
-          <div className="flex justify-center items-center h-full">
-            <p className="text-gray-500">Loading components...</p>
+          <div className="flex items-center justify-center h-full">
+            <div className="text-gray-500 dark:text-gray-400">
+              Loading components...
+            </div>
           </div>
-        ) : searchTerm ? (
-          filteredComponents.length === 0 ? (
-            <div className="flex justify-center items-center h-full">
-              <p className="text-gray-500">No components found</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-3 gap-4">
-              {filteredComponents.map((component) => (
-                <div
-                  key={component.id}
-                  className={`cursor-pointer ${selectedComponents.has(component.id) ? "ring-2 ring-green-500" : ""}`}
-                  onClick={() => toggleComponentSelection(component.id)}
-                >
-                  <ComponentItem
-                    name={component.name}
-                    icon={component.icon}
-                    onDragStart={(e) => handleDragStart(e, component)}
-                  />
-                </div>
-              ))}
-            </div>
-          )
         ) : (
-          <div>
-            {categories.length === 0 ? (
-              <div className="flex justify-center items-center h-full">
-                <p className="text-gray-500">No components found</p>
+          <div className="space-y-2">
+            {searchTerm ? (
+              // When searching, show all filtered components
+              <div className="flex flex-col space-y-2">
+                {filteredComponents.map((component) => (
+                  <div
+                    key={component.id}
+                    className={`cursor-pointer ${selectedComponents.includes(component.id) ? "ring-2 ring-green-500" : ""}`}
+                    onClick={() => toggleComponentSelection(component.id)}
+                  >
+                    <ComponentItem
+                      name={component.name}
+                      icon={component.icon}
+                      onDragStart={(e) => handleDragStart(e, component)}
+                    />
+                  </div>
+                ))}
               </div>
             ) : (
-              <>
-                {categories.map((category) => (
-                  <CategoryItem key={category.name} category={category} />
-                ))}
-                <div className="mt-4">
-                  <button
-                    className="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                    onClick={handleLogSelectedComponents}
-                    disabled={selectedComponents.size === 0}
-                  >
-                    Generate Applications
-                  </button>
-                </div>
-                {showAppChoices && (
-                  <div className="mt-4 p-4 border rounded border-gray-200 dark:border-gray-700">
-                    <h3 className="font-semibold mb-2">
-                      Select an Application:
-                    </h3>
-                    <div className="space-y-2">
-                      {appChoices.map((app) => (
-                        <div key={app} className="flex items-center">
-                          <input
-                            type="radio"
-                            id={app}
-                            name="appChoices"
-                            value={app}
-                            checked={selectedApp === app}
-                            onChange={() => setSelectedApp(app)}
-                            className="mr-2"
-                          />
-                          <label htmlFor={app} className="text-sm">
-                            {app}
-                          </label>
-                        </div>
-                      ))}
-                    </div>
-                    <button
-                      className="mt-4 w-full px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-                      onClick={handleFetchSecondPrompt}
-                      disabled={!selectedApp}
-                    >
-                      Generate Wiring & Code
-                    </button>
-                  </div>
-                )}
-              </>
+              // When not searching, show categories with their components
+              categories.map((cat) => (
+                <CategoryItem key={cat.name} category={cat} />
+              ))
             )}
           </div>
         )}

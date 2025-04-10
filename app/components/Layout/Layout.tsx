@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import Canvas from "../Canvas/Canvas";
 import {
   FaPlay,
@@ -6,12 +6,14 @@ import {
   FaTable,
   FaMicrochip,
   FaFileCode,
+  FaChevronLeft,
+  FaChevronRight,
 } from "react-icons/fa";
 import { IoMdUndo, IoMdRedo } from "react-icons/io";
 import { BsZoomIn, BsZoomOut } from "react-icons/bs";
 import { FiSun, FiMoon } from "react-icons/fi";
-import ComponentsSidebar from "../Sidebar/ComponentsSidebar";
 import RightSidebar from "../Sidebar/RightSidebar";
+import LeftSidebar from "../Sidebar/LeftSidebar";
 import { useTheme } from "~/contexts/ThemeContext";
 import { useFile } from "~/contexts/FileContext";
 import { useAutoRouting } from "~/contexts/AutoRoutingContext";
@@ -20,14 +22,13 @@ export default function Layout() {
   const { isDarkMode, toggleDarkMode } = useTheme();
   const { setSelectedFile, selectedFile } = useFile();
   const { autoRoutingEnabled, toggleAutoRouting } = useAutoRouting();
-  const [activeRightTab, setActiveRightTab] = useState<"components" | "code">(
-    "components"
-  );
-  const [rightPanelWidth, setRightPanelWidth] = useState(320);
-  const [isResizing, setIsResizing] = useState(false);
+  const [activeRightTab, setActiveRightTab] = useState<"code">("code");
+  const [rightPanelWidth, setRightPanelWidth] = useState(600);
+  const [leftPanelWidth, setLeftPanelWidth] = useState(200); // 18rem = 288px
+  const [isLeftSidebarCollapsed, setIsLeftSidebarCollapsed] = useState(false);
+  const [isRightSidebarCollapsed, setIsRightSidebarCollapsed] = useState(false);
   const rightPanelRef = useRef<HTMLDivElement>(null);
-  const resizeStartX = useRef(0);
-  const resizeStartWidth = useRef(0);
+  const leftPanelRef = useRef<HTMLDivElement>(null);
 
   const handleCodeButtonClick = () => {
     setSelectedFile("/projects/defaultCode.ino");
@@ -39,50 +40,13 @@ export default function Layout() {
     setActiveRightTab("code");
   };
 
-  // Handle resizing
-  useEffect(() => {
-    const handleMouseDown = (e: MouseEvent) => {
-      setIsResizing(true);
-      resizeStartX.current = e.clientX;
-      resizeStartWidth.current = rightPanelWidth;
-      document.body.style.cursor = "col-resize";
-      document.body.style.userSelect = "none";
-    };
+  const toggleLeftSidebar = () => {
+    setIsLeftSidebarCollapsed((prev) => !prev);
+  };
 
-    const handleMouseMove = (e: MouseEvent) => {
-      if (isResizing) {
-        const deltaX = e.clientX - resizeStartX.current;
-        const newWidth = Math.max(
-          100,
-          Math.min(window.innerWidth - 200, resizeStartWidth.current - deltaX)
-        );
-        setRightPanelWidth(newWidth);
-      }
-    };
-
-    const handleMouseUp = () => {
-      setIsResizing(false);
-      document.body.style.cursor = "default";
-      document.body.style.userSelect = "";
-    };
-
-    const resizeHandle = document.querySelector(".resize-handle");
-    if (resizeHandle) {
-      resizeHandle.addEventListener("mousedown", handleMouseDown);
-    }
-    document.addEventListener("mousemove", handleMouseMove);
-    document.addEventListener("mouseup", handleMouseUp);
-
-    return () => {
-      if (resizeHandle) {
-        resizeHandle.removeEventListener("mousedown", handleMouseDown);
-      }
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
-      document.body.style.cursor = "default";
-      document.body.style.userSelect = "";
-    };
-  }, [isResizing, rightPanelWidth]);
+  const toggleRightSidebar = () => {
+    setIsRightSidebarCollapsed((prev) => !prev);
+  };
 
   return (
     <div className="h-screen flex flex-col bg-white dark:bg-gray-900">
@@ -141,55 +105,71 @@ export default function Layout() {
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex min-h-0 relative">
-        {/* Canvas Area */}
+      <div className="flex-1 flex min-h-0 relative bg-gray-50 dark:bg-gray-800">
+        {/* Left Sidebar */}
         <div
-          className="absolute inset-0 bg-gray-50 dark:bg-gray-800"
-          style={{ right: `${rightPanelWidth + 1}px` }}
+          ref={leftPanelRef}
+          style={{
+            width: isLeftSidebarCollapsed ? "40px" : `${leftPanelWidth}px`,
+            transition: "width 0.3s ease",
+            position: "relative",
+          }}
+          className="h-full border-r border-gray-200 dark:border-gray-700 flex flex-col bg-white dark:bg-gray-800"
         >
+          {!isLeftSidebarCollapsed && <LeftSidebar />}
+          {isLeftSidebarCollapsed && (
+            <div className="h-full flex items-center justify-center">
+              <FaMicrochip className="text-gray-700 dark:text-gray-300" />
+            </div>
+          )}
+          <button
+            onClick={toggleLeftSidebar}
+            className="absolute top-1/2 -right-3 transform -translate-y-1/2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full p-1 shadow-md z-20 hover:bg-gray-100 dark:hover:bg-gray-700"
+          >
+            {isLeftSidebarCollapsed ? <FaChevronRight /> : <FaChevronLeft />}
+          </button>
+        </div>
+
+        {/* Canvas Area */}
+        <div className="flex-1 h-full relative overflow-hidden">
           <Canvas />
         </div>
 
-        {/* Resizable Handle */}
-        <div
-          className="resize-handle absolute w-2 cursor-col-resize bg-gray-300 dark:bg-gray-600 hover:bg-blue-500 dark:hover:bg-blue-400 transition-colors duration-150"
-          style={{
-            right: `${rightPanelWidth}px`,
-            height: "100%",
-            zIndex: 10,
-          }}
-        />
-
-        {/* Right Sidebar with Tabs */}
+        {/* Right Sidebar */}
         <div
           ref={rightPanelRef}
-          style={{ width: `${rightPanelWidth}px` }}
-          className="absolute right-0 top-0 bottom-0 border-l border-gray-200 dark:border-gray-700 flex flex-col bg-white dark:bg-gray-800 min-h-0"
+          style={{
+            width: isRightSidebarCollapsed ? "40px" : `${rightPanelWidth}px`,
+            transition: "width 0.3s ease",
+            position: "relative",
+          }}
+          className="h-full border-l border-gray-200 dark:border-gray-700 flex flex-col bg-white dark:bg-gray-800"
         >
-          {/* Tab Navigation */}
-          <div className="flex border-b border-gray-200 dark:border-gray-700">
-            <button
-              className={`flex-1 py-2 flex items-center justify-center ${activeRightTab === "components" ? "bg-gray-200 dark:bg-gray-700" : ""}`}
-              onClick={() => setActiveRightTab("components")}
-            >
-              <FaMicrochip />
-            </button>
-            <button
-              className={`flex-1 py-2 flex items-center justify-center ${activeRightTab === "code" ? "bg-gray-200 dark:bg-gray-700" : ""}`}
-              onClick={() => setActiveRightTab("code")}
-            >
-              <FaFileCode />
-            </button>
-          </div>
+          {!isRightSidebarCollapsed ? (
+            <>
+              {/* Tab Navigation */}
+              <div className="flex border-b border-gray-200 dark:border-gray-700">
+                <button className="flex-1 py-2 flex items-center justify-center bg-gray-200 dark:bg-gray-700">
+                  <FaFileCode />
+                </button>
+              </div>
 
-          {/* Tab Content */}
-          <div className="flex-1 overflow-hidden">
-            {activeRightTab === "components" ? (
-              <ComponentsSidebar />
-            ) : (
-              <RightSidebar />
-            )}
-          </div>
+              {/* Tab Content */}
+              <div className="flex-1 overflow-hidden">
+                <RightSidebar />
+              </div>
+            </>
+          ) : (
+            <div className="h-full flex items-center justify-center">
+              <FaFileCode className="text-gray-700 dark:text-gray-300" />
+            </div>
+          )}
+          <button
+            onClick={toggleRightSidebar}
+            className="absolute top-1/2 -left-3 transform -translate-y-1/2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full p-1 shadow-md z-20 hover:bg-gray-100 dark:hover:bg-gray-700"
+          >
+            {isRightSidebarCollapsed ? <FaChevronLeft /> : <FaChevronRight />}
+          </button>
         </div>
       </div>
     </div>
