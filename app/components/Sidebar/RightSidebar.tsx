@@ -2,11 +2,11 @@ import React, { useState, useEffect } from "react";
 import type { EditorProps } from "@monaco-editor/react";
 import { useFile } from "~/contexts/FileContext";
 import { useComponents } from "~/contexts/ComponentContext";
+import { useRightSidebar } from "~/contexts/RightSidebarContext";
 import { FaCode, FaRobot } from "react-icons/fa";
 import { API_KEY } from "../../config/config";
 
 export default function RightSidebar() {
-  const [code, setCode] = useState("");
   const [Editor, setEditor] = useState<React.ComponentType<EditorProps> | null>(
     null
   );
@@ -14,9 +14,20 @@ export default function RightSidebar() {
   const { selectedFile, setSelectedFile } = useFile();
   const { selectedComponents } = useComponents();
   const [isLoading, setIsLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<"code" | "prompt">("code");
-  const [generatedPrompt, setGeneratedPrompt] = useState<any>(null);
-  const [isGenerating, setIsGenerating] = useState(false);
+  const {
+    sidebarState: {
+      code,
+      generatedPrompt,
+      activeTab,
+      isGenerating,
+      selectedApplicationIndex,
+    },
+    setCode,
+    setGeneratedPrompt,
+    setActiveTab,
+    setIsGenerating,
+    setSelectedApplicationIndex,
+  } = useRightSidebar();
 
   useEffect(() => {
     setIsMounted(true);
@@ -155,9 +166,30 @@ export default function RightSidebar() {
     }
   };
 
+  const handleApplicationSelect = (index: number) => {
+    setSelectedApplicationIndex(
+      selectedApplicationIndex === index ? null : index
+    );
+  };
+
   const handleApplyPrompt = () => {
     if (generatedPrompt && !generatedPrompt.error) {
-      setCode(JSON.stringify(generatedPrompt, null, 2));
+      if (selectedApplicationIndex !== null && generatedPrompt.applications) {
+        const selectedApp =
+          generatedPrompt.applications[selectedApplicationIndex];
+        const formattedJson = JSON.stringify(
+          {
+            selectedApplication: selectedApp,
+            components: selectedComponents,
+          },
+          null,
+          2
+        );
+        setCode(formattedJson);
+        setActiveTab("code");
+      } else {
+        setCode(JSON.stringify(generatedPrompt, null, 2));
+      }
     }
   };
 
@@ -170,7 +202,7 @@ export default function RightSidebar() {
           ) : (
             <div>
               No prompt generated yet. Select components and click "Generate
-              Prompt".
+              Ideas".
             </div>
           )}
         </div>
@@ -199,7 +231,12 @@ export default function RightSidebar() {
           {generatedPrompt.applications?.map((app: any, index: number) => (
             <div
               key={index}
-              className="bg-white dark:bg-gray-700 p-4 rounded shadow-sm"
+              className={`bg-white dark:bg-gray-700 p-4 rounded shadow-sm cursor-pointer transition-all duration-200 ${
+                selectedApplicationIndex === index
+                  ? "ring-2 ring-green-500 dark:ring-green-400"
+                  : "hover:ring-2 hover:ring-blue-200 dark:hover:ring-blue-800"
+              }`}
+              onClick={() => handleApplicationSelect(index)}
             >
               <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-2">
                 {app.name}

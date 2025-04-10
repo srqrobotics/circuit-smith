@@ -14,6 +14,7 @@ import { CoordinateProvider } from "./contexts/CoordinateContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { AutoRoutingProvider } from "~/contexts/AutoRoutingContext";
 import { ComponentProvider } from "~/contexts/ComponentContext";
+import { RightSidebarProvider } from "~/contexts/RightSidebarContext";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -44,7 +45,9 @@ export function RootLayout({ children }: { children: React.ReactNode }) {
             <CoordinateProvider>
               <AutoRoutingProvider>
                 <ComponentProvider>
-                  <Layout />
+                  <RightSidebarProvider>
+                    <Layout />
+                  </RightSidebarProvider>
                 </ComponentProvider>
               </AutoRoutingProvider>
             </CoordinateProvider>
@@ -64,7 +67,9 @@ export default function App() {
         <CoordinateProvider>
           <AutoRoutingProvider>
             <ComponentProvider>
-              <Layout />
+              <RightSidebarProvider>
+                <Layout />
+              </RightSidebarProvider>
             </ComponentProvider>
           </AutoRoutingProvider>
         </CoordinateProvider>
