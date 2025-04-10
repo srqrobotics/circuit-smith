@@ -3,6 +3,7 @@ import type { EditorProps } from "@monaco-editor/react";
 import { useFile } from "~/contexts/FileContext";
 import { useComponents } from "~/contexts/ComponentContext";
 import { FaCode, FaRobot } from "react-icons/fa";
+import { API_KEY } from "../../config/config";
 
 export default function RightSidebar() {
   const [code, setCode] = useState("");
@@ -14,7 +15,7 @@ export default function RightSidebar() {
   const { selectedComponents } = useComponents();
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<"code" | "prompt">("code");
-  const [generatedPrompt, setGeneratedPrompt] = useState<string>("");
+  const [generatedPrompt, setGeneratedPrompt] = useState<any>(null);
   const [isGenerating, setIsGenerating] = useState(false);
 
   useEffect(() => {
@@ -81,40 +82,154 @@ export default function RightSidebar() {
 
   const handleGeneratePrompt = async () => {
     if (selectedComponents.length === 0) {
-      setGeneratedPrompt(
-        "Please select at least one component from the left sidebar."
-      );
+      setGeneratedPrompt({
+        error: "Please select at least one component from the left sidebar.",
+      });
       return;
     }
 
     setIsGenerating(true);
     try {
-      // Simulate API call for prompt generation
-      // In a real implementation, this would call your actual API
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const applicationsPrompt = `
+      Based on the following electronic components:
+      
+      \t- ${selectedComponents.join(", \n\t\t- ")}
+      
+      Generate a list of five possible project applications that can be built using these components. Each application should have a short description of its purpose.
+      
+      The response should be in the following JSON format:
+      
+      {
+        "applications": [
+            {
+              "name": "Application Name",
+              "description": "Brief description of how the system works"
+            }
+        ]
+      }
+      
+      The generated applications should be practical, relevant, and make effective use of the given components.
+      `;
 
-      const prompt = `Generate Arduino code for a project using the following components: ${selectedComponents.join(", ")}. 
-      The code should initialize all components, set up necessary connections, and implement basic functionality.`;
+      const response = await fetch(
+        "https://api.openai.com/v1/chat/completions",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: API_KEY,
+          },
+          body: JSON.stringify({
+            model: "gpt-4o-mini",
+            messages: [
+              {
+                role: "user",
+                content: applicationsPrompt,
+              },
+            ],
+          }),
+        }
+      );
 
-      setGeneratedPrompt(prompt);
+      const responseText = await response.text();
+      const responseJSON = JSON.parse(responseText);
+
+      try {
+        const raw_msg = responseJSON.choices[0].message.content;
+        const msg = raw_msg.replace(/^```json\s*|\s*```$/g, ""); // Remove the ```json and ``` wrapping
+        const applications = JSON.parse(msg);
+        setGeneratedPrompt(applications);
+      } catch (error) {
+        console.error("Error parsing JSON:", error);
+        setGeneratedPrompt({
+          error: "Error parsing the response. Please try again.",
+        });
+      }
     } catch (error) {
       console.error("Error generating prompt:", error);
-      setGeneratedPrompt("Error generating prompt. Please try again.");
+      setGeneratedPrompt({
+        error: "Error generating prompt. Please try again.",
+      });
     } finally {
       setIsGenerating(false);
     }
   };
 
   const handleApplyPrompt = () => {
-    if (generatedPrompt) {
-      setCode(generatedPrompt);
+    if (generatedPrompt && !generatedPrompt.error) {
+      setCode(JSON.stringify(generatedPrompt, null, 2));
     }
+  };
+
+  const renderGeneratedPrompt = () => {
+    if (!generatedPrompt) {
+      return (
+        <div className="text-center text-gray-500 dark:text-gray-400 mt-8">
+          {isGenerating ? (
+            <div>Generating prompt...</div>
+          ) : (
+            <div>
+              No prompt generated yet. Select components and click "Generate
+              Prompt".
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    if (generatedPrompt.error) {
+      return (
+        <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded">
+          <h3 className="font-medium text-red-800 dark:text-red-200 mb-2">
+            Error:
+          </h3>
+          <p className="text-sm text-red-700 dark:text-red-300">
+            {generatedPrompt.error}
+          </p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded">
+        <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-4">
+          Suggested Applications:
+        </h3>
+        <div className="space-y-4">
+          {generatedPrompt.applications?.map((app: any, index: number) => (
+            <div
+              key={index}
+              className="bg-white dark:bg-gray-700 p-4 rounded shadow-sm"
+            >
+              <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-2">
+                {app.name}
+              </h4>
+              <p className="text-sm text-gray-700 dark:text-gray-300">
+                {app.description}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
   };
 
   return (
     <div className="flex flex-col h-full">
       {/* Tab Navigation */}
       <div className="flex border-b border-gray-200 dark:border-gray-700">
+        <button
+          className={`flex-1 py-2 flex items-center justify-center ${
+            activeTab === "prompt"
+              ? "bg-gray-200 dark:bg-gray-700"
+              : "hover:bg-gray-100 dark:hover:bg-gray-800"
+          }`}
+          onClick={() => setActiveTab("prompt")}
+        >
+          <FaRobot className="mr-2" />
+          <span>Idea Lab</span>
+        </button>
+
         <button
           className={`flex-1 py-2 flex items-center justify-center ${
             activeTab === "code"
@@ -125,17 +240,6 @@ export default function RightSidebar() {
         >
           <FaCode className="mr-2" />
           <span>Code Editor</span>
-        </button>
-        <button
-          className={`flex-1 py-2 flex items-center justify-center ${
-            activeTab === "prompt"
-              ? "bg-gray-200 dark:bg-gray-700"
-              : "hover:bg-gray-100 dark:hover:bg-gray-800"
-          }`}
-          onClick={() => setActiveTab("prompt")}
-        >
-          <FaRobot className="mr-2" />
-          <span>Prompt Generator</span>
         </button>
       </div>
 
@@ -195,51 +299,31 @@ export default function RightSidebar() {
         <div className="flex flex-col h-full">
           <div className="p-4 border-b border-gray-200 dark:border-gray-700">
             <h2 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">
-              Prompt Generator
+              Idea Lab
             </h2>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-              Select components from the left sidebar, then generate a prompt
-              for your project.
+              Select components from the left sidebar, then generate project
+              ideas.
             </p>
             <div className="flex space-x-2">
               <button
-                className="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded"
+                className="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed"
                 onClick={handleGeneratePrompt}
                 disabled={isGenerating}
               >
-                {isGenerating ? "Generating..." : "Generate Prompt"}
+                {isGenerating ? "Generating..." : "Generate Ideas"}
               </button>
               <button
-                className="px-3 py-1 bg-green-500 hover:bg-green-600 text-white rounded"
+                className="px-3 py-1 bg-green-500 hover:bg-green-600 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed"
                 onClick={handleApplyPrompt}
-                disabled={!generatedPrompt}
+                disabled={!generatedPrompt || !!generatedPrompt.error}
               >
-                Apply to Code
+                Save as JSON
               </button>
             </div>
           </div>
           <div className="flex-1 p-4 overflow-y-auto">
-            {generatedPrompt ? (
-              <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded">
-                <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-2">
-                  Generated Prompt:
-                </h3>
-                <pre className="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap">
-                  {generatedPrompt}
-                </pre>
-              </div>
-            ) : (
-              <div className="text-center text-gray-500 dark:text-gray-400 mt-8">
-                {isGenerating ? (
-                  <div>Generating prompt...</div>
-                ) : (
-                  <div>
-                    No prompt generated yet. Select components and click
-                    "Generate Prompt".
-                  </div>
-                )}
-              </div>
-            )}
+            {renderGeneratedPrompt()}
           </div>
         </div>
       )}
