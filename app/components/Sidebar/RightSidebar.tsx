@@ -193,6 +193,202 @@ export default function RightSidebar() {
     }
   };
 
+  const handleGenerateWiringAndCode = async () => {
+    if (selectedComponents.length === 0) {
+      setGeneratedPrompt({
+        error: "Please select at least one component from the left sidebar.",
+      });
+      return;
+    }
+
+    if (selectedApplicationIndex === null || !generatedPrompt?.applications) {
+      setGeneratedPrompt({
+        error: "Please select an application from the list.",
+      });
+      return;
+    }
+
+    setIsGenerating(true);
+    try {
+      const selectedApp =
+        generatedPrompt.applications[selectedApplicationIndex];
+
+      // Load component data to get pin information
+      const componentDataPromises = selectedComponents.map(
+        async (componentId) => {
+          try {
+            // Try to load from devBible.json first
+            const devBibleResponse = await fetch("/packages/devBible.json");
+            if (devBibleResponse.ok) {
+              const devBibleData = await devBibleResponse.json();
+              const component = devBibleData.components?.find(
+                (c: any) => c.id === componentId
+              );
+              if (component && component["pin-map"]?.src) {
+                const pinMapResponse = await fetch(component["pin-map"].src);
+                const pinMapData = await pinMapResponse.json();
+                return {
+                  id: componentId,
+                  name: component.name,
+                  pins: pinMapData["digital-pins"]?.id || [],
+                };
+              }
+            }
+
+            // If not found, try sensorBible.json
+            const sensorBibleResponse = await fetch(
+              "/packages/sensorBible.json"
+            );
+            if (sensorBibleResponse.ok) {
+              const sensorBibleData = await sensorBibleResponse.json();
+              const component = sensorBibleData.components?.find(
+                (c: any) => c.id === componentId
+              );
+              if (component && component["pin-map"]?.src) {
+                const pinMapResponse = await fetch(component["pin-map"].src);
+                const pinMapData = await pinMapResponse.json();
+                return {
+                  id: componentId,
+                  name: component.name,
+                  pins: pinMapData["digital-pins"]?.id || [],
+                };
+              }
+            }
+
+            return {
+              id: componentId,
+              name: componentId,
+              pins: [],
+            };
+          } catch (error) {
+            console.error(
+              `Error loading component data for ${componentId}:`,
+              error
+            );
+            return {
+              id: componentId,
+              name: componentId,
+              pins: [],
+            };
+          }
+        }
+      );
+
+      const componentsWithPins = await Promise.all(componentDataPromises);
+
+      // Format component information with pins
+      const componentsInfo = componentsWithPins
+        .map(
+          (comp) =>
+            `- ${comp.name} (${comp.id}): Available pins: ${comp.pins.join(", ")}`
+        )
+        .join("\n");
+
+      const prompt = `
+      Generate a JSON file containing wiring configurations and an Arduino code snippet for an Arduino-based project. The project should include the following components: \n
+
+      ${componentsInfo}
+
+      \nThe application of this project is: ${selectedApp.name}. ${selectedApp.description}. 
+      \nThe JSON file should follow this format:
+
+      {
+        "components": ["List of components used"],
+        "wire": [
+          {
+            "ArduinoBoard": "Pin",
+            "Component-1": "Pin"
+          },
+          {
+            "ArduinoBoard": "Pin",
+            "Component-2": "Pin"
+          }
+        ]
+      }
+
+      Additionally, provide Arduino code that initializes the components, reads data (if applicable), processes it, and executes necessary actions.
+      Use appropriate libraries and ensure the code is structured with comments explaining each section.
+      Make sure all pin names are in full capital letters.
+      Make sure to use the given component names for the JSON file. Make sure to use the given component name for the wiring connection reference as well.
+      Make sure to add 5V and GND connections for all modules with development board. Do not use VCC for the modules, instead use 5V as the pin name.
+      Make sure to use D1, D2 etc. for digital pins in the development board.
+      Make sure to use A0, A1 etc. for analog pins in the development board.
+      Make sure to use just the Available pins names given infront of the respective component names for the wiring json.
+      `;
+
+      const response = await fetch(
+        "https://api.openai.com/v1/chat/completions",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: API_KEY,
+          },
+          body: JSON.stringify({
+            model: "gpt-4o-mini",
+            messages: [
+              {
+                role: "user",
+                content: prompt,
+              },
+            ],
+          }),
+        }
+      );
+
+      const data = await response.json();
+      const raw_msg = data.choices[0].message.content;
+
+      // Separate JSON and C++ code
+      const jsonMatch = raw_msg.match(/```json\s*([\s\S]*?)```/);
+      const cppMatch = raw_msg.match(/```cpp\s*([\s\S]*?)```/);
+
+      const jsonString = jsonMatch ? jsonMatch[1].trim() : null;
+      const cppString = cppMatch ? cppMatch[1].trim() : null;
+
+      if (jsonString && cppString) {
+        // Save the JSON configuration
+        await fetch("/api/save-config", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            file: "configs/demo.json",
+            content: JSON.parse(jsonString),
+          }),
+        });
+
+        // Save the Arduino code
+        await fetch("/api/save-config", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            file: "projects/defaultCode.ino",
+            content: cppString.split("\n"),
+          }),
+        });
+
+        // Set the code in the editor
+        setCode(cppString);
+        setActiveTab("code");
+      } else {
+        setGeneratedPrompt({
+          error: "Failed to generate wiring and code. Please try again.",
+        });
+      }
+    } catch (error) {
+      console.error("Error generating wiring and code:", error);
+      setGeneratedPrompt({
+        error: "Error generating wiring and code. Please try again.",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   const renderGeneratedPrompt = () => {
     if (!generatedPrompt) {
       return (
@@ -352,10 +548,15 @@ export default function RightSidebar() {
               </button>
               <button
                 className="px-3 py-1 bg-green-500 hover:bg-green-600 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed"
-                onClick={handleApplyPrompt}
-                disabled={!generatedPrompt || !!generatedPrompt.error}
+                onClick={handleGenerateWiringAndCode}
+                disabled={
+                  !generatedPrompt ||
+                  !!generatedPrompt.error ||
+                  selectedApplicationIndex === null ||
+                  isGenerating
+                }
               >
-                Save as JSON
+                {isGenerating ? "Generating..." : "Generate Wiring & Code"}
               </button>
             </div>
           </div>

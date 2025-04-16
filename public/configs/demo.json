@@ -1,93 +1,93 @@
 {
   "components": [
     "ArduinoMega",
-    "LDR_Sensor",
-    "I2C_LCD",
     "DHT22",
+    "I2C_LCD",
     "PIR_Sensor",
+    "LDR_Sensor",
     "servo_SG90",
     "ultrasonic_SR04"
   ],
   "wire": [
     {
-      "ARDUINOMEGA": "5V",
-      "LDR_SENSOR": "5V"
-    },
-    {
-      "ARDUINOMEGA": "GND",
-      "LDR_SENSOR": "GND"
-    },
-    {
-      "ARDUINOMEGA": "A0",
-      "LDR_SENSOR": "SIG"
-    },
-    {
-      "ARDUINOMEGA": "5V",
-      "I2C_LCD": "5V"
-    },
-    {
-      "ARDUINOMEGA": "GND",
-      "I2C_LCD": "GND"
-    },
-    {
-      "ARDUINOMEGA": "D2",
-      "I2C_LCD": "SDA"
-    },
-    {
-      "ARDUINOMEGA": "D3",
-      "I2C_LCD": "SCL"
-    },
-    {
-      "ARDUINOMEGA": "5V",
+      "ArduinoMega": "5V",
       "DHT22": "5V"
     },
     {
-      "ARDUINOMEGA": "GND",
+      "ArduinoMega": "GND-1",
       "DHT22": "GND"
     },
     {
-      "ARDUINOMEGA": "D4",
+      "ArduinoMega": "D2",
       "DHT22": "DATA"
     },
     {
-      "ARDUINOMEGA": "5V",
-      "PIR_SENSOR": "5V"
+      "ArduinoMega": "5V",
+      "I2C_LCD": "5V"
     },
     {
-      "ARDUINOMEGA": "GND",
-      "PIR_SENSOR": "GND"
+      "ArduinoMega": "GND-2",
+      "I2C_LCD": "GND"
     },
     {
-      "ARDUINOMEGA": "D5",
-      "PIR_SENSOR": "OUT"
+      "ArduinoMega": "D20",
+      "I2C_LCD": "SDA"
     },
     {
-      "ARDUINOMEGA": "5V",
-      "SERVO_SG90": "5V"
+      "ArduinoMega": "D21",
+      "I2C_LCD": "SCL"
     },
     {
-      "ARDUINOMEGA": "GND",
-      "SERVO_SG90": "GND"
+      "ArduinoMega": "5V",
+      "PIR_Sensor": "5V"
     },
     {
-      "ARDUINOMEGA": "D6",
-      "SERVO_SG90": "CONTROL"
+      "ArduinoMega": "GND-3",
+      "PIR_Sensor": "GND"
     },
     {
-      "ARDUINOMEGA": "5V",
-      "ULTRASONIC_SR04": "5V"
+      "ArduinoMega": "D3",
+      "PIR_Sensor": "DATA"
     },
     {
-      "ARDUINOMEGA": "GND",
-      "ULTRASONIC_SR04": "GND"
+      "ArduinoMega": "5V",
+      "LDR_Sensor": "5V"
     },
     {
-      "ARDUINOMEGA": "D7",
-      "ULTRASONIC_SR04": "TRIG"
+      "ArduinoMega": "GND-4",
+      "LDR_Sensor": "GND"
     },
     {
-      "ARDUINOMEGA": "D8",
-      "ULTRASONIC_SR04": "ECHO"
+      "ArduinoMega": "A0",
+      "LDR_Sensor": "A0"
+    },
+    {
+      "ArduinoMega": "5V",
+      "servo_SG90": "5V"
+    },
+    {
+      "ArduinoMega": "GND-5",
+      "servo_SG90": "GND"
+    },
+    {
+      "ArduinoMega": "D4",
+      "servo_SG90": "POS"
+    },
+    {
+      "ArduinoMega": "5V",
+      "ultrasonic_SR04": "5V"
+    },
+    {
+      "ArduinoMega": "GND-5",
+      "ultrasonic_SR04": "GND"
+    },
+    {
+      "ArduinoMega": "D5",
+      "ultrasonic_SR04": "TRIG"
+    },
+    {
+      "ArduinoMega": "D6",
+      "ultrasonic_SR04": "ECHO"
     }
   ]
 }
