@@ -81,6 +81,40 @@ export default function ComponentsSidebar() {
     }
   }, [fetcher.data, fetcher.state]);
 
+  // Load component data from parent JSON files
+  const loadComponentData = async (componentId: string): Promise<any> => {
+    try {
+      // Try to load from devBible.json first
+      const devBibleResponse = await fetch("/packages/devBible.json");
+      if (devBibleResponse.ok) {
+        const devBibleData = await devBibleResponse.json();
+        const component = devBibleData.components?.find(
+          (c: any) => c.id === componentId
+        );
+        if (component) {
+          return component;
+        }
+      }
+
+      // If not found, try sensorBible.json
+      const sensorBibleResponse = await fetch("/packages/sensorBible.json");
+      if (sensorBibleResponse.ok) {
+        const sensorBibleData = await sensorBibleResponse.json();
+        const component = sensorBibleData.components?.find(
+          (c: any) => c.id === componentId
+        );
+        if (component) {
+          return component;
+        }
+      }
+
+      return null;
+    } catch (error) {
+      console.error(`Error loading component data for ${componentId}:`, error);
+      return null;
+    }
+  };
+
   const processPackages = async (
     packages: FileSystemItem[]
   ): Promise<ComponentCategory[]> => {
@@ -104,11 +138,25 @@ export default function ComponentsSidebar() {
             );
             const data = await response.json();
             console.log("Loaded component data:", data);
-            console.log("Component image data:", data.image);
-            console.log("Component icon data:", data.icon);
 
-            // Get the icon path
-            let iconPath = data.icon || data.image?.src || "";
+            // Get component ID from the filename
+            const componentId = item.name.replace(".json", "");
+
+            // Load component data from parent JSON files
+            const parentData = await loadComponentData(componentId);
+            console.log("Parent component data:", parentData);
+
+            // Get the icon path from parent data or fallback to local data
+            let iconPath = "";
+            if (parentData?.image?.src) {
+              iconPath = parentData.image.src;
+            } else if (data.icon) {
+              iconPath = data.icon;
+            } else if (data.image?.src) {
+              iconPath = data.image.src;
+            }
+
+            console.log("Component icon path:", iconPath);
 
             // If the icon path is relative, make it absolute
             if (
@@ -134,11 +182,11 @@ export default function ComponentsSidebar() {
             }
 
             const componentItem: ComponentItemType = {
-              id: item.name.replace(".json", ""),
-              name: data.name || item.name.replace(".json", ""),
+              id: componentId,
+              name: data.name || componentId,
               path: item.path,
               icon: iconPath,
-              image: data.image,
+              image: parentData?.image || data.image,
             };
             console.log("Created component item:", componentItem);
             items.push(componentItem);

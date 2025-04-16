@@ -12,13 +12,20 @@ export default function ComponentItem({
   onDragStart,
 }: ComponentItemProps) {
   const [imageError, setImageError] = useState(false);
+  const [imagePath, setImagePath] = useState<string>("");
 
   useEffect(() => {
-    console.log(`Component ${name} icon path:`, icon);
+    // If the icon path is relative and doesn't start with http or /, add a leading slash
+    if (icon && !icon.startsWith("http") && !icon.startsWith("/")) {
+      setImagePath(`/${icon}`);
+    } else {
+      setImagePath(icon);
+    }
+    console.log(`Component ${name} icon path:`, imagePath);
   }, [name, icon]);
 
   const handleImageError = () => {
-    console.error(`Failed to load image for component ${name}:`, icon);
+    console.error(`Failed to load image for component ${name}:`, imagePath);
     setImageError(true);
   };
 
@@ -29,12 +36,17 @@ export default function ComponentItem({
       onDragStart={onDragStart}
     >
       <div className="w-12 h-12 flex items-center justify-center mb-2">
-        {icon && !imageError ? (
+        {imagePath && !imageError ? (
           <img
-            src={icon}
+            src={imagePath}
             alt={name}
             className="w-full h-full object-contain"
             onError={handleImageError}
+            style={{
+              maxWidth: "100%",
+              maxHeight: "100%",
+              objectFit: "contain",
+            }}
           />
         ) : (
           <svg
