@@ -8,6 +8,7 @@ import {
   FaFileCode,
   FaChevronLeft,
   FaChevronRight,
+  FaSync,
 } from "react-icons/fa";
 import { IoMdUndo, IoMdRedo } from "react-icons/io";
 import { BsZoomIn, BsZoomOut } from "react-icons/bs";
@@ -17,11 +18,13 @@ import LeftSidebar from "../Sidebar/LeftSidebar";
 import { useTheme } from "~/contexts/ThemeContext";
 import { useFile } from "~/contexts/FileContext";
 import { useAutoRouting } from "~/contexts/AutoRoutingContext";
+import { useCanvasRefresh } from "~/contexts/CanvasRefreshContext";
 
 export default function Layout() {
   const { isDarkMode, toggleDarkMode } = useTheme();
   const { setSelectedFile, selectedFile } = useFile();
   const { autoRoutingEnabled, toggleAutoRouting } = useAutoRouting();
+  const { triggerCanvasRefresh } = useCanvasRefresh();
   const [activeRightTab, setActiveRightTab] = useState<"code">("code");
   const [rightPanelWidth, setRightPanelWidth] = useState(600);
   const [leftPanelWidth, setLeftPanelWidth] = useState(200); // 18rem = 288px
@@ -48,6 +51,10 @@ export default function Layout() {
     setIsRightSidebarCollapsed((prev) => !prev);
   };
 
+  const handleRefreshCanvas = () => {
+    triggerCanvasRefresh();
+  };
+
   return (
     <div className="h-screen flex flex-col bg-white dark:bg-gray-900">
       {/* Top Navigation Bar */}
@@ -72,6 +79,14 @@ export default function Layout() {
             </button>
             <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded text-gray-900 dark:text-gray-100">
               <BsZoomOut />
+            </button>
+            <div className="h-6 w-px bg-gray-300 dark:bg-gray-600 mx-2" />
+            <button 
+              onClick={handleRefreshCanvas}
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded text-gray-900 dark:text-gray-100"
+              title="Refresh Canvas"
+            >
+              <FaSync />
             </button>
           </div>
         </div>

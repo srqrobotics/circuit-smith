@@ -5,6 +5,7 @@ import { useComponents } from "~/contexts/ComponentContext";
 import { useRightSidebar } from "~/contexts/RightSidebarContext";
 import { FaCode, FaRobot } from "react-icons/fa";
 import { API_KEY } from "../../config/config";
+import { useCanvasRefresh } from "~/contexts/CanvasRefreshContext";
 
 export default function RightSidebar() {
   const [Editor, setEditor] = useState<React.ComponentType<EditorProps> | null>(
@@ -14,6 +15,7 @@ export default function RightSidebar() {
   const { selectedFile, setSelectedFile } = useFile();
   const { selectedComponents } = useComponents();
   const [isLoading, setIsLoading] = useState(false);
+  const { triggerCanvasRefresh } = useCanvasRefresh();
   const {
     sidebarState: {
       code,
@@ -374,6 +376,9 @@ export default function RightSidebar() {
         // Set the code in the editor
         setCode(cppString);
         setActiveTab("code");
+
+        // Trigger canvas refresh to update the wiring
+        triggerCanvasRefresh();
       } else {
         setGeneratedPrompt({
           error: "Failed to generate wiring and code. Please try again.",

@@ -15,6 +15,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { AutoRoutingProvider } from "~/contexts/AutoRoutingContext";
 import { ComponentProvider } from "~/contexts/ComponentContext";
 import { RightSidebarProvider } from "~/contexts/RightSidebarContext";
+import { CanvasRefreshProvider } from "~/contexts/CanvasRefreshContext";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -46,7 +47,9 @@ export function RootLayout({ children }: { children: React.ReactNode }) {
               <AutoRoutingProvider>
                 <ComponentProvider>
                   <RightSidebarProvider>
-                    <Layout />
+                    <CanvasRefreshProvider>
+                      <Layout />
+                    </CanvasRefreshProvider>
                   </RightSidebarProvider>
                 </ComponentProvider>
               </AutoRoutingProvider>
@@ -68,7 +71,9 @@ export default function App() {
           <AutoRoutingProvider>
             <ComponentProvider>
               <RightSidebarProvider>
-                <Layout />
+                <CanvasRefreshProvider>
+                  <Layout />
+                </CanvasRefreshProvider>
               </RightSidebarProvider>
             </ComponentProvider>
           </AutoRoutingProvider>

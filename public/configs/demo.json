@@ -1,85 +1,69 @@
 {
   "components": [
     "ArduinoMega",
-    "DHT22",
     "I2C_LCD",
     "PIR_Sensor",
+    "DHT22",
     "LDR_Sensor",
     "servo_SG90",
     "ultrasonic_SR04"
   ],
   "wire": [
     {
-      "ArduinoMega": "5V",
-      "DHT22": "5V"
-    },
-    {
       "ArduinoMega": "GND-1",
-      "DHT22": "GND"
-    },
-    {
-      "ArduinoMega": "D2",
-      "DHT22": "DATA"
-    },
-    {
-      "ArduinoMega": "5V",
-      "I2C_LCD": "5V"
-    },
-    {
-      "ArduinoMega": "GND-2",
-      "I2C_LCD": "GND"
-    },
-    {
-      "ArduinoMega": "D20",
-      "I2C_LCD": "SDA"
-    },
-    {
-      "ArduinoMega": "D21",
-      "I2C_LCD": "SCL"
+      "PIR_Sensor": "GND"
     },
     {
       "ArduinoMega": "5V",
       "PIR_Sensor": "5V"
     },
     {
-      "ArduinoMega": "GND-3",
-      "PIR_Sensor": "GND"
+      "ArduinoMega": "D2",
+      "PIR_Sensor": "DATA"
+    },
+    {
+      "ArduinoMega": "GND-2",
+      "DHT22": "GND"
+    },
+    {
+      "ArduinoMega": "5V",
+      "DHT22": "5V"
     },
     {
       "ArduinoMega": "D3",
-      "PIR_Sensor": "DATA"
+      "DHT22": "DATA"
+    },
+    {
+      "ArduinoMega": "GND-3",
+      "LDR_Sensor": "GND"
     },
     {
       "ArduinoMega": "5V",
       "LDR_Sensor": "5V"
     },
     {
-      "ArduinoMega": "GND-4",
-      "LDR_Sensor": "GND"
-    },
-    {
       "ArduinoMega": "A0",
       "LDR_Sensor": "A0"
+    },
+    {
+      "ArduinoMega": "GND-4",
+      "servo_SG90": "GND"
     },
     {
       "ArduinoMega": "5V",
       "servo_SG90": "5V"
     },
     {
-      "ArduinoMega": "GND-5",
-      "servo_SG90": "GND"
-    },
-    {
       "ArduinoMega": "D4",
       "servo_SG90": "POS"
     },
     {
-      "ArduinoMega": "5V",
-      "ultrasonic_SR04": "5V"
-    },
-    {
       "ArduinoMega": "GND-5",
       "ultrasonic_SR04": "GND"
+    },
+    {
+      "ArduinoMega": "5V",
+      "ultrasonic_SR04": "5V"
     },
     {
       "ArduinoMega": "D5",
@@ -88,6 +72,22 @@
     {
       "ArduinoMega": "D6",
       "ultrasonic_SR04": "ECHO"
+    },
+    {
+      "ArduinoMega": "GND-1",
+      "I2C_LCD": "GND"
+    },
+    {
+      "ArduinoMega": "5V",
+      "I2C_LCD": "5V"
+    },
+    {
+      "ArduinoMega": "D7",
+      "I2C_LCD": "SDA"
+    },
+    {
+      "ArduinoMega": "D8",
+      "I2C_LCD": "SCL"
     }
   ]
 }

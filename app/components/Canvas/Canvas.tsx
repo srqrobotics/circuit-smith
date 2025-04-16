@@ -12,6 +12,7 @@ import {
 import { preloadImage } from "~/utils/imageLoader";
 import { useCoordinates } from "~/contexts/CoordinateContext";
 import { useAutoRouting } from "~/contexts/AutoRoutingContext";
+import { useCanvasRefresh } from "~/contexts/CanvasRefreshContext";
 
 export default function Canvas() {
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
@@ -45,6 +46,7 @@ export default function Canvas() {
   const [isDraggingWires, setIsDraggingWires] = useState(false);
   const routingInProgress = useRef(false);
   const componentsRef = useRef<DroppedComponent[]>([]);
+  const { refreshTrigger } = useCanvasRefresh();
 
   // Keep componentsRef in sync with components state
   useEffect(() => {
@@ -55,7 +57,9 @@ export default function Canvas() {
   useEffect(() => {
     setIsMounted(true);
     const updateDimensions = () => {
-      const container = document.querySelector('.flex-1.h-full.relative.overflow-hidden');
+      const container = document.querySelector(
+        ".flex-1.h-full.relative.overflow-hidden"
+      );
       if (container) {
         setDimensions({
           width: container.clientWidth,
@@ -67,7 +71,9 @@ export default function Canvas() {
     updateDimensions();
     window.addEventListener("resize", updateDimensions);
     const resizeObserver = new ResizeObserver(updateDimensions);
-    const container = document.querySelector('.flex-1.h-full.relative.overflow-hidden');
+    const container = document.querySelector(
+      ".flex-1.h-full.relative.overflow-hidden"
+    );
     if (container) {
       resizeObserver.observe(container);
     }
@@ -93,6 +99,32 @@ export default function Canvas() {
       resizeObserver.disconnect();
     };
   }, []);
+
+  // Reload configuration when refreshTrigger changes
+  useEffect(() => {
+    const reloadConfiguration = async () => {
+      try {
+        console.log("Reloading configuration due to refresh trigger");
+        const loadedConfig = await ComponentLoader.loadInitialComponents(
+          setLoadedImages,
+          setComponents,
+          setWires
+        );
+        setConfig(loadedConfig);
+
+        // If auto-routing is enabled, start routing with the new configuration
+        if (autoRoutingEnabled) {
+          startRouting();
+        }
+      } catch (error) {
+        console.error("Error reloading configuration:", error);
+      }
+    };
+
+    if (refreshTrigger > 0) {
+      reloadConfiguration();
+    }
+  }, [refreshTrigger, autoRoutingEnabled]);
 
   // Handle keyboard events
   useEffect(() => {
@@ -171,8 +203,8 @@ export default function Canvas() {
         // Only recalculate routing if auto-routing is enabled
         if (autoRoutingEnabled) {
           // Wait for the component state to be updated
-          await new Promise(resolve => setTimeout(resolve, 0));
-          
+          await new Promise((resolve) => setTimeout(resolve, 0));
+
           // Force a complete re-routing of all components
           await startRouting();
         }
