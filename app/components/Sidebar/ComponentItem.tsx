@@ -31,11 +31,11 @@ export default function ComponentItem({
 
   return (
     <div
-      className="flex flex-col items-center p-2 border rounded hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer border-gray-200 dark:border-gray-600"
+      className="flex flex-col items-center p-2 border rounded hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer border-gray-200 dark:border-gray-600 transition-colors duration-150"
       draggable
       onDragStart={onDragStart}
     >
-      <div className="w-12 h-12 flex items-center justify-center mb-2">
+      <div className="w-10 h-10 flex items-center justify-center mb-1">
         {imagePath && !imageError ? (
           <img
             src={imagePath}
@@ -51,8 +51,8 @@ export default function ComponentItem({
         ) : (
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
+            width="20"
+            height="20"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -66,7 +66,7 @@ export default function ComponentItem({
           </svg>
         )}
       </div>
-      <span className="text-xs text-center text-gray-600 dark:text-gray-300">
+      <span className="text-xs text-center text-gray-600 dark:text-gray-300 truncate w-full">
         {name}
       </span>
     </div>
