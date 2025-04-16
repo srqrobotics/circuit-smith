@@ -156,11 +156,10 @@ export default function Canvas() {
 
       if (draggedComponent) {
         // Update the component's position in state
-        setComponents((prev) =>
-          prev.map((c) =>
-            c.id === draggedComponent.id ? { ...c, x: pos.x, y: pos.y } : c
-          )
+        const updatedComponents = components.map((c) =>
+          c.id === draggedComponent.id ? { ...c, x: pos.x, y: pos.y } : c
         );
+        setComponents(updatedComponents);
 
         // Update the component position in the configuration
         await ComponentLoader.updateComponentPosition(
@@ -171,6 +170,9 @@ export default function Canvas() {
 
         // Only recalculate routing if auto-routing is enabled
         if (autoRoutingEnabled) {
+          // Wait for the component state to be updated
+          await new Promise(resolve => setTimeout(resolve, 0));
+          
           // Force a complete re-routing of all components
           await startRouting();
         }

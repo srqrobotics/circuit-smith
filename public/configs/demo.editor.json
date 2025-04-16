@@ -92,8 +92,8 @@
   {
     "id": "ultrasonic_SR04",
     "name": "ultrasonic_SR04",
-    "x": 2171,
-    "y": 363,
+    "x": 2037,
+    "y": 275,
     "rotation": 0,
     "image": {
       "src": "/packages/Modules/ultrasonic_SR04.png",
