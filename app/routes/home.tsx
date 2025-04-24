@@ -1,5 +1,4 @@
 import type { Route } from "./+types/home";
-import Layout from "../components/Layout/Layout";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -9,5 +8,5 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function Home() {
-  return <Layout />;
+  return null;
 }
