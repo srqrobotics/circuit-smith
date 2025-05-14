@@ -4,7 +4,7 @@ import { useFile } from "~/contexts/FileContext";
 import { useComponents } from "~/contexts/ComponentContext";
 import { useRightSidebar } from "~/contexts/RightSidebarContext";
 import { FaCode, FaRobot } from "react-icons/fa";
-import { API_KEY } from "../../config/config";
+import { API_KEY } from "~/config/config";
 import { useCanvasRefresh } from "~/contexts/CanvasRefreshContext";
 
 export default function RightSidebar() {

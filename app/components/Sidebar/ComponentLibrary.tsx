@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useFetcher } from "react-router";
 import type { FileSystemItem } from "~/types/files";
-import { API_KEY } from "../../config/config"; // Adjust the path as necessary
+import { API_KEY } from "~/config/config"; // Adjust the path as necessary
 
 interface ComponentItem {
   id: string;
