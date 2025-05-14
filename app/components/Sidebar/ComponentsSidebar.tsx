@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useFetcher } from "react-router";
 import type { FileSystemItem } from "~/types/files";
 import ComponentItem from "./ComponentItem";
-import { API_KEY } from "~/config/config"; // Adjust the path as necessary
+import { API_KEY } from "~/config/config4public"; // Adjust the path as necessary
 import { useComponents } from "~/contexts/ComponentContext";
 
 interface ComponentItemType {
