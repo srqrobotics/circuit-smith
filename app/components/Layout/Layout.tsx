@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Canvas from "../Canvas/Canvas";
 import {
   FaPlay,
@@ -32,6 +32,11 @@ export default function Layout() {
   const [isRightSidebarCollapsed, setIsRightSidebarCollapsed] = useState(false);
   const rightPanelRef = useRef<HTMLDivElement>(null);
   const leftPanelRef = useRef<HTMLDivElement>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleCodeButtonClick = () => {
     setSelectedFile("/projects/defaultCode.ino");
@@ -81,7 +86,7 @@ export default function Layout() {
               <BsZoomOut />
             </button>
             <div className="h-6 w-px bg-gray-300 dark:bg-gray-600 mx-2" />
-            <button 
+            <button
               onClick={handleRefreshCanvas}
               className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded text-gray-900 dark:text-gray-100"
               title="Refresh Canvas"
@@ -97,7 +102,15 @@ export default function Layout() {
             onClick={toggleDarkMode}
             className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded text-gray-900 dark:text-gray-100"
           >
-            {isDarkMode ? <FiSun /> : <FiMoon />}
+            {mounted ? (
+              isDarkMode ? (
+                <FiMoon />
+              ) : (
+                <FiSun />
+              )
+            ) : (
+              <div className="w-6 h-6" />
+            )}
           </button>
           <button
             id="layout-auto-route-button"
