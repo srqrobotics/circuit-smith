@@ -1,7 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { useFetcher } from "react-router";
 import type { FileSystemItem } from "~/types/files";
-import { API_KEY } from "~/config/config4public"; // Adjust the path as necessary
+// import { API_KEY } from "~/config/config"; // Adjust the path as necessary
+
+useEffect(() => {
+  fetch('/api/proxy')
+    .then((res) => res.json())
+    .then((data) => console.log(data))
+    .catch((err) => console.error('Error:', err));
+}, []);
+
 
 interface ComponentItem {
   id: string;

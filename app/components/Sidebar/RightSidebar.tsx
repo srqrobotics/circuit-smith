@@ -4,8 +4,16 @@ import { useFile } from "~/contexts/FileContext";
 import { useComponents } from "~/contexts/ComponentContext";
 import { useRightSidebar } from "~/contexts/RightSidebarContext";
 import { FaCode, FaRobot } from "react-icons/fa";
-import { API_KEY } from "~/config/config4public";
+// import { API_KEY } from "~/config/config";
 import { useCanvasRefresh } from "~/contexts/CanvasRefreshContext";
+
+useEffect(() => {
+  fetch('/api/proxy')
+    .then((res) => res.json())
+    .then((data) => console.log(data))
+    .catch((err) => console.error('Error:', err));
+}, []);
+
 
 export default function RightSidebar() {
   const [Editor, setEditor] = useState<React.ComponentType<EditorProps> | null>(
