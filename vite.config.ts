@@ -1,8 +1,8 @@
-import { reactRouter } from "@react-router/dev/vite";
 import autoprefixer from "autoprefixer";
 import tailwindcss from "tailwindcss";
 import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
+import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   css: {
@@ -10,5 +10,9 @@ export default defineConfig({
       plugins: [tailwindcss, autoprefixer],
     },
   },
-  plugins: [reactRouter(), tsconfigPaths()],
+  plugins: [react(), tsconfigPaths()],
+  server: {
+    port: 5173,
+    open: true,
+  },
 });
