@@ -25,7 +25,7 @@ function SplashPage() {
       <div
         className="absolute h-full right-0 top-0"
         style={{
-          width: "calc(100% - 3/7 * 100%)",
+          width: "calc(100% )",
           background: "linear-gradient(180deg, #101833 0%, #131B33 100%)",
         }}
       />

@@ -17,6 +17,18 @@ module.exports = {
         "custom-blue": "#7787B9",
         "navy-dark": "#233B4F",
       },
+      lineHeight: {
+        97: "0.97",
+      },
+      animation: {
+        "slide-infinite": "slide 20s linear infinite",
+      },
+      keyframes: {
+        slide: {
+          "0%": { transform: "translateX(0)" },
+          "100%": { transform: "translateX(-50%)" },
+        },
+      },
     },
   },
   plugins: [],
