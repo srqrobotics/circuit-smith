@@ -1,10 +1,43 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { authAPI } from "../api/auth";
 
 function LandingPage() {
   const { logout } = useAuth();
+  const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [user, setUser] = useState<any>(null);
+  const [isValidating, setIsValidating] = useState(true);
+
+  useEffect(() => {
+    const validateUser = async () => {
+      try {
+        const response = await authAPI.verifyToken();
+        if (response.success && response.user) {
+          setUser(response.user);
+        }
+      } catch (error) {
+        console.error("Validation failed:", error);
+        // Don't redirect to login, just continue without user
+      } finally {
+        setIsValidating(false);
+      }
+    };
+
+    validateUser();
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await authAPI.logout();
+      logout();
+      setUser(null);
+      navigate("/");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
 
   const slides = [
     {
@@ -130,9 +163,16 @@ function LandingPage() {
     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
   };
 
+  if (isValidating) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-xl">Loading...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-white">
-      {" "}
       {/* Header/Navigation */}
       <nav className="bg-[#C45E32] shadow-md">
         <div className="max-w-[1512px] h-[150px] w-full mx-auto px-4 sm:px-6 lg:px-8">
@@ -151,21 +191,38 @@ function LandingPage() {
                 CIRCUITSMITH
               </span>
             </div>
-            {/* Auth Buttons */}
-            <div className="flex items-center space-x-6">
-              <Link
-                to="/login"
-                className="px-8 py-3 w-[180px] h-[60px] flex items-center justify-center rounded-[25px] border-[6px] border-white text-white hover:bg-white/10 transition font-medium text-xl"
-              >
-                Login
-              </Link>
-              <Link
-                to="/signup"
-                className="px-8 py-3 w-[180px] h-[60px] flex items-center justify-center rounded-[25px] bg-white text-[#C45E32] hover:bg-white/90 transition font-medium text-xl"
-              >
-                Sign Up
-              </Link>
-            </div>
+
+            {/* Conditional Navigation */}
+            {user ? (
+              /* User Info and Logout */
+              <div className="flex items-center space-x-6">
+                <span className="text-white text-lg">
+                  Welcome, {user.fullName}
+                </span>
+                <button
+                  onClick={handleLogout}
+                  className="px-8 py-3 w-[180px] h-[60px] flex items-center justify-center rounded-[25px] border-[6px] border-white text-white hover:bg-white/10 transition font-medium text-xl"
+                >
+                  Logout
+                </button>
+              </div>
+            ) : (
+              /* Auth Buttons */
+              <div className="flex items-center space-x-6">
+                <Link
+                  to="/login"
+                  className="px-8 py-3 w-[180px] h-[60px] flex items-center justify-center rounded-[25px] border-[6px] border-white text-white hover:bg-white/10 transition font-medium text-xl"
+                >
+                  Login
+                </Link>
+                <Link
+                  to="/signup"
+                  className="px-8 py-3 w-[180px] h-[60px] flex items-center justify-center rounded-[25px] bg-white text-[#C45E32] hover:bg-white/90 transition font-medium text-xl"
+                >
+                  Sign Up
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       </nav>

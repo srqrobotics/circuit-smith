@@ -8,3 +8,4 @@
 
 /app/config/config.ts
 public/configs/demo.editor.json
+.env

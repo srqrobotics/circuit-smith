@@ -1,16 +1,48 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
+import { authAPI, SignupData } from "../api/auth";
 import BackgroundEllipses from "../components/common/BackgroundEllipses";
 
 function SignupPage() {
-  const { login } = useAuth();
   const navigate = useNavigate();
+  const [formData, setFormData] = useState<SignupData>({
+    fullName: "",
+    email: "",
+    password: "",
+  });
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    login();
-    navigate("/landing");
+    setError("");
+    setSuccessMessage("");
+    setIsLoading(true);
+
+    try {
+      const response = await authAPI.signup(formData);
+      if (response.success) {
+        setSuccessMessage(
+          "Account created successfully! Redirecting to login..."
+        );
+        setTimeout(() => {
+          navigate("/login");
+        }, 2000);
+      }
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Signup failed");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -40,6 +72,20 @@ function SignupPage() {
                 Sign Up
               </h2>
 
+              {/* Error message */}
+              {error && (
+                <div className="w-[95%] mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+                  {error}
+                </div>
+              )}
+
+              {/* Success message */}
+              {successMessage && (
+                <div className="w-[95%] mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+                  {successMessage}
+                </div>
+              )}
+
               {/* Form  */}
               <form className="space-y-8" onSubmit={handleSubmit}>
                 {/* Full name  */}
@@ -62,6 +108,10 @@ function SignupPage() {
                   <input
                     type="text"
                     id="fullName"
+                    name="fullName"
+                    value={formData.fullName}
+                    onChange={handleInputChange}
+                    required
                     className="w-full py-3 pl-10 pr-4 bg-[#F1ECEC] rounded-lg shadow-[inset_0px_4px_4px_rgba(0,0,0,0.25)] focus:outline-none text-black placeholder-black font-roboto"
                     placeholder="Full Name"
                   />
@@ -84,6 +134,10 @@ function SignupPage() {
                   <input
                     type="email"
                     id="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    required
                     className="w-full py-3 pl-10 pr-4 bg-[#F1ECEC] rounded-lg shadow-[inset_0px_4px_4px_rgba(0,0,0,0.25)] focus:outline-none text-black placeholder-black font-roboto"
                     placeholder="Enter Email"
                   />
@@ -109,6 +163,11 @@ function SignupPage() {
                   <input
                     type="password"
                     id="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleInputChange}
+                    required
+                    minLength={6}
                     className="w-full py-3 pl-10 pr-4 bg-[#F1ECEC] rounded-lg shadow-[inset_0px_4px_4px_rgba(0,0,0,0.25)] focus:outline-none text-black placeholder-black font-roboto"
                     placeholder="Create Password"
                   />
@@ -118,9 +177,10 @@ function SignupPage() {
                 <div className="w-[95%] mt-12">
                   <button
                     type="submit"
-                    className="w-full py-3 px-4 bg-[#C45E32] text-white font-bold rounded-lg shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25),0px_-3px_6px_0px_rgba(0,0,0,0.17)] hover:opacity-90 transition-opacity font-roboto"
+                    disabled={isLoading}
+                    className="w-full py-3 px-4 bg-[#C45E32] text-white font-bold rounded-lg shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25),0px_-3px_6px_0px_rgba(0,0,0,0.17)] hover:opacity-90 transition-opacity font-roboto disabled:opacity-50"
                   >
-                    Sign Up
+                    {isLoading ? "Signing Up..." : "Sign Up"}
                   </button>
                 </div>
 

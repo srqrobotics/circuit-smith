@@ -1,16 +1,43 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { authAPI, LoginData } from "../api/auth";
 import BackgroundEllipses from "../components/common/BackgroundEllipses";
 
 function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const [formData, setFormData] = useState<LoginData>({
+    email: "",
+    password: "",
+  });
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    login();
-    navigate("/landing");
+    setError("");
+    setIsLoading(true);
+
+    try {
+      const response = await authAPI.login(formData);
+      if (response.success) {
+        login();
+        navigate("/landing");
+      }
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Login failed");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -40,6 +67,13 @@ function LoginPage() {
                 Login
               </h2>
 
+              {/* Error message */}
+              {error && (
+                <div className="w-[95%] mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+                  {error}
+                </div>
+              )}
+
               {/* Form */}
               <form className="space-y-8" onSubmit={handleSubmit}>
                 {/* Email field */}
@@ -59,6 +93,10 @@ function LoginPage() {
                   <input
                     type="email"
                     id="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    required
                     className="w-full py-3 pl-10 pr-4 bg-[#F1ECEC] rounded-lg shadow-[inset_0px_4px_4px_rgba(0,0,0,0.25)] focus:outline-none text-black placeholder-black font-roboto"
                     placeholder="Email Address"
                   />
@@ -84,6 +122,10 @@ function LoginPage() {
                   <input
                     type="password"
                     id="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleInputChange}
+                    required
                     className="w-full py-3 pl-10 pr-4 bg-[#F1ECEC] rounded-lg shadow-[inset_0px_4px_4px_rgba(0,0,0,0.25)] focus:outline-none text-black placeholder-black font-roboto"
                     placeholder="Password"
                   />
@@ -103,9 +145,10 @@ function LoginPage() {
                 <div className="w-[95%] mt-8">
                   <button
                     type="submit"
-                    className="w-full py-3 px-4 bg-[#C45E32] text-white font-bold rounded-lg shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25),0px_-3px_6px_0px_rgba(0,0,0,0.17)] hover:opacity-90 transition-opacity font-roboto"
+                    disabled={isLoading}
+                    className="w-full py-3 px-4 bg-[#C45E32] text-white font-bold rounded-lg shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25),0px_-3px_6px_0px_rgba(0,0,0,0.17)] hover:opacity-90 transition-opacity font-roboto disabled:opacity-50"
                   >
-                    Login
+                    {isLoading ? "Logging in..." : "Login"}
                   </button>
                 </div>
 
