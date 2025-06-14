@@ -97,4 +97,31 @@ export const authAPI = {
       throw error instanceof Error ? error : new Error("Network error");
     }
   },
+
+  async googleLogin(): Promise<void> {
+    // Redirect to Google OAuth endpoint
+    window.location.href = `${BASE_URL}/api/users/auth/google`;
+  },
+
+  async handleGoogleCallback(): Promise<AuthResponse> {
+    try {
+      const response = await fetch(
+        `${BASE_URL}/api/users/auth/google/callback`,
+        {
+          method: "GET",
+          credentials: "include",
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Google authentication failed");
+      }
+
+      return result;
+    } catch (error) {
+      throw error instanceof Error ? error : new Error("Network error");
+    }
+  },
 };

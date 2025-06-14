@@ -6,6 +6,7 @@ import SignupPage from "./pages/SignupPage";
 import LandingPage from "./pages/LandingPage";
 import MainAppPage from "./pages/MainAppPage";
 import NotFoundPage from "./pages/NotFoundPage";
+import GoogleCallbackPage from "./pages/GoogleCallbackPage";
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
       <Route path="/signup" element={<SignupPage />} />
       <Route path="/landing" element={<LandingPage />} />
       <Route path="/app" element={<MainAppPage />} />
+      <Route path="/auth/google/callback" element={<GoogleCallbackPage />} />
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
