@@ -1,19 +1,6 @@
-import React, { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import React from "react";
 
-function SplashPage() {
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    // Redirect to the landing page after 3 seconds
-    const timer = setTimeout(() => {
-      navigate("/landing");
-    }, 3000);
-
-    // Cleanup timer on component unmount
-    return () => clearTimeout(timer);
-  }, [navigate]);
-
+function SplashScreen() {
   return (
     <div className="h-screen w-screen relative overflow-hidden">
       {/* Left section with different background */}
@@ -55,4 +42,4 @@ function SplashPage() {
   );
 }
 
-export default SplashPage;
+export default SplashScreen;

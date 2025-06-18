@@ -19,6 +19,7 @@ import { useTheme } from "~/contexts/ThemeContext";
 import { useFile } from "~/contexts/FileContext";
 import { useAutoRouting } from "~/contexts/AutoRoutingContext";
 import { useCanvasRefresh } from "~/contexts/CanvasRefreshContext";
+import { useNavigate } from "react-router-dom";
 
 export default function Layout() {
   const { isDarkMode, toggleDarkMode } = useTheme();
@@ -33,6 +34,7 @@ export default function Layout() {
   const rightPanelRef = useRef<HTMLDivElement>(null);
   const leftPanelRef = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     setMounted(true);
@@ -66,7 +68,12 @@ export default function Layout() {
       <div className="h-12 border-b border-gray-200 dark:border-gray-700 flex items-center px-4 justify-between">
         <div className="flex items-center space-x-4">
           {/* Project Title */}
-          <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+          <h1
+            className="text-lg font-semibold text-gray-900 dark:text-gray-100 cursor-pointer"
+            onClick={() => {
+              navigate("/");
+            }}
+          >
             Circuit Smith
           </h1>
 

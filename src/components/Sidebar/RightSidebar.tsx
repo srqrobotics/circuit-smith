@@ -6,6 +6,7 @@ import { useRightSidebar } from "~/contexts/RightSidebarContext";
 import { FaCode, FaRobot } from "react-icons/fa";
 // import { API_KEY } from "~/config/config";
 import { useCanvasRefresh } from "~/contexts/CanvasRefreshContext";
+import { gptAPI } from "~/api/gpt";
 
 // useEffect(() => {
 //   fetch('/api/proxy')
@@ -110,59 +111,63 @@ export default function RightSidebar() {
 
     setIsGenerating(true);
     try {
-      const applicationsPrompt = `
-      Based on the following electronic components:
-      
-      \t- ${selectedComponents.join(", \n\t\t- ")}
-      
-      Generate a list of five possible project applications that can be built using these components. Each application should have a short description of its purpose.
-      
-      The response should be in the following JSON format:
-      
-      {
-        "applications": [
-            {
-              "name": "Application Name",
-              "description": "Brief description of how the system works"
-            }
-        ]
-      }
-      
-      The generated applications should be practical, relevant, and make effective use of the given components.
-      `;
+      // const applicationsPrompt = `
+      // Based on the following electronic components:
 
-      const response = await fetch(
-        "https://api.openai.com/v1/chat/completions",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: API_KEY,
-          },
-          body: JSON.stringify({
-            model: "gpt-4o-mini",
-            messages: [
-              {
-                role: "user",
-                content: applicationsPrompt,
-              },
-            ],
-          }),
-        }
-      );
+      // \t- ${selectedComponents.join(", \n\t\t- ")}
 
-      const responseText = await response.text();
-      const responseJSON = JSON.parse(responseText);
+      // Generate a list of five possible project applications that can be built using these components. Each application should have a short description of its purpose.
 
-      try {
-        const raw_msg = responseJSON.choices[0].message.content;
-        const msg = raw_msg.replace(/^```json\s*|\s*```$/g, ""); // Remove the ```json and ``` wrapping
-        const applications = JSON.parse(msg);
-        setGeneratedPrompt(applications);
-      } catch (error) {
-        console.error("Error parsing JSON:", error);
+      // The response should be in the following JSON format:
+
+      // {
+      //   "applications": [
+      //       {
+      //         "name": "Application Name",
+      //         "description": "Brief description of how the system works"
+      //       }
+      //   ]
+      // }
+
+      // The generated applications should be practical, relevant, and make effective use of the given components.
+      // `;
+
+      // const response2 = await fetch(
+      //   "https://api.openai.com/v1/chat/completions",
+      //   {
+      //     method: "POST",
+      //     headers: {
+      //       "Content-Type": "application/json",
+      //       Authorization: API_KEY,
+      //     },
+      //     body: JSON.stringify({
+      //       model: "gpt-4o-mini",
+      //       messages: [
+      //         {
+      //           role: "user",
+      //           content: applicationsPrompt,
+      //         },
+      //       ],
+      //     }),
+      //   }
+      // );
+
+      const response = await gptAPI.generatePrompt(selectedComponents);
+
+      const responseJson = await response;
+
+      // Handle the nested "applications" object
+      if (
+        responseJson &&
+        responseJson.applications &&
+        Array.isArray(responseJson.applications.applications)
+      ) {
         setGeneratedPrompt({
-          error: "Error parsing the response. Please try again.",
+          applications: responseJson.applications.applications,
+        });
+      } else {
+        setGeneratedPrompt({
+          error: "Unexpected response format. Please try again.",
         });
       }
     } catch (error) {
@@ -293,60 +298,69 @@ export default function RightSidebar() {
         )
         .join("\n");
 
-      const prompt = `
-      Generate a JSON file containing wiring configurations and an Arduino code snippet for an Arduino-based project. The project should include the following components: \n
+      // const prompt = `
+      // Generate a JSON file containing wiring configurations and an Arduino code snippet for an Arduino-based project. The project should include the following components: \n
 
-      ${componentsInfo}
+      // ${componentsInfo}
 
-      \nThe application of this project is: ${selectedApp.name}. ${selectedApp.description}. 
-      \nThe JSON file should follow this format:
+      // \nThe application of this project is: ${selectedApp.name}. ${selectedApp.description}.
+      // \nThe JSON file should follow this format:
 
-      {
-        "components": ["List of components used"],
-        "wire": [
-          {
-            "ArduinoBoard": "Pin",
-            "Component-1": "Pin"
-          },
-          {
-            "ArduinoBoard": "Pin",
-            "Component-2": "Pin"
-          }
-        ]
+      // {
+      //   "components": ["List of components used"],
+      //   "wire": [
+      //     {
+      //       "ArduinoBoard": "Pin",
+      //       "Component-1": "Pin"
+      //     },
+      //     {
+      //       "ArduinoBoard": "Pin",
+      //       "Component-2": "Pin"
+      //     }
+      //   ]
+      // }
+
+      // Additionally, provide Arduino code that initializes the components, reads data (if applicable), processes it, and executes necessary actions.
+      // Use appropriate libraries and ensure the code is structured with comments explaining each section.
+      // Make sure all pin names are in full capital letters.
+      // Make sure to use the given component names for the JSON file. Make sure to use the given component name for the wiring connection reference as well.
+      // Make sure to add 5V and GND connections for all modules with development board. Do not use VCC for the modules, instead use 5V as the pin name.
+      // Make sure to use D1, D2 etc. for digital pins in the development board.
+      // Make sure to use A0, A1 etc. for analog pins in the development board.
+      // Make sure to use just the Available pins names given infront of the respective component names for the wiring json.
+      // `;
+
+      // const response2 = await fetch(
+      //   "https://api.openai.com/v1/chat/completions",
+      //   {
+      //     method: "POST",
+      //     headers: {
+      //       "Content-Type": "application/json",
+      //       Authorization: API_KEY,
+      //     },
+      //     body: JSON.stringify({
+      //       model: "gpt-4o-mini",
+      //       messages: [
+      //         {
+      //           role: "user",
+      //           content: prompt,
+      //         },
+      //       ],
+      //     }),
+      //   }
+      // );
+
+      const response = await gptAPI.generateCode(componentsInfo, selectedApp);
+      if (!response || !response.code) {
+        setGeneratedPrompt({
+          error: "Failed to generate wiring and code. Please try again.",
+        });
+        return;
       }
 
-      Additionally, provide Arduino code that initializes the components, reads data (if applicable), processes it, and executes necessary actions.
-      Use appropriate libraries and ensure the code is structured with comments explaining each section.
-      Make sure all pin names are in full capital letters.
-      Make sure to use the given component names for the JSON file. Make sure to use the given component name for the wiring connection reference as well.
-      Make sure to add 5V and GND connections for all modules with development board. Do not use VCC for the modules, instead use 5V as the pin name.
-      Make sure to use D1, D2 etc. for digital pins in the development board.
-      Make sure to use A0, A1 etc. for analog pins in the development board.
-      Make sure to use just the Available pins names given infront of the respective component names for the wiring json.
-      `;
-
-      const response = await fetch(
-        "https://api.openai.com/v1/chat/completions",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: API_KEY,
-          },
-          body: JSON.stringify({
-            model: "gpt-4o-mini",
-            messages: [
-              {
-                role: "user",
-                content: prompt,
-              },
-            ],
-          }),
-        }
-      );
-
-      const data = await response.json();
-      const raw_msg = data.choices[0].message.content;
+      const data = await response;
+      const raw_msg = data.code;
+      console.log("Raw message from GPT:", raw_msg);
 
       // Separate JSON and C++ code
       const jsonMatch = raw_msg.match(/```json\s*([\s\S]*?)```/);

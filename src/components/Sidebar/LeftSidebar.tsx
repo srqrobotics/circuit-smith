@@ -14,9 +14,7 @@ export default function LeftSidebar() {
 
       {/* Component Content */}
       <div className="flex-1 overflow-y-auto w-full h-full">
-        <div className="w-full h-full">
-          <ComponentsSidebar />
-        </div>
+        <ComponentsSidebar />
       </div>
     </div>
   );

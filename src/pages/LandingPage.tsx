@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { authAPI } from "../api/auth";
+import SplashScreen from "~/components/SplashScreen";
 
 function LandingPage() {
   const { logout } = useAuth();
@@ -21,7 +22,13 @@ function LandingPage() {
         console.error("Validation failed:", error);
         // Don't redirect to login, just continue without user
       } finally {
-        setIsValidating(false);
+        //set 2000 timer
+        const timer = setTimeout(() => {
+          setIsValidating(false);
+        }, 2000);
+
+        // Cleanup function
+        return () => clearTimeout(timer);
       }
     };
 
@@ -164,11 +171,7 @@ function LandingPage() {
   };
 
   if (isValidating) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-xl">Loading...</div>
-      </div>
-    );
+    return <SplashScreen />;
   }
 
   return (
@@ -289,7 +292,7 @@ function LandingPage() {
             {/* Let's Start Button */}
             <div className="mt-12 flex justify-center">
               <Link
-                to="/home"
+                to="/app"
                 className="flex items-center justify-center gap-3 w-[336px] h-[79px] bg-[#3B9EEE] text-white font-bold rounded-[30px] hover:bg-[#2A8BD9] transition-colors duration-200"
                 style={{
                   fontFamily: "Roboto, sans-serif",
