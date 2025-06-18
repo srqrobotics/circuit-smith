@@ -1,0 +1,101 @@
+# Circuit Smith
+
+A modern circuit design and simulation tool for makers, hobbyists, and educational purposes.
+
+![Circuit Smith](public/icons/savecirc.svg)
+
+## Features
+
+- 🔌 Interactive circuit design interface using React and Konva
+- ⚡️ Circuit component placement and wire connection
+- 📊 Auto-routing for wires with collision detection
+- 📱 Responsive design with touch support
+- 🎨 Light and dark mode support
+- 🔒 TypeScript for enhanced code safety
+- 🎉 TailwindCSS for modern styling
+- 💾 Save and load circuit designs
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 18.x or newer
+- npm 9.x or newer
+
+### Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/SRQRobotics/circuit-smith.git
+   cd circuit-smith
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+### Running Locally
+
+Start the development server with hot module replacement:
+
+```bash
+npm run dev
+```
+
+Your application will be available at `http://localhost:5173`. Any changes you make to the code will be automatically reflected in the browser.
+
+### Building for Production
+
+Create a production build:
+
+```bash
+npm run build
+```
+
+### Running the Production Build Locally
+
+After building, you can preview the production build locally:
+
+```bash
+npm run start
+```
+
+This will start a local server with your production build running at `http://localhost:4173`.
+
+## Project Structure
+
+- `/app` - Main application code
+  - `/components` - Reusable UI components including the Canvas system
+  - `/contexts` - React contexts for state management
+  - `/types` - TypeScript type definitions
+  - `/utils` - Utility functions for wire management and component loading
+- `/public` - Static assets
+  - `/icons` - Component and UI icons
+  - `/packages` - Component package definitions
+  - `/configs` - Default configurations
+
+## Technology Stack
+
+Circuit Smith is built with:
+
+- **React 19** for the UI framework
+- **Konva.js** for the canvas-based circuit editor
+- **React Router** for navigation
+- **TailwindCSS** for styling
+- **TypeScript** for type safety
+- **Vite** for fast development and optimized builds
+
+## Usage Guide
+
+1. **Starting Circuit Smith**: After running `npm run dev`, navigate to http://localhost:5173 in your browser
+2. **Component Selection**: Use the sidebar to browse and select circuit components
+3. **Component Placement**: Drag components from the sidebar onto the canvas
+4. **Creating Connections**: 
+   - Click on a connection point of a component
+   - Click on another component's connection point to create a wire
+   - For auto-routing wires, enable the auto-routing option in the toolbar
+5. **Saving Your Design**: Click the save icon in the toolbar to save your circuit design
+6. **Loading Designs**: Use the file menu to load existing circuit designs
+7. **Component Properties**: Right-click on a component to view or edit its properties
+
