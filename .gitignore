@@ -1,0 +1,11 @@
+.DS_Store
+/node_modules/
+
+# React Router
+/.react-router/
+/build/
+
+
+/app/config/config.ts
+public/configs/demo.editor.json
+.env
