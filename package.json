@@ -1,12 +1,15 @@
 {
   "name": "circuit-smith",
-  "private": true,
+  "private": false,
+  "homepage": "https://srqrobotics.github.io/circuit-smith",
   "type": "module",
   "scripts": {
     "build": "vite build",
     "dev": "vite",
     "start": "vite preview",
-    "typecheck": "tsc"
+    "typecheck": "tsc",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "@monaco-editor/react": "^4.6.0",

@@ -5,6 +5,7 @@ import tsconfigPaths from "vite-tsconfig-paths";
 import react from "@vitejs/plugin-react";
 
 export default defineConfig({
+  base: "/circuit-smith/", // 👈 This line is important
   css: {
     postcss: {
       plugins: [tailwindcss, autoprefixer],
