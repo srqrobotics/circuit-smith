@@ -49,34 +49,34 @@ function LandingPage() {
   const slides = [
     {
       id: 1,
-      src: "/landing/slide1.jpg",
+      src: "/public/landing/slide1.jpg",
       alt: "Circuit Smith Feature 1",
     },
     {
       id: 2,
-      src: "/landing/slide2.jpg",
+      src: "/public/landing/slide2.jpg",
       alt: "Circuit Smith Feature 2",
     },
     {
       id: 3,
-      src: "/landing/slide3.jpg",
+      src: "/public/landing/slide3.jpg",
       alt: "Circuit Smith Feature 3",
     },
     {
       id: 4,
-      src: "/landing/slide4.jpg",
+      src: "/public/landing/slide4.jpg",
       alt: "Circuit Smith Feature 4",
     },
     {
       id: 5,
-      src: "/landing/slide5.jpg",
+      src: "/public/landing/slide5.jpg",
       alt: "Circuit Smith Feature 5",
     },
   ];
   const cardData = [
     {
       id: 1,
-      image: "/landing/2.gif",
+      image: "/public/landing/2.gif",
       alt: "Feature 1",
       title: "Circuit Design",
       description:
@@ -85,7 +85,7 @@ function LandingPage() {
     },
     {
       id: 2,
-      image: "/landing/3.gif",
+      image: "/public/landing/3.gif",
       alt: "Feature 2",
       title: "Code Editor",
       description:
@@ -94,7 +94,7 @@ function LandingPage() {
     },
     {
       id: 3,
-      image: "/landing/1.gif",
+      image: "/public/landing/1.gif",
       alt: "Feature 3",
       title: "Live Simulation",
       description:
@@ -253,7 +253,7 @@ function LandingPage() {
             <div className="flex justify-center lg:justify-end items-center mr-8">
               <div className="w-full ">
                 <img
-                  src="/landing/hero-image.gif"
+                  src="/public/landing/hero-image.gif"
                   alt="Circuit Smith Hero"
                   className="w-full h-auto object-contain"
                 />
@@ -267,7 +267,7 @@ function LandingPage() {
         <div className="absolute -top-16 left-1/2 transform -translate-x-1/2 z-10">
           <div className="flex justify-center">
             <img
-              src="/landing/image.jpg"
+              src="/public/landing/image.jpg"
               alt="Circuit Smith Feature"
               className="w-[656px] border-8 border-[#D9D9D9] rounded-lg"
               style={{
@@ -429,7 +429,7 @@ function LandingPage() {
       <footer
         className="relative h-[256px] flex items-center justify-center"
         style={{
-          backgroundImage: "url('/landing/footer-bg.jpg')",
+          backgroundImage: "url('/public/landing/footer-bg.jpg')",
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
