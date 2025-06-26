@@ -6,7 +6,9 @@
     "build": "vite build",
     "dev": "vite",
     "start": "vite preview",
-    "typecheck": "tsc"
+    "typecheck": "tsc",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d docs -r https://github.com/srqrobotics/circuit-smith.git"
   },
   "dependencies": {
     "@monaco-editor/react": "^4.6.0",
