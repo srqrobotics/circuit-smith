@@ -9,7 +9,7 @@
     "start": "vite preview",
     "typecheck": "tsc",
     "predeploy": "npm run build",
-    "deploy": "GH_PAGES_CACHE_DIR=.gh-pages-cache gh-pages -d dist"
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "@monaco-editor/react": "^4.6.0",
