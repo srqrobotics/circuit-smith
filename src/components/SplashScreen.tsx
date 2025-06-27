@@ -23,7 +23,7 @@ function SplashScreen() {
         {/* Centered Animation - Made responsive */}
         <div className="absolute w-full max-w-[1472px] transform -translate-x-1/2 left-1/2">
           <img
-            src="/SplashPage/splashAnimation.gif"
+            src={`${import.meta.env.BASE_URL}SplashPage/splashAnimation.gif`}
             alt="Loading Animation"
             className="w-full h-full object-contain"
           />
@@ -32,7 +32,7 @@ function SplashScreen() {
         {/* Bottom Right Logo - Positioned at the bottom right corner */}
         <div className="absolute bottom-0 right-0 mb-4 mr-4 md:mb-6 md:mr-6 lg:mb-8 lg:mr-8 w-48">
           <img
-            src="/SplashPage/logo.png"
+            src={`${import.meta.env.BASE_URL}SplashPage/logo.png`}
             alt="Circuit Smith Logo"
             className="w-full h-full object-contain"
           />

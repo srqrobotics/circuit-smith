@@ -1,6 +1,6 @@
 {
   "name": "circuit-smith",
-  "homepage": "https://srqrobotics.github.io/circuit-smith/#/",
+  "homepage": "https://srqrobotics.github.io/circuit-smith/",
   "private": true,
   "type": "module",
   "scripts": {
