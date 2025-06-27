@@ -57,7 +57,7 @@ function SignupPage() {
       <div className="absolute top-0 left-0 h-full w-5/8 bg-custom-blue">
         {/* Design Image in left corner with white filter */}
         <img
-          src="/sign/design.png"
+          src={`${import.meta.env.BASE_URL}sign/design.png`}
           alt="Design Element"
           className="h-full object-contain object-left-top absolute top-0 left-0 brightness-0 invert opacity-30"
         />
