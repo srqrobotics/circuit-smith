@@ -183,7 +183,7 @@ function LandingPage() {
             {/* Logo */}
             <div className="flex items-center">
               <img
-                src="public\SplashPage\logo.png"
+                src={`${import.meta.env.BASE_URL}SplashPage/logo.png`}
                 alt="Circuit Smith Logo"
                 className="h-24 w-auto"
               />
