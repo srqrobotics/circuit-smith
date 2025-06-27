@@ -71,7 +71,7 @@ export default function Layout() {
           <h1
             className="text-lg font-semibold text-gray-900 dark:text-gray-100 cursor-pointer"
             onClick={() => {
-              navigate("/");
+              navigate("/landing");
             }}
           >
             Circuit Smith

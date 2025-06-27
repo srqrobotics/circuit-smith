@@ -9,7 +9,7 @@ function NotFoundPage() {
         Sorry, the page you're looking for doesn't exist or has been moved.
       </p>
       <Link
-        to="/"
+        to="/landing"
         className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
       >
         Return Home
