@@ -49,27 +49,27 @@ function LandingPage() {
   const slides = [
     {
       id: 1,
-      src: "/public/landing/slide1.jpg",
+      src: `${import.meta.env.BASE_URL}landing/slide1.jpg`,
       alt: "Circuit Smith Feature 1",
     },
     {
       id: 2,
-      src: "/public/landing/slide2.jpg",
+      src: `${import.meta.env.BASE_URL}landing/slide2.jpg`,
       alt: "Circuit Smith Feature 2",
     },
     {
       id: 3,
-      src: "/public/landing/slide3.jpg",
+      src: `${import.meta.env.BASE_URL}landing/slide3.jpg`,
       alt: "Circuit Smith Feature 3",
     },
     {
       id: 4,
-      src: "/public/landing/slide4.jpg",
+      src: `${import.meta.env.BASE_URL}landing/slide4.jpg`,
       alt: "Circuit Smith Feature 4",
     },
     {
       id: 5,
-      src: "/public/landing/slide5.jpg",
+      src: `${import.meta.env.BASE_URL}landing/slide5.jpg`,
       alt: "Circuit Smith Feature 5",
     },
   ];
