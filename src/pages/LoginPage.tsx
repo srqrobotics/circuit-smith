@@ -224,7 +224,7 @@ function LoginPage() {
             {/* Logo in the left top corner */}
             <div className="absolute top-8 left-8">
               <img
-                src="/sign/logo.png"
+                src={`${import.meta.env.BASE_URL}sign/logo.png`}
                 alt="Circuit Smith Logo"
                 className="w-24 h-auto"
               />
@@ -240,7 +240,7 @@ function LoginPage() {
             {/* Animation at bottom center */}
             <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 w-4/5">
               <img
-                src="/sign/animation.gif"
+                src={`${import.meta.env.BASE_URL}sign/animation.gif`}
                 alt="Animation"
                 className="w-full h-auto"
               />
