@@ -5,6 +5,9 @@ import tsconfigPaths from "vite-tsconfig-paths";
 import react from "@vitejs/plugin-react";
 
 export default defineConfig({
+  build: {
+    outDir: "docs", // 👈 GitHub Pages requires /docs or / (root)
+  },
   css: {
     postcss: {
       plugins: [tailwindcss, autoprefixer],
