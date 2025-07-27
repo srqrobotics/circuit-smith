@@ -7,6 +7,7 @@ import { FaCode, FaRobot } from "react-icons/fa";
 // import { API_KEY } from "~/config/config";
 import { useCanvasRefresh } from "~/contexts/CanvasRefreshContext";
 import { gptAPI } from "~/api/gpt";
+import { project } from "~/api/project";
 
 // useEffect(() => {
 //   fetch('/api/proxy')
@@ -31,12 +32,15 @@ export default function RightSidebar() {
       activeTab,
       isGenerating,
       selectedApplicationIndex,
+      currentProjectId,
     },
     setCode,
     setGeneratedPrompt,
     setActiveTab,
     setIsGenerating,
     setSelectedApplicationIndex,
+    setGeneratedConfig,
+    setCurrentProjectId,
   } = useRightSidebar();
 
   useEffect(() => {
@@ -370,29 +374,46 @@ export default function RightSidebar() {
       const cppString = cppMatch ? cppMatch[1].trim() : null;
 
       if (jsonString && cppString) {
-        // Save the JSON configuration
-        await fetch("/api/save-config", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            file: "configs/demo.json",
-            content: JSON.parse(jsonString),
-          }),
-        });
+        // Store the generated configuration in the context so it can be accessed by the save button
+        setGeneratedConfig(jsonString);
 
-        // Save the Arduino code
-        await fetch("/api/save-config", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            file: "projects/defaultCode.ino",
-            content: cppString.split("\n"),
-          }),
-        });
+        // // Save the JSON configuration
+        // await fetch("/api/save-config", {
+        //   method: "POST",
+        //   headers: {
+        //     "Content-Type": "application/json",
+        //   },
+        //   body: JSON.stringify({
+        //     file: "configs/demo.json",
+        //     content: JSON.parse(jsonString),
+        //   }),
+        // });
+
+        // // Save the Arduino code
+        // await fetch("/api/save-config", {
+        //   method: "POST",
+        //   headers: {
+        //     "Content-Type": "application/json",
+        //   },
+        //   body: JSON.stringify({
+        //     file: "projects/defaultCode.ino",
+        //     content: cppString.split("\n"),
+        //   }),
+        // });
+
+        //call a api call to save the wiring configuration
+
+        const saveResponse = await project.saveProject(
+          jsonString,
+          cppString,
+          currentProjectId || "0"
+        );
+
+        // Handle the response and update project ID if returned
+        if (saveResponse && saveResponse.projectId) {
+          setCurrentProjectId(saveResponse.projectId);
+          console.log("Project saved with ID:", saveResponse.projectId);
+        }
 
         // Set the code in the editor
         setCode(cppString);

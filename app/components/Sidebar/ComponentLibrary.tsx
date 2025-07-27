@@ -4,12 +4,11 @@ import type { FileSystemItem } from "~/types/files";
 // import { API_KEY } from "~/config/config"; // Adjust the path as necessary
 
 useEffect(() => {
-  fetch('/api/proxy')
+  fetch("/api/proxy")
     .then((res) => res.json())
     .then((data) => console.log(data))
-    .catch((err) => console.error('Error:', err));
+    .catch((err) => console.error("Error:", err));
 }, []);
-
 
 interface ComponentItem {
   id: string;
@@ -351,6 +350,8 @@ export default function ComponentLibrary() {
 
       // Save the updated config back to the file
       const fcppString = cppString.split("\n");
+
+      console.log("Formatted C++ Code:\n", fcppString);
       await saveConfig("projects/defaultCode.ino", fcppString);
 
       await saveConfig("configs/demo.json", JSON.parse(jsonString));

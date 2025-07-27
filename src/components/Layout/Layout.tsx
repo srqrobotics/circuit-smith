@@ -9,6 +9,7 @@ import {
   FaChevronLeft,
   FaChevronRight,
   FaSync,
+  FaSave,
 } from "react-icons/fa";
 import { IoMdUndo, IoMdRedo } from "react-icons/io";
 import { BsZoomIn, BsZoomOut } from "react-icons/bs";
@@ -19,13 +20,16 @@ import { useTheme } from "~/contexts/ThemeContext";
 import { useFile } from "~/contexts/FileContext";
 import { useAutoRouting } from "~/contexts/AutoRoutingContext";
 import { useCanvasRefresh } from "~/contexts/CanvasRefreshContext";
+import { useRightSidebar } from "~/contexts/RightSidebarContext";
 import { useNavigate } from "react-router-dom";
+import { project } from "~/api/project";
 
 export default function Layout() {
   const { isDarkMode, toggleDarkMode } = useTheme();
   const { setSelectedFile, selectedFile } = useFile();
   const { autoRoutingEnabled, toggleAutoRouting } = useAutoRouting();
   const { triggerCanvasRefresh } = useCanvasRefresh();
+  const { sidebarState, setCurrentProjectId } = useRightSidebar();
   const [activeRightTab, setActiveRightTab] = useState<"code">("code");
   const [rightPanelWidth, setRightPanelWidth] = useState(600);
   const [leftPanelWidth, setLeftPanelWidth] = useState(200); // 18rem = 288px
@@ -34,6 +38,7 @@ export default function Layout() {
   const rightPanelRef = useRef<HTMLDivElement>(null);
   const leftPanelRef = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -62,20 +67,93 @@ export default function Layout() {
     triggerCanvasRefresh();
   };
 
+  const handleSaveProject = async () => {
+    setIsSaving(true);
+    try {
+      // Get the current code from the sidebar
+      const cppString = sidebarState.code;
+
+      // Use the generated configuration if available, otherwise fall back to current config
+      let jsonString = sidebarState.generatedConfig;
+
+      if (!jsonString) {
+        // If no generated config is available, try to read the current configuration
+        console.log(
+          "No generated config found, reading current configuration..."
+        );
+        try {
+          const configResponse = await fetch("/configs/demo.json");
+          if (configResponse.ok) {
+            const currentConfig = await configResponse.json();
+            jsonString = JSON.stringify(currentConfig, null, 2);
+          } else {
+            // If we can't read the config, use empty structure
+            console.warn(
+              "Could not read current config, using empty structure"
+            );
+            const emptyConfig = {
+              components: [],
+              wire: [],
+            };
+            jsonString = JSON.stringify(emptyConfig, null, 2);
+          }
+        } catch (configError) {
+          console.warn("Error reading configuration:", configError);
+          const emptyConfig = {
+            components: [],
+            wire: [],
+          };
+          jsonString = JSON.stringify(emptyConfig, null, 2);
+        }
+      } else {
+        console.log("Using generated configuration for save");
+      }
+
+      // Save the project
+      const saveResponse = await project.saveProject(
+        jsonString,
+        cppString,
+        sidebarState.currentProjectId || "0"
+      );
+
+      // Handle the response and update project ID if returned
+      if (saveResponse && saveResponse.projectId) {
+        setCurrentProjectId(saveResponse.projectId);
+        console.log("Project saved with ID:", saveResponse.projectId);
+      }
+
+      console.log("Project saved successfully!");
+      console.log("Saved configuration:", JSON.parse(jsonString));
+      // You could add a toast notification here
+    } catch (error) {
+      console.error("Error saving project:", error);
+      // You could add error handling/notification here
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   return (
     <div className="h-screen flex flex-col bg-white dark:bg-gray-900">
       {/* Top Navigation Bar */}
       <div className="h-12 border-b border-gray-200 dark:border-gray-700 flex items-center px-4 justify-between">
         <div className="flex items-center space-x-4">
           {/* Project Title */}
-          <h1
-            className="text-lg font-semibold text-gray-900 dark:text-gray-100 cursor-pointer"
-            onClick={() => {
-              navigate("/");
-            }}
-          >
-            Circuit Smith
-          </h1>
+          <div className="flex items-center space-x-2">
+            <h1
+              className="text-lg font-semibold text-gray-900 dark:text-gray-100 cursor-pointer"
+              onClick={() => {
+                navigate("/");
+              }}
+            >
+              Circuit Smith
+            </h1>
+            {sidebarState.currentProjectId && (
+              <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium rounded">
+                Project: {sidebarState.currentProjectId}
+              </span>
+            )}
+          </div>
 
           {/* Basic Controls */}
           <div className="flex items-center space-x-2">
@@ -105,6 +183,15 @@ export default function Layout() {
 
         {/* Right Side Controls */}
         <div className="flex items-center space-x-2">
+          <button
+            onClick={handleSaveProject}
+            disabled={isSaving}
+            className="flex items-center gap-2 px-3 py-1.5 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-md transition-colors"
+            title="Save Project"
+          >
+            <FaSave className="text-sm" />
+            <span>{isSaving ? "Saving..." : "Save"}</span>
+          </button>
           <button
             onClick={toggleDarkMode}
             className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded text-gray-900 dark:text-gray-100"
