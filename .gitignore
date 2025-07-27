@@ -1,11 +1,8 @@
 .DS_Store
 /node_modules/
 
-# React Router
-/.react-router/
+/dist/
+
 /build/
-
-
-/app/config/config.ts
-public/configs/demo.editor.json
+/.react-router/
 .env
