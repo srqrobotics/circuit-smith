@@ -799,6 +799,120 @@ export class ComponentLoader {
     }
   }
 
+  static async loadInitialComponentsFromData(
+    wiringData: any,
+    setLoadedImages: React.Dispatch<
+      React.SetStateAction<{ [key: string]: HTMLImageElement }>
+    >,
+    setComponents: React.Dispatch<React.SetStateAction<DroppedComponent[]>>,
+    setWires: React.Dispatch<React.SetStateAction<Wire[]>>
+  ): Promise<any> {
+    try {
+      // Use the provided wiring data instead of loading from default files
+      const config = wiringData;
+
+      // Load component libraries to get full component definitions
+      let response = await fetch("/packages/devBible.json");
+      const dev_boards = await response.json();
+
+      response = await fetch("/packages/sensorBible.json");
+      const sensors = await response.json();
+
+      const components_list = [...dev_boards.components, ...sensors.components];
+
+      // Filter components based on the config data
+      const components = components_list.filter((component: any) =>
+        config.components.includes(component.id)
+      );
+      console.log("Selected components from project data:", components);
+
+      // Load images
+      const imageLoadPromises = components.map(
+        async (component: DroppedComponent) => {
+          console.log(component.image.src);
+          const img = await preloadImage(component.image.src);
+          component.image.width = img.naturalWidth;
+          component.image.height = img.naturalHeight;
+          return { src: component.image.src, img };
+        }
+      );
+
+      // Load pin mappings
+      const pinWirePromises = components.map(async (component: any) => {
+        if (component["pin-map"]?.src) {
+          const pinMapResponse = await fetch(component["pin-map"].src);
+          component.pinMap = await pinMapResponse.json();
+          return ComponentLoader.locatePins(component);
+        }
+        return [];
+      });
+
+      // Wait for all promises to resolve
+      const [pinWires, loadedImgs] = await Promise.all([
+        Promise.all(pinWirePromises),
+        Promise.all(imageLoadPromises),
+      ]);
+
+      // Update states
+      setLoadedImages((prev) => {
+        const newImages = { ...prev };
+        loadedImgs.forEach(({ src, img }) => {
+          newImages[src] = img;
+        });
+        return newImages;
+      });
+
+      setComponents(components);
+
+      // Process wire configurations from config
+      console.log("loading wireConnections from project data");
+      const compWiring: Wire[] = [];
+
+      if (config.wire) {
+        await ComponentLoader.processWireConnections(
+          config,
+          components,
+          compWiring,
+          setComponents
+        );
+        console.log("compWiring: ", compWiring);
+      }
+
+      // Store all pin wires in the class variable
+      this.allPinWires = [...pinWires.flat(), ...compWiring];
+
+      if (components) {
+        const deviceBounds = ComponentLoader.getDeviceBounds(components);
+
+        // Process each wire to find valid paths around components
+        compWiring.forEach((wire) => {
+          const [startX, startY] = [wire.points[2], wire.points[3]];
+          const [endX, endY] = [wire.points[4], wire.points[5]];
+          const path = findPath([startX, startY], [endX, endY], deviceBounds);
+          if (path.length > 0) {
+            const wirePath = path.flat();
+            wire.points.splice(wire.points.length - 4, 0, ...wirePath);
+          }
+        });
+
+        const newWiring = shiftOverlappingPaths(compWiring, deviceBounds);
+        const finalWiring = shiftOverlappingPaths(newWiring, deviceBounds);
+
+        // Store final wiring in the class variable
+        this.finalWiring = finalWiring;
+        const fullWiring = [...pinWires.flat(), ...finalWiring];
+
+        // Set wires state
+        // setWires(fullWiring);
+      }
+
+      return config; // Return the loaded config
+    } catch (error) {
+      console.error("Failed to load components from project data:", error);
+      throw error; // Rethrow the error for handling in the calling function
+    }
+  }
+
   // Method to access all pin wires
   static getAllPinWires(): Wire[] {
     return this.allPinWires;
