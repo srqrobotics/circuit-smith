@@ -16,4 +16,26 @@ export const project = {
     });
     return response.json();
   },
+
+  async getProjectsByUserId(userId: string) {
+    const response = await fetch(`${BASE_URL}/api/projects`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+    });
+    return response.json();
+  },
+
+  async getDataFromProjectId(projectId: string) {
+    const response = await fetch(`${BASE_URL}/api/projects/${projectId}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+    });
+    return response.json();
+  },
 };
