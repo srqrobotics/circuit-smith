@@ -455,10 +455,10 @@ export class ComponentLoader {
   }
 
   static async createGroundSymbol(x: number, y: number): Promise<GroundSymbol> {
-    const response = await fetch("/packages/Power/GND.json");
+    const response = await fetch("packages/Power/GND.json");
     const groundData = await response.json();
 
-    const img = await preloadImage("/packages/Power/GND.png");
+    const img = await preloadImage("packages/Power/GND.png");
 
     return {
       id: `ground-${Math.random().toString(36).substr(2, 9)}`,
@@ -467,7 +467,7 @@ export class ComponentLoader {
       name: "GND",
       rotation: 0,
       image: {
-        src: "/packages/Power/GND.png",
+        src: "packages/Power/GND.png",
         width: img.naturalWidth,
         height: img.naturalHeight,
       },
@@ -680,19 +680,19 @@ export class ComponentLoader {
     setWires: React.Dispatch<React.SetStateAction<Wire[]>>
   ): Promise<any> {
     try {
-      let response = await fetch("/configs/demo.json");
+      let response = await fetch("configs/demo.json");
       const config = await response.json();
 
-      response = await fetch("/configs/demo.editor.json");
+      response = await fetch("configs/demo.editor.json");
       const components = await response.json();
 
       if (!matchComponents(components, config.components)) {
         console.log("new config loading...");
 
-        response = await fetch("/packages/devBible.json");
+        response = await fetch("packages/devBible.json");
         const dev_boards = await response.json();
 
-        response = await fetch("/packages/sensorBible.json");
+        response = await fetch("packages/sensorBible.json");
         const sensors = await response.json();
 
         const components_list = [
@@ -707,7 +707,7 @@ export class ComponentLoader {
         );
         console.log("Selected components:", components);
 
-        backupComponentsToJson(components, "/configs/demo.editor.json"); // Specify the file name for backup
+        backupComponentsToJson(components, "configs/demo.editor.json"); // Specify the file name for backup
       }
 
       // Load images
@@ -812,10 +812,10 @@ export class ComponentLoader {
       const config = wiringData;
 
       // Load component libraries to get full component definitions
-      let response = await fetch("/packages/devBible.json");
+      let response = await fetch("packages/devBible.json");
       const dev_boards = await response.json();
 
-      response = await fetch("/packages/sensorBible.json");
+      response = await fetch("packages/sensorBible.json");
       const sensors = await response.json();
 
       const components_list = [...dev_boards.components, ...sensors.components];
@@ -930,7 +930,7 @@ export class ComponentLoader {
   ) {
     try {
       // Get the current configuration file path
-      const configFiles = ["/configs/demo.editor.json"];
+      const configFiles = ["configs/demo.editor.json"];
 
       // Search through config files to find the component
       for (const configFile of configFiles) {
@@ -969,7 +969,7 @@ export class ComponentLoader {
             console.log("New position:", { x, y });
 
             // Save the updated config back to the file
-            const saveResponse = await fetch(`/api/save-config`, {
+            const saveResponse = await fetch(`api/save-config`, {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
@@ -1040,7 +1040,7 @@ async function backupComponentsToJson(
   // }
 
   // Save the updated config back to the file
-  const saveResponse = await fetch(`/api/save-config`, {
+  const saveResponse = await fetch("api/save-config", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
