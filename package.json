@@ -1,7 +1,7 @@
 {
   "name": "circuit-smith",
+  "private": false,
   "homepage": "https://srqrobotics.github.io/circuit-smith/",
-  "private": true,
   "type": "module",
   "scripts": {
     "build": "vite build",
