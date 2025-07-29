@@ -5,7 +5,7 @@ export function preloadImage(src: string): Promise<HTMLImageElement> {
     const isAbsolute = /^(?:[a-z]+:)?\/\//i.test(src);
     img.src = isAbsolute
       ? src
-      : `${import.meta.env.BASE_URL}${src.replace(/^\//, "")}`;
+      : `${src.replace(/^\//, "")}`;
     img.onload = () => {
       console.log("Image loaded successfully:", img.src);
       resolve(img);

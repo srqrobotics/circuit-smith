@@ -57,7 +57,7 @@ function SignupPage() {
       <div className="absolute top-0 left-0 h-full w-5/8 bg-custom-blue">
         {/* Design Image in left corner with white filter */}
         <img
-          src={`${import.meta.env.BASE_URL}sign/design.png`}
+          src={`sign/design.png`}
           alt="Design Element"
           className="h-full object-contain object-left-top absolute top-0 left-0 brightness-0 invert opacity-30"
         />
@@ -258,7 +258,7 @@ function SignupPage() {
             {/* Logo in the left top corner */}
             <div className="absolute top-8 left-8">
               <img
-                src={`${import.meta.env.BASE_URL}sign/logo.png`}
+                src={`sign/logo.png`}
                 alt="Circuit Smith Logo"
                 className="w-24 h-auto"
               />
@@ -274,7 +274,7 @@ function SignupPage() {
             {/* Animation at bottom center */}
             <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 w-4/5">
               <img
-                src={`${import.meta.env.BASE_URL}sign/animation.gif`}
+                src={`sign/animation.gif`}
                 alt="Animation"
                 className="w-full h-auto"
               />
