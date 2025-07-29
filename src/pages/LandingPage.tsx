@@ -292,7 +292,7 @@ function LandingPage() {
             {/* Let's Start Button */}
             <div className="mt-12 flex justify-center">
               <Link
-                to="/app"
+                to="/projects"
                 className="flex items-center justify-center gap-3 w-[336px] h-[79px] bg-[#3B9EEE] text-white font-bold rounded-[30px] hover:bg-[#2A8BD9] transition-colors duration-200"
                 style={{
                   fontFamily: "Roboto, sans-serif",

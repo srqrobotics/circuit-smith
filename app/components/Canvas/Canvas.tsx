@@ -13,6 +13,7 @@ import { preloadImage } from "~/utils/imageLoader";
 import { useCoordinates } from "~/contexts/CoordinateContext";
 import { useAutoRouting } from "~/contexts/AutoRoutingContext";
 import { useCanvasRefresh } from "~/contexts/CanvasRefreshContext";
+import { getDataFromProjectId } from "~/api/project";
 
 export default function Canvas() {
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
@@ -78,15 +79,80 @@ export default function Canvas() {
       resizeObserver.observe(container);
     }
 
-    // Load initial components
+    // Check URL parameters to determine loading strategy
     const initializeCanvas = async () => {
       try {
-        const loadedConfig = await ComponentLoader.loadInitialComponents(
-          setLoadedImages,
-          setComponents,
-          setWires
-        );
-        setConfig(loadedConfig);
+        const urlParams = new URLSearchParams(window.location.search);
+        const projectParam = urlParams.get("project");
+        const newParam = urlParams.get("new");
+
+        if (projectParam && projectParam !== "null") {
+          // Load existing project from local file system
+          console.log("Loading existing project with ID:", projectParam);
+          try {
+            // Fetch project data from the public/projects directory
+            const response = await fetch(`/projects/${projectParam}.json`);
+            if (response.ok) {
+              const projectData = await response.json();
+
+              if (projectData && (projectData.components || projectData.wire)) {
+                // If we have project data, use it to load components
+                const loadedConfig =
+                  await ComponentLoader.loadInitialComponentsFromData(
+                    projectData,
+                    setLoadedImages,
+                    setComponents,
+                    setWires
+                  );
+                setConfig(loadedConfig);
+              } else {
+                // Fallback to default loading if no valid project data
+                const loadedConfig =
+                  await ComponentLoader.loadInitialComponents(
+                    setLoadedImages,
+                    setComponents,
+                    setWires
+                  );
+                setConfig(loadedConfig);
+              }
+            } else {
+              console.error("Failed to load project file:", response.status);
+              // Fallback to default loading
+              const loadedConfig = await ComponentLoader.loadInitialComponents(
+                setLoadedImages,
+                setComponents,
+                setWires
+              );
+              setConfig(loadedConfig);
+            }
+          } catch (error) {
+            console.error("Error loading project:", error);
+            // Fallback to default loading
+            const loadedConfig = await ComponentLoader.loadInitialComponents(
+              setLoadedImages,
+              setComponents,
+              setWires
+            );
+            setConfig(loadedConfig);
+          }
+        } else if (newParam === "true") {
+          // Start with a new/empty project
+          console.log("Starting new project");
+          const loadedConfig = await ComponentLoader.loadInitialComponents(
+            setLoadedImages,
+            setComponents,
+            setWires
+          );
+          setConfig(loadedConfig);
+        } else {
+          // Default loading when no special parameters
+          const loadedConfig = await ComponentLoader.loadInitialComponents(
+            setLoadedImages,
+            setComponents,
+            setWires
+          );
+          setConfig(loadedConfig);
+        }
       } catch (error) {
         console.error("Error initializing canvas:", error);
       }

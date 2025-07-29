@@ -7,6 +7,8 @@ interface RightSidebarState {
   activeTab: "code" | "prompt";
   isGenerating: boolean;
   selectedApplicationIndex: number | null;
+  generatedConfig: string | null; // Add this to store the generated JSON configuration
+  currentProjectId: string | null; // Add this to store the current project ID
 }
 
 interface RightSidebarContextType {
@@ -16,6 +18,8 @@ interface RightSidebarContextType {
   setActiveTab: (tab: "code" | "prompt") => void;
   setIsGenerating: (isGenerating: boolean) => void;
   setSelectedApplicationIndex: (index: number | null) => void;
+  setGeneratedConfig: (config: string | null) => void; // Add this method
+  setCurrentProjectId: (projectId: string | null) => void; // Add this method
 }
 
 const RightSidebarContext = createContext<RightSidebarContextType | undefined>(
@@ -29,6 +33,8 @@ export function RightSidebarProvider({ children }: { children: ReactNode }) {
     activeTab: "code",
     isGenerating: false,
     selectedApplicationIndex: null,
+    generatedConfig: null,
+    currentProjectId: null,
   });
 
   const setCode = (code: string) => {
@@ -36,7 +42,11 @@ export function RightSidebarProvider({ children }: { children: ReactNode }) {
   };
 
   const setGeneratedPrompt = (prompt: any) => {
-    setSidebarState((prev) => ({ ...prev, generatedPrompt: prompt, selectedApplicationIndex: null }));
+    setSidebarState((prev) => ({
+      ...prev,
+      generatedPrompt: prompt,
+      selectedApplicationIndex: null,
+    }));
   };
 
   const setActiveTab = (tab: "code" | "prompt") => {
@@ -51,6 +61,14 @@ export function RightSidebarProvider({ children }: { children: ReactNode }) {
     setSidebarState((prev) => ({ ...prev, selectedApplicationIndex: index }));
   };
 
+  const setGeneratedConfig = (config: string | null) => {
+    setSidebarState((prev) => ({ ...prev, generatedConfig: config }));
+  };
+
+  const setCurrentProjectId = (projectId: string | null) => {
+    setSidebarState((prev) => ({ ...prev, currentProjectId: projectId }));
+  };
+
   return (
     <RightSidebarContext.Provider
       value={{
@@ -60,6 +78,8 @@ export function RightSidebarProvider({ children }: { children: ReactNode }) {
         setActiveTab,
         setIsGenerating,
         setSelectedApplicationIndex,
+        setGeneratedConfig,
+        setCurrentProjectId,
       }}
     >
       {children}

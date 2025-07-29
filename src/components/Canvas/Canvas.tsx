@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Stage, Layer, Line, Group, Image, Text } from "react-konva";
 import Konva from "konva";
-import { useFile } from "~/contexts/FileContext";
 import type { Wire, DroppedComponent } from "~/types/circuit";
 import { handleWireDrawing } from "~/utils/wireManager";
 import {
@@ -13,6 +12,9 @@ import { preloadImage } from "~/utils/imageLoader";
 import { useCoordinates } from "~/contexts/CoordinateContext";
 import { useAutoRouting } from "~/contexts/AutoRoutingContext";
 import { useCanvasRefresh } from "~/contexts/CanvasRefreshContext";
+import { useRightSidebar } from "~/contexts/RightSidebarContext";
+import { useFile } from "~/contexts/FileContext";
+import { project } from "~/api/project";
 
 export default function Canvas() {
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
@@ -47,6 +49,8 @@ export default function Canvas() {
   const routingInProgress = useRef(false);
   const componentsRef = useRef<DroppedComponent[]>([]);
   const { refreshTrigger } = useCanvasRefresh();
+  const { setCode } = useRightSidebar();
+  const { setSelectedFile } = useFile();
 
   // Keep componentsRef in sync with components state
   useEffect(() => {
@@ -78,15 +82,104 @@ export default function Canvas() {
       resizeObserver.observe(container);
     }
 
-    // Load initial components
+    // Check URL parameters to determine loading strategy
     const initializeCanvas = async () => {
       try {
-        const loadedConfig = await ComponentLoader.loadInitialComponents(
-          setLoadedImages,
-          setComponents,
-          setWires
-        );
-        setConfig(loadedConfig);
+        const urlParams = new URLSearchParams(window.location.search);
+        const projectParam = urlParams.get("project");
+        const newParam = urlParams.get("new");
+
+        if (projectParam && projectParam !== "null") {
+          // Load existing project
+          console.log("Loading existing project with ID:", projectParam);
+          try {
+            const projectResponse =
+              await project.getDataFromProjectId(projectParam);
+            if (projectResponse.success && projectResponse.project) {
+              // Parse jsonString and cppString from the project response
+              const { jsonString, cppString } = projectResponse.project;
+
+              if (jsonString) {
+                // Parse the JSON string to get wiring data
+                const wiringData = JSON.parse(jsonString);
+
+                // If we have wiring data, use it to load components
+                const loadedConfig =
+                  await ComponentLoader.loadInitialComponentsFromData(
+                    wiringData,
+                    setLoadedImages,
+                    setComponents,
+                    setWires
+                  );
+                setConfig(loadedConfig);
+              } else {
+                // Fallback to default loading if no wiring data
+                const loadedConfig =
+                  await ComponentLoader.loadInitialComponents(
+                    setLoadedImages,
+                    setComponents,
+                    setWires
+                  );
+                setConfig(loadedConfig);
+              }
+
+              // Handle code data - you might want to set this in a code context or state
+              if (cppString) {
+                console.log("Loaded C++ code:", cppString);
+                // Set the loaded C++ code in the right sidebar context
+                setCode(cppString);
+              } else {
+                // Clear code editor for projects without code
+                setCode("");
+              }
+            } else {
+              console.error(
+                "Failed to load project:",
+                projectResponse.message || "Unknown error"
+              );
+              // For failed project loads, start with empty state instead of default
+              console.log(
+                "Starting with empty state due to project load failure"
+              );
+              setComponents([]);
+              setWires([]);
+              setConfig({ components: [], wire: {} });
+              // Clear code editor for failed loads
+              setCode("");
+              // Clear selected file to prevent default code from loading
+              setSelectedFile(null);
+            }
+          } catch (error) {
+            console.error("Error loading project data:", error);
+            // For errors, start with empty state instead of default
+            console.log("Starting with empty state due to error");
+            setComponents([]);
+            setWires([]);
+            setConfig({ components: [], wire: {} });
+            // Clear code editor for errors
+            setCode("");
+            // Clear selected file to prevent default code from loading
+            setSelectedFile(null);
+          }
+        } else if (newParam === "true") {
+          // Create new project - load default demo configuration
+          console.log("Creating new project - loading default demo");
+          const loadedConfig = await ComponentLoader.loadInitialComponents(
+            setLoadedImages,
+            setComponents,
+            setWires
+          );
+          setConfig(loadedConfig);
+          // For new projects, let the default code load naturally (don't clear it)
+        } else {
+          // Default behavior - load demo config
+          const loadedConfig = await ComponentLoader.loadInitialComponents(
+            setLoadedImages,
+            setComponents,
+            setWires
+          );
+          setConfig(loadedConfig);
+        }
       } catch (error) {
         console.error("Error initializing canvas:", error);
       }
@@ -105,6 +198,27 @@ export default function Canvas() {
     const reloadConfiguration = async () => {
       try {
         console.log("Reloading configuration due to refresh trigger");
+
+        // Check URL parameters to determine if we should reload demo or keep empty state
+        const urlParams = new URLSearchParams(window.location.search);
+        const newParam = urlParams.get("new");
+
+        if (newParam === "true") {
+          // For new projects, reload demo configuration and let default code load
+          console.log(
+            "Refresh triggered for new project - loading default demo"
+          );
+          const loadedConfig = await ComponentLoader.loadInitialComponents(
+            setLoadedImages,
+            setComponents,
+            setWires
+          );
+          setConfig(loadedConfig);
+          // For new projects, let the default code load naturally (don't clear it)
+          return;
+        }
+
+        // For other cases, load the demo configuration
         const loadedConfig = await ComponentLoader.loadInitialComponents(
           setLoadedImages,
           setComponents,
