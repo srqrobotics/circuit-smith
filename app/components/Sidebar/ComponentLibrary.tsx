@@ -4,7 +4,7 @@ import type { FileSystemItem } from "~/types/files";
 // import { API_KEY } from "~/config/config"; // Adjust the path as necessary
 
 useEffect(() => {
-  fetch("/api/proxy")
+  fetch("./api/proxy")
     .then((res) => res.json())
     .then((data) => console.log(data))
     .catch((err) => console.error("Error:", err));
@@ -53,7 +53,7 @@ export default function ComponentLibrary() {
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
 
   useEffect(() => {
-    fetcher.load("/api/packages");
+    fetcher.load("./api/packages");
   }, []);
 
   useEffect(() => {
@@ -85,7 +85,7 @@ export default function ComponentLibrary() {
           try {
             console.log("Loading component data for:", item.path);
             const response = await fetch(
-              `/api/file-content?path=${encodeURIComponent(item.path)}`
+              `./api/file-content?path=${encodeURIComponent(item.path)}`
             );
             const data = await response.json();
             console.log("Loaded component data:", data);

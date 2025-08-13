@@ -71,17 +71,17 @@ export default function ComponentsSidebar() {
           children: [
             {
               name: "ArduinoUNO.json",
-              path: "/packages/Microcontrollers/Arduino/ArduinoUNO.json",
+              path: "./packages/Microcontrollers/Arduino/ArduinoUNO.json",
               type: "file",
             },
             {
               name: "ArduinoMega.json",
-              path: "/packages/Microcontrollers/Arduino/ArduinoMega.json",
+              path: "./packages/Microcontrollers/Arduino/ArduinoMega.json",
               type: "file",
             },
             {
               name: "ArduinoNano.json",
-              path: "/packages/Microcontrollers/Arduino/ArduinoNano.json",
+              path: "./packages/Microcontrollers/Arduino/ArduinoNano.json",
               type: "file",
             },
           ],
@@ -93,12 +93,12 @@ export default function ComponentsSidebar() {
           children: [
             {
               name: "ESP32Wroom.json",
-              path: "/packages/Microcontrollers/Espressif/ESP32Wroom.json",
+              path: "./packages/Microcontrollers/Espressif/ESP32Wroom.json",
               type: "file",
             },
             {
               name: "NodeMCU.json",
-              path: "/packages/Microcontrollers/Espressif/NodeMCU.json",
+              path: "./packages/Microcontrollers/Espressif/NodeMCU.json",
               type: "file",
             },
           ],
@@ -112,44 +112,32 @@ export default function ComponentsSidebar() {
       children: [
         {
           name: "DHT22.json",
-          path: "/packages/Modules/DHT22.json",
+          path: "./packages/Modules/DHT22.json",
           type: "file",
         },
         {
           name: "I2C_LCD.json",
-          path: "/packages/Modules/I2C_LCD.json",
+          path: "./packages/Modules/I2C_LCD.json",
           type: "file",
         },
         {
           name: "LDR_Sensor.json",
-          path: "/packages/Modules/LDR_Sensor.json",
+          path: "./packages/Modules/LDR_Sensor.json",
           type: "file",
         },
         {
           name: "PIR_Sensor.json",
-          path: "/packages/Modules/PIR_Sensor.json",
+          path: "./packages/Modules/PIR_Sensor.json",
           type: "file",
         },
         {
           name: "servo_SG90.json",
-          path: "/packages/Modules/servo_SG90.json",
+          path: "./packages/Modules/servo_SG90.json",
           type: "file",
         },
         {
           name: "ultrasonic_SR04.json",
-          path: "/packages/Modules/ultrasonic_SR04.json",
-          type: "file",
-        },
-      ],
-    },
-    {
-      name: "Power",
-      path: "/components/power",
-      type: "directory",
-      children: [
-        {
-          name: "GND.json",
-          path: "/packages/Power/GND.json",
+          path: "./packages/Modules/ultrasonic_SR04.json",
           type: "file",
         },
       ],
@@ -201,7 +189,7 @@ export default function ComponentsSidebar() {
     try {
       // Try to load from devBible.json first
       try {
-        const devBibleResponse = await fetch("/packages/devBible.json");
+        const devBibleResponse = await fetch("./packages/devBible.json");
         if (devBibleResponse.ok) {
           const devBibleData = await devBibleResponse.json();
           const component = devBibleData.components?.find(
@@ -221,7 +209,7 @@ export default function ComponentsSidebar() {
 
       // If not found, try sensorBible.json
       try {
-        const sensorBibleResponse = await fetch("/packages/sensorBible.json");
+        const sensorBibleResponse = await fetch("./packages/sensorBible.json");
         if (sensorBibleResponse.ok) {
           const sensorBibleData = await sensorBibleResponse.json();
           const component = sensorBibleData.components?.find(
@@ -248,11 +236,11 @@ export default function ComponentsSidebar() {
           componentId.toLowerCase().includes("esp") ||
           componentId.toLowerCase().includes("node")
         ) {
-          path = `/packages/Microcontrollers/${
+          path = `./packages/Microcontrollers/${
             componentId.includes("Arduino") ? "Arduino" : "Espressif"
           }/${componentId}.json`;
         } else {
-          path = `/packages/Modules/${componentId}.json`;
+          path = `./packages/Modules/${componentId}.json`;
         }
 
         const response = await fetch(path);
@@ -263,7 +251,7 @@ export default function ComponentsSidebar() {
             id: componentId,
             name: data.name || componentId,
             image: {
-              src: `/packages/${
+              src: `./packages/${
                 componentId.includes("Arduino") || componentId.includes("ESP")
                   ? "Microcontrollers"
                   : "Modules"
@@ -286,10 +274,10 @@ export default function ComponentsSidebar() {
         image: {
           src:
             componentId.includes("Arduino") || componentId.includes("ESP")
-              ? `/packages/Microcontrollers/${
+              ? `./packages/Microcontrollers/${
                   componentId.includes("Arduino") ? "Arduino" : "Espressif"
                 }/${componentId}.png`
-              : `/packages/Modules/${componentId}.png`,
+              : `./packages/Modules/${componentId}.png`,
           width: 100,
           height: 100,
         },

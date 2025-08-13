@@ -46,12 +46,12 @@ export default function Layout() {
   }, []);
 
   const handleCodeButtonClick = () => {
-    setSelectedFile("/projects/defaultCode.ino");
+    setSelectedFile("./projects/defaultCode.ino");
     setActiveRightTab("code");
   };
 
   const handleTableButtonClick = () => {
-    setSelectedFile("/configs/demo.json");
+    setSelectedFile("./configs/demo.json");
     setActiveRightTab("code");
   };
 
@@ -82,7 +82,7 @@ export default function Layout() {
           "No generated config found, reading current configuration..."
         );
         try {
-          const configResponse = await fetch("/configs/demo.json");
+          const configResponse = await fetch("./configs/demo.json");
           if (configResponse.ok) {
             const currentConfig = await configResponse.json();
             jsonString = JSON.stringify(currentConfig, null, 2);

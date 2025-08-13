@@ -62,7 +62,7 @@ export default function RightSidebar() {
           setCode(data.content);
         }
       } else {
-        const response = await fetch("/projects/defaultCode.ino");
+        const response = await fetch("./projects/defaultCode.ino");
         const text = await response.text();
         let modText = text.replace(/^\[|\]$/g, "");
         const lines = modText.split("\n");
@@ -98,7 +98,7 @@ export default function RightSidebar() {
 
   const getFilePath = () => {
     if (!selectedFile) return "";
-    const projectsIndex = selectedFile.indexOf("/projects/");
+    const projectsIndex = selectedFile.indexOf("./projects/");
     if (projectsIndex === -1) return "";
     const relativePath = selectedFile.slice(projectsIndex + 15);
     const parts = relativePath.split("/");
@@ -236,7 +236,7 @@ export default function RightSidebar() {
         async (componentId) => {
           try {
             // Try to load from devBible.json first
-            const devBibleResponse = await fetch("/packages/devBible.json");
+            const devBibleResponse = await fetch("./packages/devBible.json");
             if (devBibleResponse.ok) {
               const devBibleData = await devBibleResponse.json();
               const component = devBibleData.components?.find(
@@ -255,7 +255,7 @@ export default function RightSidebar() {
 
             // If not found, try sensorBible.json
             const sensorBibleResponse = await fetch(
-              "/packages/sensorBible.json"
+              "./packages/sensorBible.json"
             );
             if (sensorBibleResponse.ok) {
               const sensorBibleData = await sensorBibleResponse.json();

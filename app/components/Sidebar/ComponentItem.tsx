@@ -17,7 +17,7 @@ export default function ComponentItem({
   useEffect(() => {
     // If the icon path is relative and doesn't start with http or /, add a leading slash
     if (icon && !icon.startsWith("http") && !icon.startsWith("/")) {
-      setImagePath(`/${icon}`);
+      setImagePath(`./${icon}`);
     } else {
       setImagePath(icon);
     }

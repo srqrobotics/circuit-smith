@@ -93,7 +93,7 @@ export default function ComponentsSidebar() {
   const loadComponentData = async (componentId: string): Promise<any> => {
     try {
       // Try to load from devBible.json first
-      const devBibleResponse = await fetch("/packages/devBible.json");
+      const devBibleResponse = await fetch("./packages/devBible.json");
       if (devBibleResponse.ok) {
         const devBibleData = await devBibleResponse.json();
         const component = devBibleData.components?.find(
@@ -105,7 +105,7 @@ export default function ComponentsSidebar() {
       }
 
       // If not found, try sensorBible.json
-      const sensorBibleResponse = await fetch("/packages/sensorBible.json");
+      const sensorBibleResponse = await fetch("./packages/sensorBible.json");
       if (sensorBibleResponse.ok) {
         const sensorBibleData = await sensorBibleResponse.json();
         const component = sensorBibleData.components?.find(

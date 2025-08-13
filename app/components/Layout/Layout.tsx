@@ -39,12 +39,12 @@ export default function Layout() {
   }, []);
 
   const handleCodeButtonClick = () => {
-    setSelectedFile("/projects/defaultCode.ino");
+    setSelectedFile("./projects/defaultCode.ino");
     setActiveRightTab("code");
   };
 
   const handleTableButtonClick = () => {
-    setSelectedFile("/configs/demo.json");
+    setSelectedFile("./configs/demo.json");
     setActiveRightTab("code");
   };
 

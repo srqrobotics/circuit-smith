@@ -91,7 +91,7 @@ export default function Canvas() {
           console.log("Loading existing project with ID:", projectParam);
           try {
             // Fetch project data from the public/projects directory
-            const response = await fetch(`/projects/${projectParam}.json`);
+            const response = await fetch(`./projects/${projectParam}.json`);
             if (response.ok) {
               const projectData = await response.json();
 
