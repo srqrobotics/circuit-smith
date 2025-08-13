@@ -6,4 +6,4 @@
 /build/
 /.react-router/
 .env
-/docs/
+/docs/*
