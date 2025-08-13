@@ -7,12 +7,12 @@
 			"y": 276,
 			"rotation": 0,
 			"image": {
-				"src": "/packages/Microcontrollers/Arduino/ArduinoUNO.png",
+				"src": "./packages/Microcontrollers/Arduino/ArduinoUNO.png",
 				"width": 0,
 				"height": 0
 			},
 			"pin-map": {
-				"src": "/packages/Microcontrollers/Arduino/ArduinoUNO.json"
+				"src": "./packages/Microcontrollers/Arduino/ArduinoUNO.json"
 			}
 		},
 		{
@@ -22,12 +22,12 @@
 			"y": 276,
 			"rotation": 0,
 			"image": {
-				"src": "/packages/Microcontrollers/Arduino/ArduinoMega.png",
+				"src": "./packages/Microcontrollers/Arduino/ArduinoMega.png",
 				"width": 0,
 				"height": 0
 			},
 			"pin-map": {
-				"src": "/packages/Microcontrollers/Arduino/ArduinoMega.json"
+				"src": "./packages/Microcontrollers/Arduino/ArduinoMega.json"
 			}
 		},
 		{
@@ -37,12 +37,12 @@
 			"y": 276,
 			"rotation": 0,
 			"image": {
-				"src": "/packages/Microcontrollers/Arduino/ArduinoNano.png",
+				"src": "./packages/Microcontrollers/Arduino/ArduinoNano.png",
 				"width": 0,
 				"height": 0
 			},
 			"pin-map": {
-				"src": "/packages/Microcontrollers/Arduino/ArduinoNano.json"
+				"src": "./packages/Microcontrollers/Arduino/ArduinoNano.json"
 			}
 		},
 		{
@@ -52,12 +52,12 @@
 			"y": 276,
 			"rotation": 0,
 			"image": {
-				"src": "/packages/Microcontrollers/Espressif/ESP32Wroom.png",
+				"src": "./packages/Microcontrollers/Espressif/ESP32Wroom.png",
 				"width": 0,
 				"height": 0
 			},
 			"pin-map": {
-				"src": "/packages/Microcontrollers/Espressif/ESP32Wroom.json"
+				"src": "./packages/Microcontrollers/Espressif/ESP32Wroom.json"
 			}
 		},
 		{
@@ -67,12 +67,12 @@
 			"y": 276,
 			"rotation": 0,
 			"image": {
-				"src": "/packages/Microcontrollers/Espressif/NodeMCU.png",
+				"src": "./packages/Microcontrollers/Espressif/NodeMCU.png",
 				"width": 0,
 				"height": 0
 			},
 			"pin-map": {
-				"src": "/packages/Microcontrollers/Espressif/NodeMCU.json"
+				"src": "./packages/Microcontrollers/Espressif/NodeMCU.json"
 			}
 		}
 	]
