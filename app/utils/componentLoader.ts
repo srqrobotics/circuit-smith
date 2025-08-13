@@ -969,7 +969,7 @@ export class ComponentLoader {
             console.log("New position:", { x, y });
 
             // Save the updated config back to the file
-            const saveResponse = await fetch(`/api/save-config`, {
+            const saveResponse = await fetch(`./api/save-config`, {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
@@ -1040,7 +1040,7 @@ async function backupComponentsToJson(
   // }
 
   // Save the updated config back to the file
-  const saveResponse = await fetch(`/api/save-config`, {
+  const saveResponse = await fetch(`./api/save-config`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

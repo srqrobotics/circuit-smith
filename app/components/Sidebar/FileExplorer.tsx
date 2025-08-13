@@ -13,7 +13,7 @@ export default function FileExplorer() {
   const { setSelectedFile } = useFile();
 
   useEffect(() => {
-    fetcher.load("/api/files");
+    fetcher.load("./api/files");
   }, []);
 
   useEffect(() => {

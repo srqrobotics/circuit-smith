@@ -6,7 +6,7 @@ import ComponentItem from "./ComponentItem";
 import { useComponents } from "~/contexts/ComponentContext";
 
 useEffect(() => {
-  fetch('/api/proxy')
+  fetch('./api/proxy')
     .then((res) => res.json())
     .then((data) => console.log(data))
     .catch((err) => console.error('Error:', err));
@@ -56,7 +56,7 @@ export default function ComponentsSidebar() {
   const fetcher = useFetcher();
 
   useEffect(() => {
-    fetcher.load("/api/packages");
+    fetcher.load("./api/packages");
   }, []);
 
   useEffect(() => {
@@ -142,7 +142,7 @@ export default function ComponentsSidebar() {
           try {
             console.log("Loading component data for:", item.path);
             const response = await fetch(
-              `/api/file-content?path=${encodeURIComponent(item.path)}`
+              `./api/file-content?path=${encodeURIComponent(item.path)}`
             );
             const data = await response.json();
             console.log("Loaded component data:", data);
@@ -275,7 +275,7 @@ export default function ComponentsSidebar() {
     filePath: string,
     content: string
   ): Promise<void> => {
-    const saveResponse = await fetch(`/api/save-config`, {
+    const saveResponse = await fetch(`./api/save-config`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

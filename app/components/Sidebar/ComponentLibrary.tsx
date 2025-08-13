@@ -147,7 +147,7 @@ export default function ComponentLibrary() {
   ): Promise<void> => {
     // Replace literal \n with actual newlines and wrap each element in backticks
 
-    const saveResponse = await fetch(`/api/save-config`, {
+    const saveResponse = await fetch(`./api/save-config`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

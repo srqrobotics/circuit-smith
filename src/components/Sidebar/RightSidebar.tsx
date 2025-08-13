@@ -10,7 +10,7 @@ import { gptAPI } from "~/api/gpt";
 import { project } from "~/api/project";
 
 // useEffect(() => {
-//   fetch('/api/proxy')
+//   fetch('./api/proxy')
 //     .then((res) => res.json())
 //     .then((data) => console.log(data))
 //     .catch((err) => console.error('Error:', err));
@@ -55,7 +55,7 @@ export default function RightSidebar() {
     try {
       if (selectedFile) {
         const response = await fetch(
-          `/api/file-content?path=${encodeURIComponent(selectedFile)}`
+          `./api/file-content?path=${encodeURIComponent(selectedFile)}`
         );
         const data = await response.json();
         if (data.content !== undefined) {
@@ -378,7 +378,7 @@ export default function RightSidebar() {
         setGeneratedConfig(jsonString);
 
         // // Save the JSON configuration
-        // await fetch("/api/save-config", {
+        // await fetch("./api/save-config", {
         //   method: "POST",
         //   headers: {
         //     "Content-Type": "application/json",
@@ -390,7 +390,7 @@ export default function RightSidebar() {
         // });
 
         // // Save the Arduino code
-        // await fetch("/api/save-config", {
+        // await fetch("./api/save-config", {
         //   method: "POST",
         //   headers: {
         //     "Content-Type": "application/json",
