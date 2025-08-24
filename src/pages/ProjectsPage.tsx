@@ -92,7 +92,7 @@ function ProjectsPage() {
             {/* Logo */}
             <Link to="/" className="flex items-center">
               <img
-                src="/public/SplashPage/logo.png"
+                src="/SplashPage/logo.png"
                 alt="Circuit Smith Logo"
                 className="h-24 w-auto"
               />

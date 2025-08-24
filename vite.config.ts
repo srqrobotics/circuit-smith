@@ -11,7 +11,7 @@ export default defineConfig({
     },
   },
   plugins: [react(), tsconfigPaths()],
-  base: "/circuit-smith/",
+  base: "",
   server: {
     port: 5173,
     open: true,
