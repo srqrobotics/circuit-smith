@@ -3,18 +3,9 @@ import type { EditorProps } from "@monaco-editor/react";
 import { useFile } from "~/contexts/FileContext";
 import { useComponents } from "~/contexts/ComponentContext";
 import { useRightSidebar } from "~/contexts/RightSidebarContext";
+import { useCanvasState } from "~/contexts/CanvasStateContext";
 import { FaCode, FaRobot } from "react-icons/fa";
-// import { API_KEY } from "~/config/config";
-import { useCanvasRefresh } from "~/contexts/CanvasRefreshContext";
 import { gptAPI } from "~/api/gpt";
-import { project } from "~/api/project";
-
-// useEffect(() => {
-//   fetch('./api/proxy')
-//     .then((res) => res.json())
-//     .then((data) => console.log(data))
-//     .catch((err) => console.error('Error:', err));
-// }, []);
 
 export default function RightSidebar() {
   const [Editor, setEditor] = useState<React.ComponentType<EditorProps> | null>(
@@ -23,8 +14,8 @@ export default function RightSidebar() {
   const [isMounted, setIsMounted] = useState(false);
   const { selectedFile, setSelectedFile } = useFile();
   const { selectedComponents } = useComponents();
+  const { canvasState } = useCanvasState();
   const [isLoading, setIsLoading] = useState(false);
-  const { triggerCanvasRefresh } = useCanvasRefresh();
   const {
     sidebarState: {
       code,
@@ -32,7 +23,6 @@ export default function RightSidebar() {
       activeTab,
       isGenerating,
       selectedApplicationIndex,
-      currentProjectId,
     },
     setCode,
     setGeneratedPrompt,
@@ -40,7 +30,7 @@ export default function RightSidebar() {
     setIsGenerating,
     setSelectedApplicationIndex,
     setGeneratedConfig,
-    setCurrentProjectId,
+    setUnsavedChanges,
   } = useRightSidebar();
 
   useEffect(() => {
@@ -54,29 +44,74 @@ export default function RightSidebar() {
     setIsLoading(true);
     try {
       if (selectedFile) {
-        const response = await fetch(
-          `./api/file-content?path=${encodeURIComponent(selectedFile)}`
-        );
-        const data = await response.json();
-        if (data.content !== undefined) {
-          setCode(data.content);
+        // Check if this is a project-specific file
+        const projectMatch = selectedFile.match(/^\.\/projects\/(\d+)\/(.*)/);
+
+        if (projectMatch) {
+          // This is a project-specific file, use backend API
+          const [, projectId, filename] = projectMatch;
+          const BASE_URL =
+            import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
+
+          try {
+            const response = await fetch(
+              `${BASE_URL}/api/file-content?path=${encodeURIComponent(filename)}&projectId=${projectId}`,
+              {
+                credentials: "include",
+              }
+            );
+            const data = await response.json();
+            if (data.content !== undefined) {
+              setCode(data.content);
+            } else if (data.error) {
+              console.warn("Project file not found, falling back to default");
+              // Fall back to default file loading
+              await loadDefaultFile();
+            }
+          } catch (error) {
+            console.error(
+              "Error loading project file, falling back to default:",
+              error
+            );
+            // Fall back to default file loading
+            await loadDefaultFile();
+          }
+        } else {
+          // Regular file, use Remix API
+          const response = await fetch(
+            `./api/file-content?path=${encodeURIComponent(selectedFile)}`
+          );
+          const data = await response.json();
+          if (data.content !== undefined) {
+            setCode(data.content);
+          }
         }
       } else {
-        const response = await fetch("./projects/defaultCode.ino");
-        const text = await response.text();
-        let modText = text.replace(/^\[|\]$/g, "");
-        const lines = modText.split("\n");
-        const modifiedLines = lines
-          .map((line) => line.slice(3, -2))
-          .map((line) => line.replace(/\\"/g, '"'));
-        modifiedLines.push("}");
-        const mergedLines = modifiedLines.join("\n");
-        setCode(mergedLines);
+        await loadDefaultFile();
       }
     } catch (error) {
       console.error("Error loading file:", error);
+      await loadDefaultFile();
     } finally {
       setIsLoading(false);
+    }
+  }
+
+  async function loadDefaultFile() {
+    try {
+      const response = await fetch("./projects/defaultCode.ino");
+      const text = await response.text();
+      let modText = text.replace(/^\[|\]$/g, "");
+      const lines = modText.split("\n");
+      const modifiedLines = lines
+        .map((line) => line.slice(3, -2))
+        .map((line) => line.replace(/\\"/g, '"'));
+      modifiedLines.push("}");
+      const mergedLines = modifiedLines.join("\n");
+      setCode(mergedLines);
+    } catch (error) {
+      console.error("Error loading default file:", error);
+      setCode("// Error loading code file");
     }
   }
 
@@ -115,47 +150,6 @@ export default function RightSidebar() {
 
     setIsGenerating(true);
     try {
-      // const applicationsPrompt = `
-      // Based on the following electronic components:
-
-      // \t- ${selectedComponents.join(", \n\t\t- ")}
-
-      // Generate a list of five possible project applications that can be built using these components. Each application should have a short description of its purpose.
-
-      // The response should be in the following JSON format:
-
-      // {
-      //   "applications": [
-      //       {
-      //         "name": "Application Name",
-      //         "description": "Brief description of how the system works"
-      //       }
-      //   ]
-      // }
-
-      // The generated applications should be practical, relevant, and make effective use of the given components.
-      // `;
-
-      // const response2 = await fetch(
-      //   "https://api.openai.com/v1/chat/completions",
-      //   {
-      //     method: "POST",
-      //     headers: {
-      //       "Content-Type": "application/json",
-      //       Authorization: API_KEY,
-      //     },
-      //     body: JSON.stringify({
-      //       model: "gpt-4o-mini",
-      //       messages: [
-      //         {
-      //           role: "user",
-      //           content: applicationsPrompt,
-      //         },
-      //       ],
-      //     }),
-      //   }
-      // );
-
       const response = await gptAPI.generatePrompt(selectedComponents);
 
       const responseJson = await response;
@@ -190,31 +184,12 @@ export default function RightSidebar() {
     );
   };
 
-  const handleApplyPrompt = () => {
-    if (generatedPrompt && !generatedPrompt.error) {
-      if (selectedApplicationIndex !== null && generatedPrompt.applications) {
-        const selectedApp =
-          generatedPrompt.applications[selectedApplicationIndex];
-        const formattedJson = JSON.stringify(
-          {
-            selectedApplication: selectedApp,
-            components: selectedComponents,
-          },
-          null,
-          2
-        );
-        setCode(formattedJson);
-        setActiveTab("code");
-      } else {
-        setCode(JSON.stringify(generatedPrompt, null, 2));
-      }
-    }
-  };
-
   const handleGenerateWiringAndCode = async () => {
-    if (selectedComponents.length === 0) {
+    // Use canvas components instead of selected components
+    const canvasComponents = canvasState.components;
+    if (canvasComponents.length === 0) {
       setGeneratedPrompt({
-        error: "Please select at least one component from the left sidebar.",
+        error: "Please add at least one component to the canvas.",
       });
       return;
     }
@@ -232,65 +207,64 @@ export default function RightSidebar() {
         generatedPrompt.applications[selectedApplicationIndex];
 
       // Load component data to get pin information
-      const componentDataPromises = selectedComponents.map(
-        async (componentId) => {
-          try {
-            // Try to load from devBible.json first
-            const devBibleResponse = await fetch("./packages/devBible.json");
-            if (devBibleResponse.ok) {
-              const devBibleData = await devBibleResponse.json();
-              const component = devBibleData.components?.find(
-                (c: any) => c.id === componentId
-              );
-              if (component && component["pin-map"]?.src) {
-                const pinMapResponse = await fetch(component["pin-map"].src);
-                const pinMapData = await pinMapResponse.json();
-                return {
-                  id: componentId,
-                  name: component.name,
-                  pins: pinMapData["digital-pins"]?.id || [],
-                };
-              }
-            }
-
-            // If not found, try sensorBible.json
-            const sensorBibleResponse = await fetch(
-              "./packages/sensorBible.json"
+      const componentDataPromises = canvasComponents.map(async (component) => {
+        const componentId = component.id;
+        try {
+          // Try to load from devBible.json first
+          const devBibleResponse = await fetch("./packages/devBible.json");
+          if (devBibleResponse.ok) {
+            const devBibleData = await devBibleResponse.json();
+            const component = devBibleData.components?.find(
+              (c: any) => c.id === componentId
             );
-            if (sensorBibleResponse.ok) {
-              const sensorBibleData = await sensorBibleResponse.json();
-              const component = sensorBibleData.components?.find(
-                (c: any) => c.id === componentId
-              );
-              if (component && component["pin-map"]?.src) {
-                const pinMapResponse = await fetch(component["pin-map"].src);
-                const pinMapData = await pinMapResponse.json();
-                return {
-                  id: componentId,
-                  name: component.name,
-                  pins: pinMapData["digital-pins"]?.id || [],
-                };
-              }
+            if (component && component["pin-map"]?.src) {
+              const pinMapResponse = await fetch(component["pin-map"].src);
+              const pinMapData = await pinMapResponse.json();
+              return {
+                id: componentId,
+                name: component.name,
+                pins: pinMapData["digital-pins"]?.id || [],
+              };
             }
-
-            return {
-              id: componentId,
-              name: componentId,
-              pins: [],
-            };
-          } catch (error) {
-            console.error(
-              `Error loading component data for ${componentId}:`,
-              error
-            );
-            return {
-              id: componentId,
-              name: componentId,
-              pins: [],
-            };
           }
+
+          // If not found, try sensorBible.json
+          const sensorBibleResponse = await fetch(
+            "./packages/sensorBible.json"
+          );
+          if (sensorBibleResponse.ok) {
+            const sensorBibleData = await sensorBibleResponse.json();
+            const component = sensorBibleData.components?.find(
+              (c: any) => c.id === componentId
+            );
+            if (component && component["pin-map"]?.src) {
+              const pinMapResponse = await fetch(component["pin-map"].src);
+              const pinMapData = await pinMapResponse.json();
+              return {
+                id: componentId,
+                name: component.name,
+                pins: pinMapData["digital-pins"]?.id || [],
+              };
+            }
+          }
+
+          return {
+            id: componentId,
+            name: componentId,
+            pins: [],
+          };
+        } catch (error) {
+          console.error(
+            `Error loading component data for ${componentId}:`,
+            error
+          );
+          return {
+            id: componentId,
+            name: componentId,
+            pins: [],
+          };
         }
-      );
+      });
 
       const componentsWithPins = await Promise.all(componentDataPromises);
 
@@ -302,58 +276,6 @@ export default function RightSidebar() {
         )
         .join("\n");
 
-      // const prompt = `
-      // Generate a JSON file containing wiring configurations and an Arduino code snippet for an Arduino-based project. The project should include the following components: \n
-
-      // ${componentsInfo}
-
-      // \nThe application of this project is: ${selectedApp.name}. ${selectedApp.description}.
-      // \nThe JSON file should follow this format:
-
-      // {
-      //   "components": ["List of components used"],
-      //   "wire": [
-      //     {
-      //       "ArduinoBoard": "Pin",
-      //       "Component-1": "Pin"
-      //     },
-      //     {
-      //       "ArduinoBoard": "Pin",
-      //       "Component-2": "Pin"
-      //     }
-      //   ]
-      // }
-
-      // Additionally, provide Arduino code that initializes the components, reads data (if applicable), processes it, and executes necessary actions.
-      // Use appropriate libraries and ensure the code is structured with comments explaining each section.
-      // Make sure all pin names are in full capital letters.
-      // Make sure to use the given component names for the JSON file. Make sure to use the given component name for the wiring connection reference as well.
-      // Make sure to add 5V and GND connections for all modules with development board. Do not use VCC for the modules, instead use 5V as the pin name.
-      // Make sure to use D1, D2 etc. for digital pins in the development board.
-      // Make sure to use A0, A1 etc. for analog pins in the development board.
-      // Make sure to use just the Available pins names given infront of the respective component names for the wiring json.
-      // `;
-
-      // const response2 = await fetch(
-      //   "https://api.openai.com/v1/chat/completions",
-      //   {
-      //     method: "POST",
-      //     headers: {
-      //       "Content-Type": "application/json",
-      //       Authorization: API_KEY,
-      //     },
-      //     body: JSON.stringify({
-      //       model: "gpt-4o-mini",
-      //       messages: [
-      //         {
-      //           role: "user",
-      //           content: prompt,
-      //         },
-      //       ],
-      //     }),
-      //   }
-      // );
-
       const response = await gptAPI.generateCode(componentsInfo, selectedApp);
       if (!response || !response.code) {
         setGeneratedPrompt({
@@ -363,64 +285,48 @@ export default function RightSidebar() {
       }
 
       const data = await response;
-      const raw_msg = data.code;
-      console.log("Raw message from GPT:", raw_msg);
+      const result = data.code;
+      console.log("Parsed JSON from GPT:", result);
 
-      // Separate JSON and C++ code
-      const jsonMatch = raw_msg.match(/```json\s*([\s\S]*?)```/);
-      const cppMatch = raw_msg.match(/```cpp\s*([\s\S]*?)```/);
+      const componentsArr = Array.isArray(result.components)
+        ? result.components
+        : [];
+      const wireArr = Array.isArray(result.wire) ? result.wire : [];
+      const arduinoCodeStr =
+        typeof result.arduinoCode === "string" ? result.arduinoCode : "";
 
-      const jsonString = jsonMatch ? jsonMatch[1].trim() : null;
-      const cppString = cppMatch ? cppMatch[1].trim() : null;
+      if (
+        componentsArr.length === 0 ||
+        wireArr.length === 0 ||
+        !arduinoCodeStr
+      ) {
+        setGeneratedPrompt({
+          error: "Incomplete response from GPT. Please try again.",
+        });
+        return;
+      }
+
+      const jsonString = JSON.stringify(
+        { components: componentsArr, wire: wireArr },
+        null,
+        2
+      );
+      const cppString = arduinoCodeStr;
 
       if (jsonString && cppString) {
-        // Store the generated configuration in the context so it can be accessed by the save button
+        // Store generated config/code locally only; no network persistence
         setGeneratedConfig(jsonString);
-
-        // // Save the JSON configuration
-        // await fetch("./api/save-config", {
-        //   method: "POST",
-        //   headers: {
-        //     "Content-Type": "application/json",
-        //   },
-        //   body: JSON.stringify({
-        //     file: "configs/demo.json",
-        //     content: JSON.parse(jsonString),
-        //   }),
-        // });
-
-        // // Save the Arduino code
-        // await fetch("./api/save-config", {
-        //   method: "POST",
-        //   headers: {
-        //     "Content-Type": "application/json",
-        //   },
-        //   body: JSON.stringify({
-        //     file: "projects/defaultCode.ino",
-        //     content: cppString.split("\n"),
-        //   }),
-        // });
-
-        //call a api call to save the wiring configuration
-
-        const saveResponse = await project.saveProject(
-          jsonString,
-          cppString,
-          currentProjectId || "0"
-        );
-
-        // Handle the response and update project ID if returned
-        if (saveResponse && saveResponse.projectId) {
-          setCurrentProjectId(saveResponse.projectId);
-          console.log("Project saved with ID:", saveResponse.projectId);
-        }
-
-        // Set the code in the editor
         setCode(cppString);
         setActiveTab("code");
-
-        // Trigger canvas refresh to update the wiring
-        triggerCanvasRefresh();
+        setUnsavedChanges(true);
+        // Do NOT create / save project automatically anymore
+        console.log("Generation complete. Changes are UNSAVED until user clicks Save.");
+        // Force editor refresh logic remains unchanged below
+        const currentFile = selectedFile;
+        setSelectedFile(null);
+        setTimeout(() => {
+          setSelectedFile(currentFile || "./projects/defaultCode.ino");
+        }, 300);
       } else {
         setGeneratedPrompt({
           error: "Failed to generate wiring and code. Please try again.",

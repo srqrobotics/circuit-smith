@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
+import { useState, useEffect, useRef } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { authAPI } from "../api/auth";
 import Layout from "../components/Layout/Layout";
 import { FileProvider } from "../contexts/FileContext";
@@ -9,16 +8,72 @@ import { AutoRoutingProvider } from "../contexts/AutoRoutingContext";
 import { ComponentProvider } from "../contexts/ComponentContext";
 import { RightSidebarProvider } from "../contexts/RightSidebarContext";
 import { CanvasRefreshProvider } from "../contexts/CanvasRefreshContext";
+import { CanvasStateProvider } from "../contexts/CanvasStateContext";
 import { ThemeProvider } from "../contexts/ThemeContext";
+import { ProjectProvider } from "../contexts/ProjectContext";
 
 function MainAppPage() {
-  const { logout } = useAuth();
   const navigate = useNavigate();
-  const [user, setUser] = useState<any>(null);
+  const [searchParams] = useSearchParams();
+  const [, setUser] = useState<any>(null);
   const [isValidating, setIsValidating] = useState(true);
   const [authError, setAuthError] = useState("");
+  const [currentProjectId, setCurrentProjectId] = useState<string | null>(null);
+  const [isNewProject, setIsNewProject] = useState(false);
+
+  const projectInitRanRef = useRef(false);
+  const authValidateRanRef = useRef(false);
+
+  // Get project ID from URL parameters
+  const urlProjectId = searchParams.get("project");
+  const urlIsNewProject = searchParams.get("new") === "true";
+
+  console.log("MainAppPage - Project ID from URL:", urlProjectId);
+  console.log("MainAppPage - Is new project:", urlIsNewProject);
+
+  // Initialize project ID from URL or create new project
+  useEffect(() => {
+    if (projectInitRanRef.current) return; // guard against double-invoke (e.g., React.StrictMode)
+    projectInitRanRef.current = true;
+    const initializeProject = async () => {
+      if (urlIsNewProject && !urlProjectId) {
+        // Create a new project
+        try {
+          console.log("Creating new project...");
+          const { project } = await import("../api/project");
+          const saveResponse = await project.saveProject(
+            "{}",
+            "// New project",
+            "0"
+          );
+
+          if (saveResponse && saveResponse.projectId) {
+            const newProjectId = saveResponse.projectId;
+            setCurrentProjectId(newProjectId);
+            setIsNewProject(true);
+
+            // Update URL with the new project ID
+            const newUrl = `/app?project=${newProjectId}`;
+            navigate(newUrl, { replace: true });
+            console.log(`Created new project with ID: ${newProjectId}`);
+          }
+        } catch (error) {
+          console.error("Error creating new project:", error);
+        }
+      } else if (urlProjectId) {
+        // Load existing project
+        setCurrentProjectId(urlProjectId);
+        setIsNewProject(false);
+        console.log(`Loading existing project: ${urlProjectId}`);
+      }
+    };
+
+    initializeProject();
+  }, [urlIsNewProject, urlProjectId, navigate]);
 
   useEffect(() => {
+    if (authValidateRanRef.current) return; // guard against double-invoke
+    authValidateRanRef.current = true;
     const validateAuthentication = async () => {
       try {
         const response = await authAPI.verifyToken();
@@ -43,16 +98,6 @@ function MainAppPage() {
 
     validateAuthentication();
   }, [navigate]);
-
-  const handleLogout = async () => {
-    try {
-      await authAPI.logout();
-      logout();
-      navigate("/");
-    } catch (error) {
-      console.error("Logout failed:", error);
-    }
-  };
 
   if (isValidating) {
     return (
@@ -80,6 +125,18 @@ function MainAppPage() {
     );
   }
 
+  // Optional: delay render until projectId resolved (if new project requested)
+  if (urlIsNewProject && !currentProjectId) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#C45E32] mx-auto mb-4"></div>
+          <div className="text-xl text-gray-600">Creating project...</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     // Wrap with ThemeProvider to ensure useTheme has access to context
     <ThemeProvider>
@@ -87,11 +144,18 @@ function MainAppPage() {
         <CoordinateProvider>
           <AutoRoutingProvider>
             <ComponentProvider>
-              <RightSidebarProvider>
-                <CanvasRefreshProvider>
-                  <Layout />
-                </CanvasRefreshProvider>
-              </RightSidebarProvider>
+              <ProjectProvider
+                initialProjectId={currentProjectId}
+                initialIsNew={isNewProject}
+              >
+                <RightSidebarProvider>
+                  <CanvasRefreshProvider>
+                    <CanvasStateProvider>
+                      <Layout />
+                    </CanvasStateProvider>
+                  </CanvasRefreshProvider>
+                </RightSidebarProvider>
+              </ProjectProvider>
             </ComponentProvider>
           </AutoRoutingProvider>
         </CoordinateProvider>

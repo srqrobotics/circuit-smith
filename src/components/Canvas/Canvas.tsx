@@ -1,8 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Stage, Layer, Line, Group, Image, Text } from "react-konva";
+import { Stage, Layer, Line, Group, Image } from "react-konva";
 import Konva from "konva";
 import type { Wire, DroppedComponent } from "~/types/circuit";
-import { handleWireDrawing } from "~/utils/wireManager";
 import {
   ComponentLoader,
   findPath,
@@ -14,52 +13,63 @@ import { useAutoRouting } from "~/contexts/AutoRoutingContext";
 import { useCanvasRefresh } from "~/contexts/CanvasRefreshContext";
 import { useRightSidebar } from "~/contexts/RightSidebarContext";
 import { useFile } from "~/contexts/FileContext";
+import { useComponents } from "~/contexts/ComponentContext";
+import { useCanvasState } from "~/contexts/CanvasStateContext";
 import { project } from "~/api/project";
+import { useProject } from "~/contexts/ProjectContext"; // <-- added
 
 export default function Canvas() {
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
-  const [isMounted, setIsMounted] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
   const [scale, setScale] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [components, setComponents] = useState<DroppedComponent[]>([]);
   const [loadedImages, setLoadedImages] = useState<{
     [key: string]: HTMLImageElement;
   }>({});
   const [isDraggingComponent, setIsDraggingComponent] = useState(false);
-  const [wires, setWires] = useState<Wire[]>([]);
-  const [isDrawingWire, setIsDrawingWire] = useState(false);
-  const [currentWire, setCurrentWire] = useState<number[]>([]);
-  const [wireColor, setWireColor] = useState("#ff0000");
   const stageRef = useRef<any>(null);
   const [isCtrlPressed, setIsCtrlPressed] = useState(false);
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const { setCoordinates } = useCoordinates();
-  const [hoveredWireId, setHoveredWireId] = useState<string | null>(null);
-  const [isRouting, setIsRouting] = useState(false);
   const { autoRoutingEnabled } = useAutoRouting();
-  const [config, setConfig] = useState<any>(null);
-  const [draggedComponentId, setDraggedComponentId] = useState<string | null>(
-    null
-  );
   const [hoveredComponentName, setHoveredComponentName] = useState<
     string | null
   >(null);
   const [isDraggingWires, setIsDraggingWires] = useState(false);
   const routingInProgress = useRef(false);
   const componentsRef = useRef<DroppedComponent[]>([]);
+  // Track if we've already done the initial blank setup for a new project
+  const hasInitializedNewProjectRef = useRef(false);
+  const previousProjectIdRef = useRef<string | null>(null);
   const { refreshTrigger } = useCanvasRefresh();
-  const { setCode } = useRightSidebar();
+  const { sidebarState, setCode } = useRightSidebar();
+  const currentProjectId = sidebarState.currentProjectId;
+  const isNewProject = sidebarState.isNewProject;
+  const generatedConfig = sidebarState.generatedConfig;
+
+  // Debug logging for currentProjectId
+  useEffect(() => {
+    console.log(`Canvas: currentProjectId changed to: ${currentProjectId}`);
+  }, [currentProjectId]);
+
   const { setSelectedFile } = useFile();
+  const { selectedComponents } = useComponents();
+  const {
+    canvasState,
+    setComponents,
+    setWires,
+    setConfig,
+    addComponent,
+    updateComponentPosition,
+  } = useCanvasState();
+
+  const { components, wires, config } = canvasState;
 
   // Keep componentsRef in sync with components state
   useEffect(() => {
     componentsRef.current = components;
   }, [components]);
 
-  // Initialize canvas and load components
+  // Initialize canvas dimensions
   useEffect(() => {
-    setIsMounted(true);
     const updateDimensions = () => {
       const container = document.querySelector(
         ".flex-1.h-full.relative.overflow-hidden"
@@ -82,116 +92,108 @@ export default function Canvas() {
       resizeObserver.observe(container);
     }
 
-    // Check URL parameters to determine loading strategy
-    const initializeCanvas = async () => {
-      try {
-        const urlParams = new URLSearchParams(window.location.search);
-        const projectParam = urlParams.get("project");
-        const newParam = urlParams.get("new");
-
-        if (projectParam && projectParam !== "null") {
-          // Load existing project
-          console.log("Loading existing project with ID:", projectParam);
-          try {
-            const projectResponse =
-              await project.getDataFromProjectId(projectParam);
-            if (projectResponse.success && projectResponse.project) {
-              // Parse jsonString and cppString from the project response
-              const { jsonString, cppString } = projectResponse.project;
-
-              if (jsonString) {
-                // Parse the JSON string to get wiring data
-                const wiringData = JSON.parse(jsonString);
-
-                // If we have wiring data, use it to load components
-                const loadedConfig =
-                  await ComponentLoader.loadInitialComponentsFromData(
-                    wiringData,
-                    setLoadedImages,
-                    setComponents,
-                    setWires
-                  );
-                setConfig(loadedConfig);
-              } else {
-                // Fallback to default loading if no wiring data
-                const loadedConfig =
-                  await ComponentLoader.loadInitialComponents(
-                    setLoadedImages,
-                    setComponents,
-                    setWires
-                  );
-                setConfig(loadedConfig);
-              }
-
-              // Handle code data - you might want to set this in a code context or state
-              if (cppString) {
-                console.log("Loaded C++ code:", cppString);
-                // Set the loaded C++ code in the right sidebar context
-                setCode(cppString);
-              } else {
-                // Clear code editor for projects without code
-                setCode("");
-              }
-            } else {
-              console.error(
-                "Failed to load project:",
-                projectResponse.message || "Unknown error"
-              );
-              // For failed project loads, start with empty state instead of default
-              console.log(
-                "Starting with empty state due to project load failure"
-              );
-              setComponents([]);
-              setWires([]);
-              setConfig({ components: [], wire: {} });
-              // Clear code editor for failed loads
-              setCode("");
-              // Clear selected file to prevent default code from loading
-              setSelectedFile(null);
-            }
-          } catch (error) {
-            console.error("Error loading project data:", error);
-            // For errors, start with empty state instead of default
-            console.log("Starting with empty state due to error");
-            setComponents([]);
-            setWires([]);
-            setConfig({ components: [], wire: {} });
-            // Clear code editor for errors
-            setCode("");
-            // Clear selected file to prevent default code from loading
-            setSelectedFile(null);
-          }
-        } else if (newParam === "true") {
-          // Create new project - load default demo configuration
-          console.log("Creating new project - loading default demo");
-          const loadedConfig = await ComponentLoader.loadInitialComponents(
-            setLoadedImages,
-            setComponents,
-            setWires
-          );
-          setConfig(loadedConfig);
-          // For new projects, let the default code load naturally (don't clear it)
-        } else {
-          // Default behavior - load demo config
-          const loadedConfig = await ComponentLoader.loadInitialComponents(
-            setLoadedImages,
-            setComponents,
-            setWires
-          );
-          setConfig(loadedConfig);
-        }
-      } catch (error) {
-        console.error("Error initializing canvas:", error);
-      }
-    };
-
-    initializeCanvas();
-
     return () => {
       window.removeEventListener("resize", updateDimensions);
       resizeObserver.disconnect();
     };
   }, []);
+
+  // Initialize canvas based on project state
+  useEffect(() => {
+    const initializeCanvas = async () => {
+      console.log("Canvas initialization:", {
+        currentProjectId,
+        isNewProject,
+      });
+
+      if (isNewProject) {
+        // Only clear once for a brand-new project
+        if (!hasInitializedNewProjectRef.current) {
+          console.log("Starting with empty canvas for new project (initial)");
+          setComponents([]);
+          setWires([]);
+          setConfig({ components: [], wire: [] });
+          setCode("");
+          setSelectedFile(null);
+          hasInitializedNewProjectRef.current = true;
+        } else {
+          console.log(
+            "New project flag still true, but initialization already performed; skipping reset"
+          );
+        }
+        return;
+      }
+
+      if (currentProjectId && currentProjectId !== "0") {
+        // Load existing project
+        console.log("Loading existing project with ID:", currentProjectId);
+        try {
+          const projectResponse =
+            await project.getDataFromProjectId(currentProjectId);
+          if (projectResponse.success && projectResponse.project) {
+            const { jsonString, cppString } = projectResponse.project;
+
+            if (jsonString) {
+              // Parse the JSON string to get wiring data
+              const wiringData = JSON.parse(jsonString);
+              const loadedConfig =
+                await ComponentLoader.loadInitialComponentsFromData(
+                  wiringData,
+                  setLoadedImages,
+                  setComponents,
+                  setWires
+                );
+              setConfig(loadedConfig);
+            } else {
+              // Start with empty state for projects without wiring data
+              console.log(
+                "Project has no wiring data, starting with empty canvas"
+              );
+              setComponents([]);
+              setWires([]);
+              setConfig({ components: [], wire: [] });
+            }
+
+            // Handle code data
+            if (cppString) {
+              console.log("Loaded C++ code:", cppString);
+              setCode(cppString);
+            } else {
+              setCode("");
+            }
+          } else {
+            console.error(
+              "Failed to load project:",
+              projectResponse.message || "Unknown error"
+            );
+            setComponents([]);
+            setWires([]);
+            setConfig({ components: [], wire: [] });
+            setCode("");
+            setSelectedFile(null);
+          }
+        } catch (error) {
+          console.error("Error loading project data:", error);
+          setComponents([]);
+          setWires([]);
+          setConfig({ components: [], wire: [] });
+          setCode("");
+          setSelectedFile(null);
+        }
+      } else {
+        // No project ID - start with empty canvas
+        console.log("No project ID, starting with empty canvas");
+        setComponents([]);
+        setWires([]);
+        setConfig({ components: [], wire: [] });
+      }
+    };
+
+    // Only initialize when we have the project information
+    if (currentProjectId !== null || isNewProject) {
+      initializeCanvas();
+    }
+  }, [currentProjectId, isNewProject]);
 
   // Reload configuration when refreshTrigger changes
   useEffect(() => {
@@ -199,32 +201,36 @@ export default function Canvas() {
       try {
         console.log("Reloading configuration due to refresh trigger");
 
-        // Check URL parameters to determine if we should reload demo or keep empty state
-        const urlParams = new URLSearchParams(window.location.search);
-        const newParam = urlParams.get("new");
-
-        if (newParam === "true") {
-          // For new projects, reload demo configuration and let default code load
+        // Only reload if we don't have components on canvas
+        // This prevents replacing user-added components
+        if (components.length === 0) {
+          if (isNewProject) {
+            // New project - keep empty canvas
+            console.log("New project, keeping empty canvas");
+            setComponents([]);
+            setWires([]);
+            setConfig({ components: [], wire: [] });
+          } else if (currentProjectId && currentProjectId !== "0") {
+            // Load existing project
+            const loadedConfig = await ComponentLoader.loadInitialComponents(
+              setLoadedImages,
+              setComponents,
+              setWires,
+              currentProjectId
+            );
+            setConfig(loadedConfig);
+          } else {
+            // No project ID, start with empty canvas
+            console.log("No project ID, starting with empty canvas");
+            setComponents([]);
+            setWires([]);
+            setConfig({ components: [], wire: [] });
+          }
+        } else {
           console.log(
-            "Refresh triggered for new project - loading default demo"
+            "Canvas has components, skipping reload to preserve user state"
           );
-          const loadedConfig = await ComponentLoader.loadInitialComponents(
-            setLoadedImages,
-            setComponents,
-            setWires
-          );
-          setConfig(loadedConfig);
-          // For new projects, let the default code load naturally (don't clear it)
-          return;
         }
-
-        // For other cases, load the demo configuration
-        const loadedConfig = await ComponentLoader.loadInitialComponents(
-          setLoadedImages,
-          setComponents,
-          setWires
-        );
-        setConfig(loadedConfig);
 
         // If auto-routing is enabled, start routing with the new configuration
         if (autoRoutingEnabled) {
@@ -238,7 +244,125 @@ export default function Canvas() {
     if (refreshTrigger > 0) {
       reloadConfiguration();
     }
-  }, [refreshTrigger, autoRoutingEnabled]);
+  }, [
+    refreshTrigger,
+    autoRoutingEnabled,
+    components.length,
+    currentProjectId,
+    isNewProject,
+  ]);
+
+  // Update wiring when generated config changes (from wiring generation)
+  useEffect(() => {
+    const updateWiringFromGeneratedConfig = async () => {
+      if (!generatedConfig) {
+        console.log("No generated config to apply");
+        return;
+      }
+
+      try {
+        const wiringData = JSON.parse(generatedConfig);
+        console.log("Updating wiring from generated config:", wiringData);
+
+        // Only update wiring if we have components on the canvas
+        if (components.length === 0) {
+          console.log("No components on canvas, skipping wiring update");
+          return;
+        }
+
+        // Update the config with the new wiring data
+        setConfig(wiringData);
+
+        // Use the new function to load components from canvas state
+        await ComponentLoader.loadComponentsFromCanvas(
+          components,
+          wiringData,
+          setLoadedImages,
+          setWires
+        );
+
+        console.log("Successfully updated wiring from canvas components");
+      } catch (error) {
+        console.error("Error parsing generated config:", error);
+      }
+    };
+
+    // Only update wiring if we have generated config and components on canvas
+    if (generatedConfig && components.length > 0) {
+      updateWiringFromGeneratedConfig();
+    }
+  }, [generatedConfig, components.length]);
+
+  // Reload configuration when project ID changes
+  useEffect(() => {
+    const reloadForProjectChange = async () => {
+      console.log("Project ID change effect:", {
+        previousProjectId: previousProjectIdRef.current,
+        currentProjectId,
+        isNewProject,
+        componentsLength: components.length,
+      });
+
+      // Skip if project id hasn't actually changed
+      if (previousProjectIdRef.current === currentProjectId) {
+        return;
+      }
+
+      // Update previous project id for next change detection
+      previousProjectIdRef.current = currentProjectId;
+
+      if (isNewProject) {
+        // For new project after initial setup we do NOT clear again
+        console.log(
+          "Detected project id recorded for new project; canvas state preserved"
+        );
+        return;
+      }
+
+      if (currentProjectId && currentProjectId !== "0") {
+        console.log(
+          `Project ID changed to ${currentProjectId}, checking if reload is needed`
+        );
+
+        // Only reload if we don't have components on canvas
+        // This prevents replacing user-added components when project ID changes
+        if (components.length === 0) {
+          try {
+            const loadedConfig = await ComponentLoader.loadInitialComponents(
+              setLoadedImages,
+              setComponents,
+              setWires,
+              currentProjectId
+            );
+            setConfig(loadedConfig);
+
+            if (autoRoutingEnabled) {
+              startRouting();
+            }
+          } catch (error) {
+            console.error(
+              "Error reloading configuration for project change:",
+              error
+            );
+          }
+        } else {
+          console.log(
+            "Canvas has components, skipping reload to preserve user state"
+          );
+        }
+      } else {
+        console.log("No valid project ID, starting with empty canvas");
+        setComponents([]);
+        setWires([]);
+        setConfig({ components: [], wire: [] });
+      }
+    };
+
+    // Only run if we have some project context (including null->id transitions)
+    if (currentProjectId !== undefined) {
+      reloadForProjectChange();
+    }
+  }, [currentProjectId, isNewProject, components.length, autoRoutingEnabled]);
 
   // Handle keyboard events
   useEffect(() => {
@@ -281,12 +405,10 @@ export default function Canvas() {
     setPosition(newPos);
   };
 
-  const handleDragStart = (e: any) => {
+  const handleDragStart = () => {
     setIsDraggingComponent(true);
     setIsDraggingWires(true);
     setWires([]);
-    const componentId = hoveredComponentName;
-    setDraggedComponentId(componentId);
   };
 
   const handleDragEnd = async (e: any) => {
@@ -302,10 +424,7 @@ export default function Canvas() {
 
       if (draggedComponent) {
         // Update the component's position in state
-        const updatedComponents = components.map((c) =>
-          c.id === draggedComponent.id ? { ...c, x: pos.x, y: pos.y } : c
-        );
-        setComponents(updatedComponents);
+        updateComponentPosition(draggedComponent.id, pos.x, pos.y);
 
         // Update the component position in the configuration
         await ComponentLoader.updateComponentPosition(
@@ -321,12 +440,17 @@ export default function Canvas() {
 
           // Force a complete re-routing of all components
           await startRouting();
+        } else {
+          // Even without auto-routing, save the visual state when components are moved
+          const updatedComponents = components.map((c) =>
+            c.id === draggedComponent.id ? { ...c, x: pos.x, y: pos.y } : c
+          );
+          await saveVisualState(updatedComponents, wires);
         }
       }
     }
 
     setIsDraggingComponent(false);
-    setDraggedComponentId(null);
     setIsDraggingWires(false);
   };
 
@@ -341,7 +465,6 @@ export default function Canvas() {
       x: Math.round((position.x - stage.x()) / scale),
       y: Math.round((position.y - stage.y()) / scale),
     };
-    setMousePosition(scaledPosition);
     setCoordinates(scaledPosition);
 
     const hoveredComponent = components.find(
@@ -353,6 +476,193 @@ export default function Canvas() {
     );
 
     setHoveredComponentName(hoveredComponent ? hoveredComponent.name : null);
+  };
+
+  // Handle drag and drop from sidebar
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "copy";
+  };
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+
+    try {
+      const componentData = JSON.parse(e.dataTransfer.getData("component"));
+      if (!componentData || !componentData.id) {
+        console.error("Invalid component data received");
+        return;
+      }
+
+      // Get drop position relative to canvas
+      const stage = stageRef.current;
+      if (!stage) return;
+
+      const rect = stage.container().getBoundingClientRect();
+      const x = (e.clientX - rect.left - stage.x()) / scale;
+      const y = (e.clientY - rect.top - stage.y()) / scale;
+
+      // Add component to canvas
+      await addComponentToCanvas(componentData.id, x, y);
+    } catch (error) {
+      console.error("Error handling component drop:", error);
+    }
+  };
+
+  // Add new component to canvas
+  const addComponentToCanvas = async (
+    componentId: string,
+    x: number,
+    y: number
+  ) => {
+    try {
+      // Load component data
+      const componentData = await loadComponentData(componentId);
+      if (!componentData) {
+        console.error(`Component data not found for ${componentId}`);
+        return;
+      }
+
+      // Create new component
+      const newComponent: DroppedComponent = {
+        id: componentId,
+        name: componentData.name,
+        x: x,
+        y: y,
+        rotation: 0,
+        image: {
+          src:
+            componentData.image?.src || `./packages/${componentId}/image.png`,
+          width: componentData.image?.width || 50,
+          height: componentData.image?.height || 50,
+        },
+        pinMap: undefined, // Will be loaded below
+      };
+
+      // Load the component image
+      const img = await preloadImage(newComponent.image.src);
+      newComponent.image.width = img.naturalWidth;
+      newComponent.image.height = img.naturalHeight;
+
+      // Load pin mappings if available
+      if (componentData["pin-map"]?.src) {
+        try {
+          const pinMapResponse = await fetch(componentData["pin-map"].src);
+          (newComponent as any).pinMap = await pinMapResponse.json();
+          console.log(`Loaded pin mappings for ${componentId}`);
+        } catch (error) {
+          console.warn(
+            `Failed to load pin mappings for ${componentId}:`,
+            error
+          );
+        }
+      }
+
+      // Add to loaded images
+      setLoadedImages((prev) => ({
+        ...prev,
+        [newComponent.image.src]: img,
+      }));
+
+      // Add to components
+      addComponent(newComponent);
+
+      // Save visual state
+      await saveVisualState([...components, newComponent], wires);
+
+      console.log(`Added component ${componentId} to canvas at (${x}, ${y})`);
+    } catch (error) {
+      console.error(`Error adding component ${componentId} to canvas:`, error);
+    }
+  };
+
+  // Load component data from packages
+  const loadComponentData = async (componentId: string): Promise<any> => {
+    try {
+      // Try to load from devBible.json first
+      const devBibleResponse = await fetch("./packages/devBible.json");
+      if (devBibleResponse.ok) {
+        const devBibleData = await devBibleResponse.json();
+        const component = devBibleData.components?.find(
+          (c: any) => c.id === componentId
+        );
+        if (component) return component;
+      }
+
+      // If not found, try sensorBible.json
+      const sensorBibleResponse = await fetch("./packages/sensorBible.json");
+      if (sensorBibleResponse.ok) {
+        const sensorBibleData = await sensorBibleResponse.json();
+        const component = sensorBibleData.components?.find(
+          (c: any) => c.id === componentId
+        );
+        if (component) return component;
+      }
+
+      return null;
+    } catch (error) {
+      console.error(`Error loading component data for ${componentId}:`, error);
+      return null;
+    }
+  };
+
+  // Save visual state to project folder
+  const saveVisualState = async (
+    components: DroppedComponent[],
+    wires: Wire[]
+  ) => {
+    if (!currentProjectId || currentProjectId === "0") {
+      console.log("No project ID available, skipping visual state save");
+      return;
+    }
+
+    try {
+      const visualState = {
+        components: components.map((comp) => ({
+          id: comp.id,
+          name: comp.name,
+          x: comp.x,
+          y: comp.y,
+          image: {
+            src: comp.image.src,
+            width: comp.image.width,
+            height: comp.image.height,
+          },
+        })),
+        wires: wires.map((wire) => ({
+          points: wire.points,
+          color: wire.color,
+        })),
+        timestamp: new Date().toISOString(),
+      };
+
+      const BASE_URL =
+        import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
+      const response = await fetch(`${BASE_URL}/api/save-config`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          file: "visual.json",
+          content: visualState,
+          projectId: currentProjectId,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log(
+        `Successfully saved visual state to projects/${currentProjectId}/visual.json`,
+        result
+      );
+    } catch (error) {
+      console.error("Error saving visual state:", error);
+    }
   };
 
   const startRouting = async () => {
@@ -368,7 +678,6 @@ export default function Canvas() {
     }
 
     routingInProgress.current = true;
-    setIsRouting(true);
     ComponentLoader.colorIndex = 0;
 
     try {
@@ -415,10 +724,12 @@ export default function Canvas() {
 
       console.log("Routing complete, setting wires:", finalWires);
       setWires(finalWires);
+
+      // Save visual state after routing is complete
+      await saveVisualState(currentComponents, finalWires);
     } catch (error) {
       console.error("Error during routing:", error);
     } finally {
-      setIsRouting(false);
       routingInProgress.current = false;
     }
   };
@@ -434,8 +745,39 @@ export default function Canvas() {
     }
   }, [autoRoutingEnabled]);
 
+  // Add components to canvas when they are selected in sidebar
+  useEffect(() => {
+    const addSelectedComponents = async () => {
+      if (selectedComponents.length === 0) return;
+
+      // Find components that are selected but not yet on canvas
+      const componentsOnCanvas = components.map((comp) => comp.id);
+      const newComponents = selectedComponents.filter(
+        (id) => !componentsOnCanvas.includes(id)
+      );
+
+      if (newComponents.length > 0) {
+        console.log("Adding new components to canvas:", newComponents);
+
+        // Add each new component at a default position (spread them out)
+        for (let i = 0; i < newComponents.length; i++) {
+          const componentId = newComponents[i];
+          const x = 100 + i * 150; // Spread components horizontally
+          const y = 100;
+          await addComponentToCanvas(componentId, x, y);
+        }
+      }
+    };
+
+    addSelectedComponents();
+  }, [selectedComponents]);
+
   return (
-    <div className="w-full h-full bg-gray-50 dark:bg-gray-800">
+    <div
+      className="w-full h-full bg-gray-50 dark:bg-gray-800"
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
+    >
       <Stage
         width={dimensions.width}
         height={dimensions.height}
