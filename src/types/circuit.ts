@@ -15,4 +15,5 @@ export interface DroppedComponent {
     width: number;
     height: number;
   };
-} 
+  pinMap?: any; // Pin mapping data for wiring
+}

@@ -477,7 +477,9 @@ export default function ComponentsSidebar() {
     filePath: string,
     content: string
   ): Promise<void> => {
-    const saveResponse = await fetch(`./api/save-config`, {
+    const BASE_URL =
+      import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
+    const saveResponse = await fetch(`${BASE_URL}/api/save-config`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

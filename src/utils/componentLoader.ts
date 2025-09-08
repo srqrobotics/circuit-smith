@@ -484,6 +484,15 @@ export class ComponentLoader {
     wireRoute: number[],
     wireNameMap: { [key: string]: string }
   ) => {
+    console.log(
+      "processDeviceConnections",
+      device,
+      connection,
+      components,
+      key,
+      wireRoute,
+      wireNameMap
+    );
     const pin = connection[device];
 
     // Find the component in the config
@@ -677,11 +686,59 @@ export class ComponentLoader {
       React.SetStateAction<{ [key: string]: HTMLImageElement }>
     >,
     setComponents: React.Dispatch<React.SetStateAction<DroppedComponent[]>>,
-    setWires: React.Dispatch<React.SetStateAction<Wire[]>>
+    setWires: React.Dispatch<React.SetStateAction<Wire[]>>,
+    projectId?: string
   ): Promise<any> {
     try {
-      let response = await fetch("configs/demo.json");
-      const config = await response.json();
+      let response;
+      let config;
+
+      // Try to load project-specific configuration first
+      if (projectId && projectId !== "0") {
+        try {
+          response = await fetch(`projects/${projectId}/config.json`);
+          if (response.ok) {
+            config = await response.json();
+            console.log(
+              `Loaded project-specific config for project ${projectId}`
+            );
+          } else {
+            throw new Error(
+              `Project config not found for project ${projectId}`
+            );
+          }
+        } catch (error) {
+          console.log(
+            `Failed to load project-specific config, falling back to demo.json:`,
+            error
+          );
+          // Fall back to demo configuration
+          response = await fetch("configs/demo.json");
+          config = await response.json();
+        }
+      } else {
+        // Load default demo configuration
+        response = await fetch("configs/demo.json");
+        config = await response.json();
+      }
+
+      // Try to load visual state from project folder if available
+      let visualState = null;
+      if (projectId && projectId !== "0") {
+        try {
+          const visualResponse = await fetch(
+            `projects/${projectId}/visual.json`
+          );
+          if (visualResponse.ok) {
+            visualState = await visualResponse.json();
+            console.log(`Loaded visual state for project ${projectId}`);
+          }
+        } catch (error) {
+          console.log(
+            `No visual state found for project ${projectId}, using default positions`
+          );
+        }
+      }
 
       response = await fetch("configs/demo.editor.json");
       const components = await response.json();
@@ -707,7 +764,16 @@ export class ComponentLoader {
         );
         console.log("Selected components:", components);
 
-        backupComponentsToJson(components, "configs/demo.editor.json"); // Specify the file name for backup
+        // Only backup to demo.editor.json if we're not loading a project-specific config
+        if (!projectId || projectId === "0") {
+          backupComponentsToJson(components, "configs/demo.editor.json"); // Specify the file name for backup
+        } else {
+          console.log(
+            "Skipping demo.editor.json backup for project-specific config"
+          );
+          // For project-specific configs, save visual state to project folder
+          await backupComponentsToProjectFolder(components, projectId);
+        }
       }
 
       // Load images
@@ -745,6 +811,20 @@ export class ComponentLoader {
         });
         return newImages;
       });
+
+      // Apply visual state if available
+      if (visualState && visualState.components) {
+        console.log("Applying visual state to components");
+        visualState.components.forEach((visualComp: any) => {
+          const component = components.find(
+            (comp: any) => comp.id === visualComp.id
+          );
+          if (component) {
+            component.x = visualComp.x;
+            component.y = visualComp.y;
+          }
+        });
+      }
 
       setComponents(components);
 
@@ -784,18 +864,107 @@ export class ComponentLoader {
         const newWiring = shiftOverlappingPaths(compWiring, deviceBounds);
         const finalWiring = shiftOverlappingPaths(newWiring, deviceBounds);
 
+        // Apply visual state to wires if available
+        let finalWires = finalWiring;
+        if (visualState && visualState.wires) {
+          console.log("Applying visual state to wires");
+          finalWires = visualState.wires.map((visualWire: any) => ({
+            points: visualWire.points,
+            color: visualWire.color,
+          }));
+        }
+
         // Store final wiring in the class variable
-        this.finalWiring = finalWiring;
-        const fullWiring = [...pinWires.flat(), ...finalWiring];
+        this.finalWiring = finalWires;
+        const fullWiring = [...pinWires.flat(), ...finalWires];
 
         // Set wires state
-        // setWires(fullWiring);
+        setWires(fullWiring);
       }
 
       return config; // Return the loaded config
     } catch (error) {
       console.error("Failed to load initial components:", error);
       throw error; // Rethrow the error for handling in the calling function
+    }
+  }
+
+  static async loadComponentsFromCanvas(
+    canvasComponents: DroppedComponent[],
+    wiringData: any,
+    setLoadedImages: React.Dispatch<
+      React.SetStateAction<{ [key: string]: HTMLImageElement }>
+    >,
+    setWires: React.Dispatch<React.SetStateAction<Wire[]>>
+  ): Promise<any> {
+    try {
+      console.log("Loading components from canvas state:", canvasComponents);
+      console.log("Wiring data:", wiringData);
+
+      // Use the canvas components directly
+      const components = canvasComponents;
+
+      // Load pin mappings for each component
+      const pinWirePromises = components.map(async (component: any) => {
+        if (component["pin-map"]?.src) {
+          const pinMapResponse = await fetch(component["pin-map"].src);
+          component.pinMap = await pinMapResponse.json();
+          return ComponentLoader.locatePins(component);
+        }
+        return [];
+      });
+
+      // Wait for pin mappings to load
+      const pinWires = await Promise.all(pinWirePromises);
+
+      // Process wire configurations from wiring data
+      console.log("Processing wire connections from canvas components");
+      const compWiring: Wire[] = [];
+
+      if (wiringData.wire) {
+        await ComponentLoader.processWireConnections(
+          wiringData,
+          components,
+          compWiring,
+          () => {} // No need to update components since we're using canvas state
+        );
+        console.log("Generated wiring:", compWiring);
+      }
+
+      // Store all pin wires in the class variable
+      this.allPinWires = [...pinWires.flat(), ...compWiring];
+
+      if (components.length > 0) {
+        const deviceBounds = ComponentLoader.getDeviceBounds(components);
+
+        // Process each wire to find valid paths around components
+        compWiring.forEach((wire) => {
+          if (wire.points.length >= 6) {
+            const [startX, startY] = [wire.points[2], wire.points[3]];
+            const [endX, endY] = [wire.points[4], wire.points[5]];
+            const path = findPath([startX, startY], [endX, endY], deviceBounds);
+            if (path.length > 0) {
+              const wirePath = path.flat();
+              wire.points.splice(wire.points.length - 4, 0, ...wirePath);
+            }
+          }
+        });
+
+        const newWiring = shiftOverlappingPaths(compWiring, deviceBounds);
+        const finalWiring = shiftOverlappingPaths(newWiring, deviceBounds);
+
+        // Store final wiring in the class variable
+        this.finalWiring = finalWiring;
+        const fullWiring = [...pinWires.flat(), ...finalWiring];
+
+        // Set wires state
+        setWires(fullWiring);
+      }
+
+      return wiringData; // Return the wiring data
+    } catch (error) {
+      console.error("Failed to load components from canvas:", error);
+      throw error;
     }
   }
 
@@ -969,7 +1138,9 @@ export class ComponentLoader {
             console.log("New position:", { x, y });
 
             // Save the updated config back to the file
-            const saveResponse = await fetch(`api/save-config`, {
+            const BASE_URL =
+              import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
+            const saveResponse = await fetch(`${BASE_URL}/api/save-config`, {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
@@ -1040,7 +1211,8 @@ async function backupComponentsToJson(
   // }
 
   // Save the updated config back to the file
-  const saveResponse = await fetch("api/save-config", {
+  const BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
+  const saveResponse = await fetch(`${BASE_URL}/api/save-config`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -1069,5 +1241,57 @@ async function backupComponentsToJson(
     console.log("Save response parsed:", result);
   } catch (e) {
     console.log("Could not parse save response as JSON:", responseText);
+  }
+}
+
+// Function to back up components to project folder
+async function backupComponentsToProjectFolder(
+  components: any[],
+  projectId: string
+): Promise<void> {
+  try {
+    const visualState = {
+      components: components.map((comp) => ({
+        id: comp.id,
+        name: comp.name,
+        x: comp.x || 0,
+        y: comp.y || 0,
+        image: {
+          src: comp.image.src,
+          width: comp.image.width,
+          height: comp.image.height,
+        },
+      })),
+      timestamp: new Date().toISOString(),
+    };
+
+    const BASE_URL =
+      import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
+    const saveResponse = await fetch(`${BASE_URL}/api/save-config`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        file: "visual.json",
+        content: visualState,
+        projectId: projectId,
+      }),
+    });
+
+    if (!saveResponse.ok) {
+      throw new Error(
+        `Failed to save visual state: ${saveResponse.statusText}`
+      );
+    }
+
+    const result = await saveResponse.json();
+    console.log(
+      `Successfully saved visual state to projects/${projectId}/visual.json`,
+      result
+    );
+  } catch (error) {
+    console.error("Error saving visual state to project folder:", error);
   }
 }

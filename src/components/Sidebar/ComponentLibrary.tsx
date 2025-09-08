@@ -4,12 +4,11 @@ import type { FileSystemItem } from "~/types/files";
 // import { API_KEY } from "~/config/config"; // Adjust the path as necessary
 
 useEffect(() => {
-  fetch('./api/proxy')
+  fetch("./api/proxy")
     .then((res) => res.json())
     .then((data) => console.log(data))
-    .catch((err) => console.error('Error:', err));
+    .catch((err) => console.error("Error:", err));
 }, []);
-
 
 interface ComponentItem {
   id: string;
@@ -148,7 +147,9 @@ export default function ComponentLibrary() {
   ): Promise<void> => {
     // Replace literal \n with actual newlines and wrap each element in backticks
 
-    const saveResponse = await fetch(`./api/save-config`, {
+    const BASE_URL =
+      import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
+    const saveResponse = await fetch(`${BASE_URL}/api/save-config`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
