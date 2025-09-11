@@ -16,7 +16,6 @@ import { useFile } from "~/contexts/FileContext";
 import { useComponents } from "~/contexts/ComponentContext";
 import { useCanvasState } from "~/contexts/CanvasStateContext";
 import { project } from "~/api/project";
-import { useProject } from "~/contexts/ProjectContext"; // <-- added
 
 export default function Canvas() {
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
@@ -30,11 +29,10 @@ export default function Canvas() {
   const [isCtrlPressed, setIsCtrlPressed] = useState(false);
   const { setCoordinates } = useCoordinates();
   const { autoRoutingEnabled } = useAutoRouting();
-  const [hoveredComponentName, setHoveredComponentName] = useState<
-    string | null
-  >(null);
+  const [hoveredComponentName, setHoveredComponentName] = useState<string | null>(null);
   const [isDraggingWires, setIsDraggingWires] = useState(false);
   const routingInProgress = useRef(false);
+  const draggedComponentIndexRef = useRef<number | null>(null);
   const componentsRef = useRef<DroppedComponent[]>([]);
   // Track if we've already done the initial blank setup for a new project
   const hasInitializedNewProjectRef = useRef(false);
@@ -405,10 +403,11 @@ export default function Canvas() {
     setPosition(newPos);
   };
 
-  const handleDragStart = () => {
+  const handleDragStart = (index: number) => {
     setIsDraggingComponent(true);
     setIsDraggingWires(true);
     setWires([]);
+    draggedComponentIndexRef.current = index;
   };
 
   const handleDragEnd = async (e: any) => {
@@ -418,9 +417,9 @@ export default function Canvas() {
         y: Math.round(e.target.y()),
       };
 
-      const draggedComponent = components.find(
-        (c) => c.name === hoveredComponentName
-      );
+      const draggedIndex = draggedComponentIndexRef.current;
+      const draggedComponent =
+        draggedIndex !== null ? components[draggedIndex] : undefined;
 
       if (draggedComponent) {
         // Update the component's position in state
@@ -442,8 +441,8 @@ export default function Canvas() {
           await startRouting();
         } else {
           // Even without auto-routing, save the visual state when components are moved
-          const updatedComponents = components.map((c) =>
-            c.id === draggedComponent.id ? { ...c, x: pos.x, y: pos.y } : c
+          const updatedComponents = components.map((c, idx) =>
+            idx === draggedIndex ? { ...c, x: pos.x, y: pos.y } : c
           );
           await saveVisualState(updatedComponents, wires);
         }
@@ -452,6 +451,7 @@ export default function Canvas() {
 
     setIsDraggingComponent(false);
     setIsDraggingWires(false);
+    draggedComponentIndexRef.current = null;
   };
 
   const handleMouseMove = (e: Konva.KonvaEventObject<MouseEvent>) => {
@@ -783,7 +783,7 @@ export default function Canvas() {
         height={dimensions.height}
         onWheel={handleWheel}
         onMouseMove={handleMouseMove}
-        draggable={!isDraggingComponent}
+        draggable={!isCtrlPressed}
         x={position.x}
         y={position.y}
         scaleX={scale}
@@ -792,13 +792,13 @@ export default function Canvas() {
       >
         <Layer>
           {/* Render components */}
-          {components.map((component) => (
+          {components.map((component, index) => (
             <Group
-              key={component.id}
+              key={`${component.id}-${index}`}
               x={component.x}
               y={component.y}
               draggable={isCtrlPressed}
-              onDragStart={handleDragStart}
+              onDragStart={() => handleDragStart(index)}
               onDragEnd={handleDragEnd}
             >
               <Image

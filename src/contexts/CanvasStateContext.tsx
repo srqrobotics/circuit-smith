@@ -11,8 +11,8 @@ interface CanvasState {
 
 interface CanvasStateContextValue {
   canvasState: CanvasState;
-  setComponents: (c: DroppedComponent[]) => void;
-  setWires: (w: Wire[]) => void;
+  setComponents: React.Dispatch<React.SetStateAction<DroppedComponent[]>>;
+  setWires: React.Dispatch<React.SetStateAction<Wire[]>>;
   setConfig: (cfg: any) => void;
   addComponent: (c: DroppedComponent) => void;
   updateComponentPosition: (id: string, x: number, y: number) => void;
@@ -28,8 +28,12 @@ export function CanvasStateProvider({ children }: { children: React.ReactNode })
   const [config, setConfigState] = useState<any>(null);
   const [ready, setReady] = useState(false);
 
-  const setComponents = useCallback((c: DroppedComponent[]) => setComponentsState(c), []);
-  const setWires = useCallback((w: Wire[]) => setWiresState(w), []);
+  const setComponents = useCallback<React.Dispatch<React.SetStateAction<DroppedComponent[]>>>(
+    (updater) => setComponentsState(updater as React.SetStateAction<DroppedComponent[]>)
+  , []);
+  const setWires = useCallback<React.Dispatch<React.SetStateAction<Wire[]>>>(
+    (updater) => setWiresState(updater as React.SetStateAction<Wire[]>)
+  , []);
   const setConfig = useCallback((cfg: any) => setConfigState(cfg), []);
   const addComponent = useCallback(
     (c: DroppedComponent) => setComponentsState(prev => [...prev, c]),
@@ -37,9 +41,7 @@ export function CanvasStateProvider({ children }: { children: React.ReactNode })
   );
   const updateComponentPosition = useCallback(
     (id: string, x: number, y: number) =>
-      setComponentsState(prev =>
-        prev.map(c => (c.id === id ? { ...c, x, y } : c))
-      ),
+      setComponentsState(prev => prev.map(c => (c.id === id ? { ...c, x, y } : c))),
     []
   );
   const setReadyCb = useCallback((v: boolean) => setReady(v), []);
