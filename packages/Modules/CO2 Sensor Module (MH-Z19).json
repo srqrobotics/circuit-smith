@@ -3,7 +3,7 @@
     "type": "Sensor",
     "digital-pins": {
         "id": [
-            "VIN",
+            "5V",
             "GND",
             "PWM",
             "NC",
@@ -15,7 +15,7 @@
         ],
         "reloc": [
             {
-                "id": "VIN",
+                "id": "5V",
                 "points": [
                     572,
                     276

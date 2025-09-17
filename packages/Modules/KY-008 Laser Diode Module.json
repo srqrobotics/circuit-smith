@@ -4,7 +4,7 @@
     "digital-pins": {
         "id": [
             "SIGNAL",
-            "VIN",
+            "5V",
             "GND"
         ],
         "reloc": [
@@ -16,7 +16,7 @@
                 ]
             },
             {
-                "id": "VIN",
+                "id": "5V",
                 "points": [
                     73,
                     246
