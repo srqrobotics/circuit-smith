@@ -1,32 +1,32 @@
 {
-    "name": "SG90 Servo",
-    "type": "Servo",
+    "name": "RF Transmitter Module (433 MHz)",
+    "type": "Communication Module",
     "digital-pins": {
         "id": [
             "GND",
-            "5V",
-            "POS"
+            "VCC",
+            "DATA"
         ],
         "reloc": [
             {
                 "id": "GND",
                 "points": [
-                    9,
-                    93
+                    343,
+                    87
                 ]
             },
             {
-                "id": "5V",
+                "id": "VCC",
                 "points": [
-                    9,
-                    80
+                    343,
+                    125
                 ]
             },
             {
-                "id": "POS",
+                "id": "DATA",
                 "points": [
-                    9,
-                    67
+                    343,
+                    163
                 ]
             }
         ]

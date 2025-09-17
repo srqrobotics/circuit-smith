@@ -1,46 +1,45 @@
 {
-    "name": "LDR Light Sensor Module",
-    "type": "Light Sensor Module",
+    "name": "Flame Sensor Module",
+    "type": "Sensor",
     "digital-pins": {
         "id": [
-            "A0",
-            "D0",
+            "AO",
+            "DO",
             "GND",
-            "5V"
+            "VCC"
         ],
         "reloc": [
             {
-                "id": "A0",
+                "id": "AO",
                 "points": [
-                    25,
-                    244
+                    1,
+                    24
                 ]
             },
             {
-                "id": "D0",
+                "id": "DO",
                 "points": [
-                    38,
-                    244
+                    1,
+                    44
                 ]
             },
             {
                 "id": "GND",
                 "points": [
-                    53,
-                    244
+                    1,
+                    65
                 ]
             },
             {
-                "id": "5V",
+                "id": "VCC",
                 "points": [
-                    66,
-                    244
+                    1,
+                    85
                 ]
             }
         ]
     },
     "specs": {
-        "Communication": "Digital,Analog",
         "voltage": "5V"
     }
 }

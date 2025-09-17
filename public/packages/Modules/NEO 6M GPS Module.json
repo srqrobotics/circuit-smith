@@ -1,47 +1,45 @@
 {
-    "name": "ultrasonic-SR04",
-    "type": "module",
+    "name": "NEO 6M GPS Module",
+    "type": "GPS Module",
     "digital-pins": {
         "id": [
-            "5V",
-            "TRIG",
-            "ECHO",
+            "VCC",
+            "RX",
+            "TX",
             "GND"
         ],
         "reloc": [
             {
-                "id": "5V",
+                "id": "VCC",
                 "points": [
-                    144,
-                    184
+                    102,
+                    17
                 ]
             },
             {
-                "id": "TRIG",
+                "id": "RX",
                 "points": [
-                    164,
-                    184
+                    132,
+                    17
                 ]
             },
             {
-                "id": "ECHO",
+                "id": "TX",
                 "points": [
-                    183,
-                    184
+                    161,
+                    17
                 ]
             },
             {
                 "id": "GND",
                 "points": [
-                    203,
-                    184
+                    191,
+                    17
                 ]
             }
         ]
     },
     "specs": {
-        "Model": "HC_SR04",
-        "Communication": "UART",
         "voltage": "5V"
     }
 }

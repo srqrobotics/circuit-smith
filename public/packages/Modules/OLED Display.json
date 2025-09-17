@@ -1,47 +1,45 @@
 {
-    "name": "16x2 LCD Display Module (I2C Compatible)",
-    "type": "LCD Display",
+    "name": "OLED Display",
+    "type": "Display",
     "digital-pins": {
         "id": [
             "GND",
-            "5V",
-            "SDA",
-            "SCL"
+            "VCC",
+            "SCL",
+            "SDA"
         ],
         "reloc": [
             {
                 "id": "GND",
                 "points": [
-                    6,
-                    44
+                    182,
+                    31
                 ]
             },
             {
-                "id": "5V",
+                "id": "VCC",
                 "points": [
-                    6,
-                    57
-                ]
-            },
-            {
-                "id": "SDA",
-                "points": [
-                    6,
-                    70
+                    227,
+                    31
                 ]
             },
             {
                 "id": "SCL",
                 "points": [
-                    6,
-                    83
+                    272,
+                    31
+                ]
+            },
+            {
+                "id": "SDA",
+                "points": [
+                    319,
+                    31
                 ]
             }
         ]
     },
     "specs": {
-        "Display Size": "16x2",
-        "Communication": "I2c",
         "voltage": "5V"
     }
 }
