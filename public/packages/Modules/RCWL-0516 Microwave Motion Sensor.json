@@ -3,7 +3,7 @@
     "type": "Motion Module",
     "digital-pins": {
         "id": [
-            "3.3V",
+            "3V3",
             "GND",
             "OUT",
             "VIN",
@@ -11,7 +11,7 @@
         ],
         "reloc": [
             {
-                "id": "3.3V",
+                "id": "3V3",
                 "points": [
                     49,
                     176
