@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useFetcher } from "react-router";
 import type { FileSystemItem } from "~/types/files";
-// import { API_KEY } from "~/config/config"; // Adjust the path as necessary
+const apiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY || "";
 
 useEffect(() => {
   fetch("./api/proxy")
@@ -213,7 +213,7 @@ export default function ComponentLibrary() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: API_KEY, // Replace with your actual API key
+            Authorization: apiKey, // Replace with your actual API key
           },
           body: JSON.stringify({
             model: "gpt-4o-mini",
@@ -319,7 +319,7 @@ export default function ComponentLibrary() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: API_KEY, // Replace with your actual API key
+            Authorization: apiKey, // Replace with your actual API key
           },
           body: JSON.stringify({
             model: "gpt-4o-mini",
@@ -352,9 +352,9 @@ export default function ComponentLibrary() {
       const fcppString = cppString.split("\n");
 
       console.log("Formatted C++ Code:\n", fcppString);
-      await saveConfig("projects/defaultCode.ino", fcppString);
+      await saveConfig("./projects/defaultCode.ino", fcppString);
 
-      await saveConfig("configs/demo.json", JSON.parse(jsonString));
+      await saveConfig("./configs/demo.json", JSON.parse(jsonString));
 
       // Handle the response as needed
     } catch (error) {

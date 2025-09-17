@@ -1,5 +1,5 @@
 import { preloadImage } from "./imageLoader";
-import type { DroppedComponent, Wire } from "~/types/circuit";
+import type { DroppedComponent, Wire } from "../types/circuit";
 
 interface PinMapData {
   "digital-pins": {
@@ -11,8 +11,6 @@ interface PinMapData {
 interface GroundSymbol extends DroppedComponent {
   pinMap: PinMapData;
   type: string;
-  name: string;
-  rotation: number;
 }
 
 export const wireColor = {
@@ -473,7 +471,7 @@ export class ComponentLoader {
       },
       pinMap: groundData,
       type: "ground",
-    };
+    } as GroundSymbol;
   }
 
   static processDeviceConnections = (

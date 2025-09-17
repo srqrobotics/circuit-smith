@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useFetcher } from "react-router";
-import type { FileSystemItem } from "~/types/files";
+// Update the import path below to the correct relative path if needed
+import type { FileSystemItem } from "../../types/files";
 import ComponentItem from "./ComponentItem";
-// import { API_KEY } from "~/config/config"; // Adjust the path as necessary
-import { useComponents } from "~/contexts/ComponentContext";
+import { useComponents } from "../../contexts/ComponentContext";
+
+// TODO: Replace with your actual API key management (never commit real keys to source control)
+const apiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY || "";
 
 useEffect(() => {
   fetch('./api/proxy')
@@ -164,7 +167,7 @@ export default function ComponentsSidebar() {
               iconPath = data.image.src;
             }
 
-            console.log("Component icon path:", iconPath);
+            // console.log("Component icon path:", iconPath);
 
             // If the icon path is relative, make it absolute
             if (
@@ -339,7 +342,7 @@ export default function ComponentsSidebar() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: API_KEY,
+            Authorization: apiKey,
           },
           body: JSON.stringify({
             model: "gpt-4o-mini",
@@ -437,7 +440,7 @@ export default function ComponentsSidebar() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: API_KEY,
+            Authorization: apiKey,
           },
           body: JSON.stringify({
             model: "gpt-4o-mini",
@@ -467,9 +470,9 @@ export default function ComponentsSidebar() {
 
       // Save the updated config back to the file
       const fcppString = cppString.split("\n");
-      await saveConfig("projects/defaultCode.ino", fcppString);
+      await saveConfig("./projects/defaultCode.ino", fcppString);
 
-      await saveConfig("configs/demo.json", JSON.parse(jsonString));
+      await saveConfig("./configs/demo.json", JSON.parse(jsonString));
 
       // Handle the response as needed
     } catch (error) {

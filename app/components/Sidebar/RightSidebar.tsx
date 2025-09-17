@@ -4,7 +4,7 @@ import { useFile } from "~/contexts/FileContext";
 import { useComponents } from "~/contexts/ComponentContext";
 import { useRightSidebar } from "~/contexts/RightSidebarContext";
 import { FaCode, FaRobot } from "react-icons/fa";
-// import { API_KEY } from "~/config/config";
+const apiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY || "";
 import { useCanvasRefresh } from "~/contexts/CanvasRefreshContext";
 
 useEffect(() => {
@@ -138,7 +138,7 @@ export default function RightSidebar() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: API_KEY,
+            Authorization: apiKey,
           },
           body: JSON.stringify({
             model: "gpt-4o-mini",
@@ -289,7 +289,7 @@ export default function RightSidebar() {
       // Format component information with pins
       const componentsInfo = componentsWithPins
         .map(
-          (comp) =>
+          (comp: { id: string; name: string; pins: string[] }) =>
             `- ${comp.name} (${comp.id}): Available pins: ${comp.pins.join(", ")}`
         )
         .join("\n");
@@ -332,7 +332,7 @@ export default function RightSidebar() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: API_KEY,
+            Authorization: apiKey,
           },
           body: JSON.stringify({
             model: "gpt-4o-mini",
@@ -376,7 +376,7 @@ export default function RightSidebar() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            file: "projects/defaultCode.ino",
+            file: "./projects/defaultCode.ino",
             content: cppString.split("\n"),
           }),
         });

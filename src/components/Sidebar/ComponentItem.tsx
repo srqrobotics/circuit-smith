@@ -21,7 +21,7 @@ export default function ComponentItem({
     } else {
       setImagePath(icon);
     }
-    console.log(`Component ${name} icon path:`, imagePath);
+    // console.log(`Component ${name} icon path:`, imagePath);
   }, [name, icon]);
 
   const handleImageError = () => {

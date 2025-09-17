@@ -131,7 +131,7 @@ export default function Canvas() {
           const projectResponse =
             await project.getDataFromProjectId(currentProjectId);
           if (projectResponse.success && projectResponse.project) {
-            const { jsonString, cppString } = projectResponse.project;
+            const { jsonString, arduino_code } = projectResponse.project;
 
             if (jsonString) {
               // Parse the JSON string to get wiring data
@@ -155,9 +155,9 @@ export default function Canvas() {
             }
 
             // Handle code data
-            if (cppString) {
-              console.log("Loaded C++ code:", cppString);
-              setCode(cppString);
+            if (arduino_code) {
+              console.log("Loaded Arduino code:", arduino_code);
+              setCode(arduino_code);
             } else {
               setCode("");
             }

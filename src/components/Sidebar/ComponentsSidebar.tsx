@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react";
 import type { FileSystemItem } from "~/types/files";
 import ComponentItem from "./ComponentItem";
 // Define a placeholder API key
-const API_KEY = "Bearer your-api-key-here";
 
 import { useComponents } from "~/contexts/ComponentContext";
 
@@ -760,7 +759,7 @@ export default function ComponentsSidebar() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: API_KEY,
+            Authorization: apiKey,
           },
           body: JSON.stringify({
             model: "gpt-4o-mini",
@@ -858,7 +857,7 @@ export default function ComponentsSidebar() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: API_KEY,
+            Authorization: apiKey,
           },
           body: JSON.stringify({
             model: "gpt-4o-mini",
@@ -888,9 +887,9 @@ export default function ComponentsSidebar() {
 
       // Save the updated config back to the file
       const fcppString = cppString.split("\n");
-      await saveConfig("projects/defaultCode.ino", fcppString);
+      await saveConfig("./projects/defaultCode.ino", fcppString);
 
-      await saveConfig("configs/demo.json", JSON.parse(jsonString));
+      await saveConfig("./configs/demo.json", JSON.parse(jsonString));
 
       // Handle the response as needed
     } catch (error) {

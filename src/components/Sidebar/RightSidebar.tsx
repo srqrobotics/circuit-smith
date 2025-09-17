@@ -321,12 +321,7 @@ export default function RightSidebar() {
         setUnsavedChanges(true);
         // Do NOT create / save project automatically anymore
         console.log("Generation complete. Changes are UNSAVED until user clicks Save.");
-        // Force editor refresh logic remains unchanged below
-        const currentFile = selectedFile;
-        setSelectedFile(null);
-        setTimeout(() => {
-          setSelectedFile(currentFile || "./projects/defaultCode.ino");
-        }, 300);
+        // No longer reset selectedFile to force refresh; setCode is enough
       } else {
         setGeneratedPrompt({
           error: "Failed to generate wiring and code. Please try again.",
