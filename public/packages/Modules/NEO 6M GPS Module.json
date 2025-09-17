@@ -3,14 +3,14 @@
     "type": "GPS Module",
     "digital-pins": {
         "id": [
-            "VCC",
+            "5V",
             "RX",
             "TX",
             "GND"
         ],
         "reloc": [
             {
-                "id": "VCC",
+                "id": "5V",
                 "points": [
                     102,
                     17

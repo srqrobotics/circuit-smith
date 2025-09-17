@@ -7,7 +7,7 @@
             "CE",
             "SCK",
             "MISO",
-            "VCC",
+            "5V",
             "CNS",
             "MOSI",
             "IRQ"
@@ -42,7 +42,7 @@
                 ]
             },
             {
-                "id": "VCC",
+                "id": "5V",
                 "points": [
                     69,
                     28
