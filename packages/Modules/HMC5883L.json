@@ -3,7 +3,7 @@
     "type": "Magnetometer Module",
     "digital-pins": {
         "id": [
-            "VCC",
+            "5V",
             "GND",
             "SCL",
             "SDA",
@@ -11,7 +11,7 @@
         ],
         "reloc": [
             {
-                "id": "VCC",
+                "id": "5V",
                 "points": [
                     205,
                     22

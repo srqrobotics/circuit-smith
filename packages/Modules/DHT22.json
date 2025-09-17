@@ -3,14 +3,14 @@
     "type": "Temperature and Humidity Sensor",
     "digital-pins": {
         "id": [
-            "Vcc",
+            "5V",
             "Data",
             "NC",
             "Gnd"
         ],
         "reloc": [
             {
-                "id": "Vcc",
+                "id": "5V",
                 "points": [
                     67,
                     494

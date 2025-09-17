@@ -3,7 +3,7 @@
     "type": "Sensor",
     "digital-pins": {
         "id": [
-            "VCC",
+            "5V",
             "GND",
             "SCL",
             "SDA",

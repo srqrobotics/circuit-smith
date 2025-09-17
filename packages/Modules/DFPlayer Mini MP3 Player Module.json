@@ -3,7 +3,7 @@
     "type": "sensor",
     "digital-pins": {
         "id": [
-            "VCC",
+            "5V",
             "RX",
             "TX",
             "DAC_R",
@@ -22,7 +22,7 @@
         ],
         "reloc": [
             {
-                "id": "VCC",
+                "id": "5V",
                 "points": [
                     20,
                     30

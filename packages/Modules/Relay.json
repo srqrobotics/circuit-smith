@@ -3,7 +3,7 @@
     "type": "RELAY Module",
     "digital-pins": {
         "id": [
-            "VCC",
+            "5V",
             "GND",
             "IN",
             "NC",
@@ -12,7 +12,7 @@
         ],
         "reloc": [
             {
-                "id": "VCC",
+                "id": "5V",
                 "points": [
                     2,
                     43
