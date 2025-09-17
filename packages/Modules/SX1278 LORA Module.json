@@ -10,8 +10,8 @@
             "RST",
             "3.3V",
             "GND_3",
-            "GND_2",
-            "GND_1",
+            "GND-2",
+            "GND-1",
             "NSS",
             "MOSI",
             "MISO",
@@ -71,14 +71,14 @@
                 ]
             },
             {
-                "id": "GND_2",
+                "id": "GND-2",
                 "points": [
                     20,
                     467
                 ]
             },
             {
-                "id": "GND_1",
+                "id": "GND-1",
                 "points": [
                     21,
                     24
