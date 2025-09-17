@@ -60,88 +60,308 @@ export default function ComponentsSidebar() {
   // Mock data for development when API is not available - now using actual component structure
   const mockComponents: FileSystemItem[] = [
     {
-      name: "Microcontrollers",
-      path: "/components/microcontrollers",
-      type: "directory",
-      children: [
+      "name": "Microcontrollers",
+      "path": "./packages/Microcontrollers",
+      "type": "directory",
+      "children": [
         {
-          name: "Arduino",
-          path: "/components/microcontrollers/arduino",
-          type: "directory",
-          children: [
+          "name": "Arduino",
+          "path": "./packages/Microcontrollers/Arduino",
+          "type": "directory",
+          "children": [
             {
-              name: "ArduinoUNO.json",
-              path: "./packages/Microcontrollers/Arduino/ArduinoUNO.json",
-              type: "file",
+              "name": "ArduinoMega.json",
+              "path": "./packages/Microcontrollers/Arduino/ArduinoMega.json",
+              "type": "file"
             },
             {
-              name: "ArduinoMega.json",
-              path: "./packages/Microcontrollers/Arduino/ArduinoMega.json",
-              type: "file",
+              "name": "ArduinoNano.json",
+              "path": "./packages/Microcontrollers/Arduino/ArduinoNano.json",
+              "type": "file"
             },
             {
-              name: "ArduinoNano.json",
-              path: "./packages/Microcontrollers/Arduino/ArduinoNano.json",
-              type: "file",
-            },
-          ],
+              "name": "ArduinoUNO.json",
+              "path": "./packages/Microcontrollers/Arduino/ArduinoUNO.json",
+              "type": "file"
+            }
+          ]
         },
         {
-          name: "Espressif",
-          path: "/components/microcontrollers/espressif",
-          type: "directory",
-          children: [
+          "name": "Espressif",
+          "path": "./packages/Microcontrollers/Espressif",
+          "type": "directory",
+          "children": [
             {
-              name: "ESP32Wroom.json",
-              path: "./packages/Microcontrollers/Espressif/ESP32Wroom.json",
-              type: "file",
+              "name": "ESP32Wroom.json",
+              "path": "./packages/Microcontrollers/Espressif/ESP32Wroom.json",
+              "type": "file"
             },
             {
-              name: "NodeMCU.json",
-              path: "./packages/Microcontrollers/Espressif/NodeMCU.json",
-              type: "file",
-            },
-          ],
-        },
-      ],
+              "name": "NodeMCU.json",
+              "path": "./packages/Microcontrollers/Espressif/NodeMCU.json",
+              "type": "file"
+            }
+          ]
+        }
+      ]
     },
     {
-      name: "Sensors",
-      path: "/components/sensors",
-      type: "directory",
-      children: [
+      "name": "Modules",
+      "path": "./packages/modules",
+      "type": "directory",
+      "children": [
         {
-          name: "DHT22.json",
-          path: "./packages/Modules/DHT22.json",
-          type: "file",
+          "name": "A3144 Hall Effect Sensor Module.json",
+          "path": "./packages/Modules/A3144 Hall Effect Sensor Module.json",
+          "type": "file"
         },
         {
-          name: "I2C_LCD.json",
-          path: "./packages/Modules/I2C_LCD.json",
-          type: "file",
+          "name": "ADXL345 Accelerometer Module.json",
+          "path": "./packages/Modules/ADXL345 Accelerometer Module.json",
+          "type": "file"
         },
         {
-          name: "LDR_Sensor.json",
-          path: "./packages/Modules/LDR_Sensor.json",
-          type: "file",
+          "name": "AS608-Optical-Fingerprint-Sensor.json",
+          "path": "./packages/Modules/AS608-Optical-Fingerprint-Sensor.json",
+          "type": "file"
         },
         {
-          name: "PIR_Sensor.json",
-          path: "./packages/Modules/PIR_Sensor.json",
-          type: "file",
+          "name": "BME280 Temperature, Humidity, and Pressure Sensor.json",
+          "path": "./packages/Modules/BME280 Temperature, Humidity, and Pressure Sensor.json",
+          "type": "file"
         },
         {
-          name: "servo_SG90.json",
-          path: "./packages/Modules/servo_SG90.json",
-          type: "file",
+          "name": "BMP280 Module.json",
+          "path": "./packages/Modules/BMP280 Module.json",
+          "type": "file"
         },
         {
-          name: "ultrasonic_SR04.json",
-          path: "./packages/Modules/ultrasonic_SR04.json",
-          type: "file",
+          "name": "CO2 Sensor Module (MH-Z19).json",
+          "path": "./packages/Modules/CO2 Sensor Module (MH-Z19).json",
+          "type": "file"
         },
-      ],
-    },
+        {
+          "name": "Capacitive Touch Sensor Module (TTP223).json",
+          "path": "./packages/Modules/Capacitive Touch Sensor Module (TTP223).json",
+          "type": "file"
+        },
+        {
+          "name": "DFPlayer Mini MP3 Player Module.json",
+          "path": "./packages/Modules/DFPlayer Mini MP3 Player Module.json",
+          "type": "file"
+        },
+        {
+          "name": "DHT22.json",
+          "path": "./packages/Modules/DHT22.json",
+          "type": "file"
+        },
+        {
+          "name": "DS18B20 Waterproof Temperature Sensor.json",
+          "path": "./packages/Modules/DS18B20 Waterproof Temperature Sensor.json",
+          "type": "file"
+        },
+        {
+          "name": "Flame Sensor Module.json",
+          "path": "./packages/Modules/Flame Sensor Module.json",
+          "type": "file"
+        },
+        {
+          "name": "Gas.json",
+          "path": "./packages/Modules/Gas.json",
+          "type": "file"
+        },
+        {
+          "name": "Gesture Sensor Module (APDS-9960).json",
+          "path": "./packages/Modules/Gesture Sensor Module (APDS-9960).json",
+          "type": "file"
+        },
+        {
+          "name": "HC-05 BT Module.json",
+          "path": "./packages/Modules/HC-05 BT Module.json",
+          "type": "file"
+        },
+        {
+          "name": "HMC5883L.json",
+          "path": "./packages/Modules/HMC5883L.json",
+          "type": "file"
+        },
+        {
+          "name": "HX711 Load Cell Amp.json",
+          "path": "./packages/Modules/HX711 Load Cell Amp.json",
+          "type": "file"
+        },
+        {
+          "name": "I2C LCD.json",
+          "path": "./packages/Modules/I2C LCD.json",
+          "type": "file"
+        },
+        {
+          "name": "INA219 Current Sensor Module.json",
+          "path": "./packages/Modules/INA219 Current Sensor Module.json",
+          "type": "file"
+        },
+        {
+          "name": "IR Receiver.json",
+          "path": "./packages/Modules/IR Receiver.json",
+          "type": "file"
+        },
+        {
+          "name": "KY-008 Laser Diode Module.json",
+          "path": "./packages/Modules/KY-008 Laser Diode Module.json",
+          "type": "file"
+        },
+        {
+          "name": "KY-040 Rotary Encoder Module.json",
+          "path": "./packages/Modules/KY-040 Rotary Encoder Module.json",
+          "type": "file"
+        },
+        {
+          "name": "Keypad Module.json",
+          "path": "./packages/Modules/Keypad Module.json",
+          "type": "file"
+        },
+        {
+          "name": "L298 Motor Driver.json",
+          "path": "./packages/Modules/L298 Motor Driver.json",
+          "type": "file"
+        },
+        {
+          "name": "LDR Light Sensor Module.json",
+          "path": "./packages/Modules/LDR Light Sensor Module.json",
+          "type": "file"
+        },
+        {
+          "name": "MAX30100 Sensor.json",
+          "path": "./packages/Modules/MAX30100 Sensor.json",
+          "type": "file"
+        },
+        {
+          "name": "MAX6675 Thermocouple Temperature Sensor Module.json",
+          "path": "./packages/Modules/MAX6675 Thermocouple Temperature Sensor Module.json",
+          "type": "file"
+        },
+        {
+          "name": "MAX7219 Dot Matrix Display Module.json",
+          "path": "./packages/Modules/MAX7219 Dot Matrix Display Module.json",
+          "type": "file"
+        },
+        {
+          "name": "MPU 6050.json",
+          "path": "./packages/Modules/MPU 6050.json",
+          "type": "file"
+        },
+        {
+          "name": "MPU9250 9-DOF IMU Module.json",
+          "path": "./packages/Modules/MPU9250 9-DOF IMU Module.json",
+          "type": "file"
+        },
+        {
+          "name": "NEO 6M GPS Module.json",
+          "path": "./packages/Modules/NEO 6M GPS Module.json",
+          "type": "file"
+        },
+        {
+          "name": "NRF24L01+ Wireless Transceiver Module.json",
+          "path": "./packages/Modules/NRF24L01+ Wireless Transceiver Module.json",
+          "type": "file"
+        },
+        {
+          "name": "OLED Display.json",
+          "path": "./packages/Modules/OLED Display.json",
+          "type": "file"
+        },
+        {
+          "name": "PIR Motion Sensor.json",
+          "path": "./packages/Modules/PIR Motion Sensor.json",
+          "type": "file"
+        },
+        {
+          "name": "RCWL-0516 Microwave Motion Sensor.json",
+          "path": "./packages/Modules/RCWL-0516 Microwave Motion Sensor.json",
+          "type": "file"
+        },
+        {
+          "name": "RF Receiver Module (433 MHz).json",
+          "path": "./packages/Modules/RF Receiver Module (433 MHz).json",
+          "type": "file"
+        },
+        {
+          "name": "RF Transmitter Module (433 MHz).json",
+          "path": "./packages/Modules/RF Transmitter Module (433 MHz).json",
+          "type": "file"
+        },
+        {
+          "name": "RFID RC522.json",
+          "path": "./packages/Modules/RFID RC522.json",
+          "type": "file"
+        },
+        {
+          "name": "Relay.json",
+          "path": "./packages/Modules/Relay.json",
+          "type": "file"
+        },
+        {
+          "name": "Rtc Module.json",
+          "path": "./packages/Modules/Rtc Module.json",
+          "type": "file"
+        },
+        {
+          "name": "SD card Module.json",
+          "path": "./packages/Modules/SD card Module.json",
+          "type": "file"
+        },
+        {
+          "name": "SX1278 LORA Module.json",
+          "path": "./packages/Modules/SX1278 LORA Module.json",
+          "type": "file"
+        },
+        {
+          "name": "Soil Moisture Sensor Module.json",
+          "path": "./packages/Modules/Soil Moisture Sensor Module.json",
+          "type": "file"
+        },
+        {
+          "name": "Sound Sensor Module (KY-038).json",
+          "path": "./packages/Modules/Sound Sensor Module (KY-038).json",
+          "type": "file"
+        },
+        {
+          "name": "Stepper Motor Driver Module A4988.json",
+          "path": "./packages/Modules/Stepper Motor Driver Module A4988.json",
+          "type": "file"
+        },
+        {
+          "name": "TCS3200 Color Detection Sensor Module.json",
+          "path": "./packages/Modules/TCS3200 Color Detection Sensor Module.json",
+          "type": "file"
+        },
+        {
+          "name": "UV Sensor Module (ML8511).json",
+          "path": "./packages/Modules/UV Sensor Module (ML8511).json",
+          "type": "file"
+        },
+        {
+          "name": "buzzer.json",
+          "path": "./packages/Modules/buzzer.json",
+          "type": "file"
+        },
+        {
+          "name": "ov7670-camera-module.json",
+          "path": "./packages/Modules/ov7670-camera-module.json",
+          "type": "file"
+        },
+        {
+          "name": "servo-SG90.json",
+          "path": "./packages/Modules/servo-SG90.json",
+          "type": "file"
+        },
+        {
+          "name": "ultrasonic-SR04.json",
+          "path": "./packages/Modules/ultrasonic-SR04.json",
+          "type": "file"
+        }
+      ]
+    }
   ];
 
   // Use regular fetch instead of useFetcher
@@ -236,9 +456,8 @@ export default function ComponentsSidebar() {
           componentId.toLowerCase().includes("esp") ||
           componentId.toLowerCase().includes("node")
         ) {
-          path = `./packages/Microcontrollers/${
-            componentId.includes("Arduino") ? "Arduino" : "Espressif"
-          }/${componentId}.json`;
+          path = `./packages/Microcontrollers/${componentId.includes("Arduino") ? "Arduino" : "Espressif"
+            }/${componentId}.json`;
         } else {
           path = `./packages/Modules/${componentId}.json`;
         }
@@ -251,11 +470,10 @@ export default function ComponentsSidebar() {
             id: componentId,
             name: data.name || componentId,
             image: {
-              src: `./packages/${
-                componentId.includes("Arduino") || componentId.includes("ESP")
+              src: `./packages/${componentId.includes("Arduino") || componentId.includes("ESP")
                   ? "Microcontrollers"
                   : "Modules"
-              }/${componentId}.png`,
+                }/${componentId}.png`,
               width: 100,
               height: 100,
             },
@@ -274,9 +492,8 @@ export default function ComponentsSidebar() {
         image: {
           src:
             componentId.includes("Arduino") || componentId.includes("ESP")
-              ? `./packages/Microcontrollers/${
-                  componentId.includes("Arduino") ? "Arduino" : "Espressif"
-                }/${componentId}.png`
+              ? `./packages/Microcontrollers/${componentId.includes("Arduino") ? "Arduino" : "Espressif"
+              }/${componentId}.png`
               : `./packages/Modules/${componentId}.png`,
           width: 100,
           height: 100,
@@ -828,9 +1045,8 @@ export default function ComponentsSidebar() {
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className={`transform transition-transform duration-200 ${
-                expandedCategories.has(category.name) ? "rotate-180" : ""
-              }`}
+              className={`transform transition-transform duration-200 ${expandedCategories.has(category.name) ? "rotate-180" : ""
+                }`}
             >
               <polyline points="6 9 12 15 18 9"></polyline>
             </svg>
@@ -844,11 +1060,10 @@ export default function ComponentsSidebar() {
                   {category.items.map((item) => (
                     <div
                       key={item.id}
-                      className={`cursor-pointer ${
-                        selectedComponents.includes(item.id)
+                      className={`cursor-pointer ${selectedComponents.includes(item.id)
                           ? "ring-2 ring-green-500"
                           : ""
-                      }`}
+                        }`}
                       onClick={() => toggleComponentSelection(item.id)}
                     >
                       <ComponentItem
@@ -918,11 +1133,10 @@ export default function ComponentsSidebar() {
                 {filteredComponents.map((component) => (
                   <div
                     key={component.id}
-                    className={`cursor-pointer ${
-                      selectedComponents.includes(component.id)
+                    className={`cursor-pointer ${selectedComponents.includes(component.id)
                         ? "ring-2 ring-green-500"
                         : ""
-                    }`}
+                      }`}
                     onClick={() => toggleComponentSelection(component.id)}
                   >
                     <ComponentItem
