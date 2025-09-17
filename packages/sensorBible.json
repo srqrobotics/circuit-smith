@@ -1,93 +1,753 @@
 {
     "components": [
         {
+            "id": "A3144 Hall Effect Sensor Module",
+            "name": "A3144 Hall Effect Sensor Module",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "image": {
+                "src": "./packages/Modules/A3144 Hall Effect Sensor Module.png",
+                "width": 300,
+                "height": 106
+            },
+            "pin-map": {
+                "src": "./packages/Modules/A3144 Hall Effect Sensor Module.json"
+            }
+        },
+        {
+            "id": "ADXL345 Accelerometer Module",
+            "name": "ADXL345 Accelerometer Module",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "image": {
+                "src": "./packages/Modules/ADXL345 Accelerometer Module.png",
+                "width": 231,
+                "height": 300
+            },
+            "pin-map": {
+                "src": "./packages/Modules/ADXL345 Accelerometer Module.json"
+            }
+        },
+        {
+            "id": "AS608-Optical-Fingerprint-Sensor",
+            "name": "AS608-Optical-Fingerprint-Sensor",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "image": {
+                "src": "./packages/Modules/AS608-Optical-Fingerprint-Sensor.png",
+                "width": 600,
+                "height": 251
+            },
+            "pin-map": {
+                "src": "./packages/Modules/AS608-Optical-Fingerprint-Sensor.json"
+            }
+        },
+        {
+            "id": "BME280 Temperature, Humidity, and Pressure Sensor",
+            "name": "BME280 Temperature, Humidity, and Pressure Sensor",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "image": {
+                "src": "./packages/Modules/BME280 Temperature, Humidity, and Pressure Sensor.png",
+                "width": 200,
+                "height": 153
+            },
+            "pin-map": {
+                "src": "./packages/Modules/BME280 Temperature, Humidity, and Pressure Sensor.json"
+            }
+        },
+        {
+            "id": "BMP280 Module",
+            "name": "BMP280 Module",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "image": {
+                "src": "./packages/Modules/BMP280 Module.png",
+                "width": 146,
+                "height": 200
+            },
+            "pin-map": {
+                "src": "./packages/Modules/BMP280 Module.json"
+            }
+        },
+        {
+            "id": "buzzer",
+            "name": "buzzer",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "image": {
+                "src": "./packages/Modules/buzzer.png",
+                "width": 256,
+                "height": 300
+            },
+            "pin-map": {
+                "src": "./packages/Modules/buzzer.json"
+            }
+        },
+        {
+            "id": "Capacitive Touch Sensor Module (TTP223)",
+            "name": "Capacitive Touch Sensor Module (TTP223)",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "image": {
+                "src": "./packages/Modules/Capacitive Touch Sensor Module (TTP223).png",
+                "width": 211,
+                "height": 260
+            },
+            "pin-map": {
+                "src": "./packages/Modules/Capacitive Touch Sensor Module (TTP223).json"
+            }
+        },
+        {
+            "id": "CO2 Sensor Module (MH-Z19)",
+            "name": "CO2 Sensor Module (MH-Z19)",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "image": {
+                "src": "./packages/Modules/CO2 Sensor Module (MH-Z19).png",
+                "width": 600,
+                "height": 361
+            },
+            "pin-map": {
+                "src": "./packages/Modules/CO2 Sensor Module (MH-Z19).json"
+            }
+        },
+        {
+            "id": "DFPlayer Mini MP3 Player Module",
+            "name": "DFPlayer Mini MP3 Player Module",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "image": {
+                "src": "./packages/Modules/DFPlayer Mini MP3 Player Module.png",
+                "width": 350,
+                "height": 345
+            },
+            "pin-map": {
+                "src": "./packages/Modules/DFPlayer Mini MP3 Player Module.json"
+            }
+        },
+        {
             "id": "DHT22",
             "name": "DHT22",
-            "x": 1763,
-            "y": 408,
+            "x": 0,
+            "y": 0,
             "rotation": 0,
             "image": {
                 "src": "./packages/Modules/DHT22.png",
-                "width": 0,
-                "height": 0
+                "width": 254,
+                "height": 500
             },
             "pin-map": {
                 "src": "./packages/Modules/DHT22.json"
             }
         },
         {
-            "id": "I2C_LCD",
-            "name": "I2C_LCD",
-            "x": 2519,
-            "y": 915,
+            "id": "DS18B20 Waterproof Temperature Sensor",
+            "name": "DS18B20 Waterproof Temperature Sensor",
+            "x": 0,
+            "y": 0,
             "rotation": 0,
             "image": {
-                "src": "./packages/Modules/I2C_LCD.png",
-                "width": 0,
-                "height": 0
+                "src": "./packages/Modules/DS18B20 Waterproof Temperature Sensor.png",
+                "width": 600,
+                "height": 382
             },
             "pin-map": {
-                "src": "./packages/Modules/I2C_LCD.json"
+                "src": "./packages/Modules/DS18B20 Waterproof Temperature Sensor.json"
             }
         },
         {
-            "id": "LDR_Sensor",
-            "name": "LDR_Sensor",
-            "x": 845,
-            "y": 392,
+            "id": "Flame Sensor Module",
+            "name": "Flame Sensor Module",
+            "x": 0,
+            "y": 0,
             "rotation": 0,
             "image": {
-                "src": "./packages/Modules/LDR_Sensor.png",
-                "width": 0,
-                "height": 0
+                "src": "./packages/Modules/Flame Sensor Module.png",
+                "width": 350,
+                "height": 102
             },
             "pin-map": {
-                "src": "./packages/Modules/LDR_Sensor.json"
+                "src": "./packages/Modules/Flame Sensor Module.json"
             }
         },
         {
-            "id": "PIR_Sensor",
-            "name": "PIR_Sensor",
-            "x": 440,
-            "y": 405,
+            "id": "Gas",
+            "name": "Gas",
+            "x": 0,
+            "y": 0,
             "rotation": 0,
             "image": {
-                "src": "./packages/Modules/PIR_Sensor.png",
-                "width": 0,
-                "height": 0
+                "src": "./packages/Modules/Gas.png",
+                "width": 450,
+                "height": 195
             },
             "pin-map": {
-                "src": "./packages/Modules/PIR_Sensor.json"
+                "src": "./packages/Modules/Gas.json"
             }
         },
         {
-            "id": "servo_SG90",
-            "name": "servo_SG90",
-            "x": 2246,
-            "y": 1276,
+            "id": "Gesture Sensor Module (APDS-9960)",
+            "name": "Gesture Sensor Module (APDS-9960)",
+            "x": 0,
+            "y": 0,
             "rotation": 0,
             "image": {
-                "src": "./packages/Modules/servo_SG90.png",
-                "width": 0,
-                "height": 0
+                "src": "./packages/Modules/Gesture Sensor Module (APDS-9960).png",
+                "width": 168,
+                "height": 230
             },
             "pin-map": {
-                "src": "./packages/Modules/servo_SG90.json"
+                "src": "./packages/Modules/Gesture Sensor Module (APDS-9960).json"
             }
         },
         {
-            "id": "ultrasonic_SR04",
-            "name": "ultrasonic_SR04",
-            "x": 1940,
-            "y": 614,
+            "id": "HC-05 BT Module",
+            "name": "HC-05 BT Module",
+            "x": 0,
+            "y": 0,
             "rotation": 0,
             "image": {
-                "src": "./packages/Modules/ultrasonic_SR04.png",
-                "width": 0,
-                "height": 0
+                "src": "./packages/Modules/HC-05 BT Module.png",
+                "width": 114,
+                "height": 320
             },
             "pin-map": {
-                "src": "./packages/Modules/ultrasonic_SR04.json"
+                "src": "./packages/Modules/HC-05 BT Module.json"
+            }
+        },
+        {
+            "id": "HMC5883L",
+            "name": "HMC5883L",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "image": {
+                "src": "./packages/Modules/HMC5883L.png",
+                "width": 220,
+                "height": 159
+            },
+            "pin-map": {
+                "src": "./packages/Modules/HMC5883L.json"
+            }
+        },
+        {
+            "id": "HX711 Load Cell Amp",
+            "name": "HX711 Load Cell Amp",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "image": {
+                "src": "./packages/Modules/HX711 Load Cell Amp.png",
+                "width": 440,
+                "height": 232
+            },
+            "pin-map": {
+                "src": "./packages/Modules/HX711 Load Cell Amp.json"
+            }
+        },
+        {
+            "id": "I2C LCD",
+            "name": "I2C LCD",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "image": {
+                "src": "./packages/Modules/I2C LCD.png",
+                "width": 800,
+                "height": 360
+            },
+            "pin-map": {
+                "src": "./packages/Modules/I2C LCD.json"
+            }
+        },
+        {
+            "id": "INA219 Current Sensor Module",
+            "name": "INA219 Current Sensor Module",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "image": {
+                "src": "./packages/Modules/INA219 Current Sensor Module.png",
+                "width": 350,
+                "height": 307
+            },
+            "pin-map": {
+                "src": "./packages/Modules/INA219 Current Sensor Module.json"
+            }
+        },
+        {
+            "id": "IR Receiver",
+            "name": "IR Receiver",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "image": {
+                "src": "./packages/Modules/IR Receiver.png",
+                "width": 250,
+                "height": 171
+            },
+            "pin-map": {
+                "src": "./packages/Modules/IR Receiver.json"
+            }
+        },
+        {
+            "id": "Keypad Module",
+            "name": "Keypad Module",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "image": {
+                "src": "./packages/Modules/Keypad Module.png",
+                "width": 500,
+                "height": 386
+            },
+            "pin-map": {
+                "src": "./packages/Modules/Keypad Module.json"
+            }
+        },
+        {
+            "id": "KY-008 Laser Diode Module",
+            "name": "KY-008 Laser Diode Module",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "image": {
+                "src": "./packages/Modules/KY-008 Laser Diode Module.png",
+                "width": 141,
+                "height": 250
+            },
+            "pin-map": {
+                "src": "./packages/Modules/KY-008 Laser Diode Module.json"
+            }
+        },
+        {
+            "id": "KY-040 Rotary Encoder Module",
+            "name": "KY-040 Rotary Encoder Module",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "image": {
+                "src": "./packages/Modules/KY-040 Rotary Encoder Module.png",
+                "width": 250,
+                "height": 177
+            },
+            "pin-map": {
+                "src": "./packages/Modules/KY-040 Rotary Encoder Module.json"
+            }
+        },
+        {
+            "id": "L298 Motor Driver",
+            "name": "L298 Motor Driver",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "image": {
+                "src": "./packages/Modules/L298 Motor Driver.png",
+                "width": 498,
+                "height": 500
+            },
+            "pin-map": {
+                "src": "./packages/Modules/L298 Motor Driver.json"
+            }
+        },
+        {
+            "id": "LDR Light Sensor Module",
+            "name": "LDR Light Sensor Module",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "image": {
+                "src": "./packages/Modules/LDR Light Sensor Module.png",
+                "width": 127,
+                "height": 350
+            },
+            "pin-map": {
+                "src": "./packages/Modules/LDR Light Sensor Module.json"
+            }
+        },
+        {
+            "id": "MAX30100 Sensor",
+            "name": "MAX30100 Sensor",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "image": {
+                "src": "./packages/Modules/MAX30100 Sensor.png",
+                "width": 214,
+                "height": 300
+            },
+            "pin-map": {
+                "src": "./packages/Modules/MAX30100 Sensor.json"
+            }
+        },
+        {
+            "id": "MAX6675 Thermocouple Temperature Sensor Module",
+            "name": "MAX6675 Thermocouple Temperature Sensor Module",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "image": {
+                "src": "./packages/Modules/MAX6675 Thermocouple Temperature Sensor Module.png",
+                "width": 399,
+                "height": 194
+            },
+            "pin-map": {
+                "src": "./packages/Modules/MAX6675 Thermocouple Temperature Sensor Module.json"
+            }
+        },
+        {
+            "id": "MAX7219 Dot Matrix Display Module",
+            "name": "MAX7219 Dot Matrix Display Module",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "image": {
+                "src": "./packages/Modules/MAX7219 Dot Matrix Display Module.png",
+                "width": 700,
+                "height": 155
+            },
+            "pin-map": {
+                "src": "./packages/Modules/MAX7219 Dot Matrix Display Module.json"
+            }
+        },
+        {
+            "id": "MPU 6050",
+            "name": "MPU 6050",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "image": {
+                "src": "./packages/Modules/MPU 6050.png",
+                "width": 200,
+                "height": 149
+            },
+            "pin-map": {
+                "src": "./packages/Modules/MPU 6050.json"
+            }
+        },
+        {
+            "id": "MPU9250 9-DOF IMU Module",
+            "name": "MPU9250 9-DOF IMU Module",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "image": {
+                "src": "./packages/Modules/MPU9250 9-DOF IMU Module.png",
+                "width": 176,
+                "height": 300
+            },
+            "pin-map": {
+                "src": "./packages/Modules/MPU9250 9-DOF IMU Module.json"
+            }
+        },
+        {
+            "id": "NEO 6M GPS Module",
+            "name": "NEO 6M GPS Module",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "image": {
+                "src": "./packages/Modules/NEO 6M GPS Module.png",
+                "width": 300,
+                "height": 400
+            },
+            "pin-map": {
+                "src": "./packages/Modules/NEO 6M GPS Module.json"
+            }
+        },
+        {
+            "id": "NRF24L01+ Wireless Transceiver Module",
+            "name": "NRF24L01+ Wireless Transceiver Module",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "image": {
+                "src": "./packages/Modules/NRF24L01+ Wireless Transceiver Module.png",
+                "width": 500,
+                "height": 264
+            },
+            "pin-map": {
+                "src": "./packages/Modules/NRF24L01+ Wireless Transceiver Module.json"
+            }
+        },
+        {
+            "id": "OLED Display",
+            "name": "OLED Display",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "image": {
+                "src": "./packages/Modules/OLED Display.png",
+                "width": 500,
+                "height": 410
+            },
+            "pin-map": {
+                "src": "./packages/Modules/OLED Display.json"
+            }
+        },
+        {
+            "id": "ov7670-camera-module",
+            "name": "ov7670-camera-module",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "image": {
+                "src": "./packages/Modules/ov7670-camera-module.png",
+                "width": 300,
+                "height": 290
+            },
+            "pin-map": {
+                "src": "./packages/Modules/ov7670-camera-module.json"
+            }
+        },
+        {
+            "id": "PIR Motion Sensor",
+            "name": "PIR Motion Sensor",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "image": {
+                "src": "./packages/Modules/PIR Motion Sensor.png",
+                "width": 739,
+                "height": 750
+            },
+            "pin-map": {
+                "src": "./packages/Modules/PIR Motion Sensor.json"
+            }
+        },
+        {
+            "id": "RCWL-0516 Microwave Motion Sensor",
+            "name": "RCWL-0516 Microwave Motion Sensor",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "image": {
+                "src": "./packages/Modules/RCWL-0516 Microwave Motion Sensor.png",
+                "width": 460,
+                "height": 221
+            },
+            "pin-map": {
+                "src": "./packages/Modules/RCWL-0516 Microwave Motion Sensor.json"
+            }
+        },
+        {
+            "id": "Relay",
+            "name": "Relay",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "image": {
+                "src": "./packages/Modules/Relay.png",
+                "width": 300,
+                "height": 136
+            },
+            "pin-map": {
+                "src": "./packages/Modules/Relay.json"
+            }
+        },
+        {
+            "id": "RF Receiver Module (433 MHz)",
+            "name": "RF Receiver Module (433 MHz)",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "image": {
+                "src": "./packages/Modules/RF Receiver Module (433 MHz).png",
+                "width": 350,
+                "height": 239
+            },
+            "pin-map": {
+                "src": "./packages/Modules/RF Receiver Module (433 MHz).json"
+            }
+        },
+        {
+            "id": "RF Transmitter Module (433 MHz)",
+            "name": "RF Transmitter Module (433 MHz)",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "image": {
+                "src": "./packages/Modules/RF Transmitter Module (433 MHz).png",
+                "width": 350,
+                "height": 266
+            },
+            "pin-map": {
+                "src": "./packages/Modules/RF Transmitter Module (433 MHz).json"
+            }
+        },
+        {
+            "id": "RFID RC522",
+            "name": "RFID RC522",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "image": {
+                "src": "./packages/Modules/RFID RC522.png",
+                "width": 400,
+                "height": 259
+            },
+            "pin-map": {
+                "src": "./packages/Modules/RFID RC522.json"
+            }
+        },
+        {
+            "id": "Rtc Module",
+            "name": "Rtc Module",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "image": {
+                "src": "./packages/Modules/Rtc Module.png",
+                "width": 300,
+                "height": 172
+            },
+            "pin-map": {
+                "src": "./packages/Modules/Rtc Module.json"
+            }
+        },
+        {
+            "id": "SD card Module",
+            "name": "SD card Module",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "image": {
+                "src": "./packages/Modules/SD card Module.png",
+                "width": 250,
+                "height": 237
+            },
+            "pin-map": {
+                "src": "./packages/Modules/SD card Module.json"
+            }
+        },
+        {
+            "id": "servo-SG90",
+            "name": "servo-SG90",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "image": {
+                "src": "./packages/Modules/servo-SG90.png",
+                "width": 220,
+                "height": 106
+            },
+            "pin-map": {
+                "src": "./packages/Modules/servo-SG90.json"
+            }
+        },
+        {
+            "id": "Soil Moisture Sensor Module",
+            "name": "Soil Moisture Sensor Module",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "image": {
+                "src": "./packages/Modules/Soil Moisture Sensor Module.png",
+                "width": 500,
+                "height": 154
+            },
+            "pin-map": {
+                "src": "./packages/Modules/Soil Moisture Sensor Module.json"
+            }
+        },
+        {
+            "id": "Sound Sensor Module (KY-038)",
+            "name": "Sound Sensor Module (KY-038)",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "image": {
+                "src": "./packages/Modules/Sound Sensor Module (KY-038).png",
+                "width": 350,
+                "height": 118
+            },
+            "pin-map": {
+                "src": "./packages/Modules/Sound Sensor Module (KY-038).json"
+            }
+        },
+        {
+            "id": "Stepper Motor Driver Module A4988",
+            "name": "Stepper Motor Driver Module A4988",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "image": {
+                "src": "./packages/Modules/Stepper Motor Driver Module A4988.png",
+                "width": 300,
+                "height": 400
+            },
+            "pin-map": {
+                "src": "./packages/Modules/Stepper Motor Driver Module A4988.json"
+            }
+        },
+        {
+            "id": "SX1278 LORA Module",
+            "name": "SX1278 LORA Module",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "image": {
+                "src": "./packages/Modules/SX1278 LORA Module.png",
+                "width": 354,
+                "height": 490
+            },
+            "pin-map": {
+                "src": "./packages/Modules/SX1278 LORA Module.json"
+            }
+        },
+        {
+            "id": "TCS3200 Color Detection Sensor Module",
+            "name": "TCS3200 Color Detection Sensor Module",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "image": {
+                "src": "./packages/Modules/TCS3200 Color Detection Sensor Module.png",
+                "width": 400,
+                "height": 384
+            },
+            "pin-map": {
+                "src": "./packages/Modules/TCS3200 Color Detection Sensor Module.json"
+            }
+        },
+        {
+            "id": "ultrasonic-SR04",
+            "name": "ultrasonic-SR04",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "image": {
+                "src": "./packages/Modules/ultrasonic-SR04.png",
+                "width": 450,
+                "height": 246
+            },
+            "pin-map": {
+                "src": "./packages/Modules/ultrasonic-SR04.json"
+            }
+        },
+        {
+            "id": "UV Sensor Module (ML8511)",
+            "name": "UV Sensor Module (ML8511)",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "image": {
+                "src": "./packages/Modules/UV Sensor Module (ML8511).png",
+                "width": 250,
+                "height": 248
+            },
+            "pin-map": {
+                "src": "./packages/Modules/UV Sensor Module (ML8511).json"
             }
         }
     ]
