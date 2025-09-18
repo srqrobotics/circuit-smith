@@ -1,5 +1,5 @@
-import GoogleCallbackPage from "./pages/GoogleCallbackPage";
 import React from "react";
+import GoogleCallbackPage from "./pages/GoogleCallbackPage";
 import { Routes, Route } from "react-router-dom";
 import SplashPage from "./pages/SplashPage";
 import LoginPage from "./pages/LoginPage";

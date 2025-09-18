@@ -790,6 +790,21 @@ export default function Canvas() {
         scaleY={scale}
         ref={stageRef}
       >
+        {/* Origin Cross Layer: Draw a 100x100px cross at the origin */}
+        <Layer listening={false}>
+          {/* Vertical line of the cross */}
+          <Line
+            points={[-50, 0, 50, 0]}
+            stroke={'#888'}
+            strokeWidth={2}
+          />
+          {/* Horizontal line of the cross */}
+          <Line
+            points={[0, -50, 0, 50]}
+            stroke={'#888'}
+            strokeWidth={2}
+          />
+        </Layer>
         <Layer>
           {/* Render components */}
           {components.map((component) => (
