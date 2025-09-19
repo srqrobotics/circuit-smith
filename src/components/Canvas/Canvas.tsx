@@ -27,7 +27,7 @@ export default function Canvas() {
   }>({});
   const [isDraggingComponent, setIsDraggingComponent] = useState(false);
   const stageRef = useRef<any>(null);
-  const [isCtrlPressed, setIsCtrlPressed] = useState(false);
+  const [isShiftPressed, setIsShiftPressed] = useState(false);
   const { setCoordinates } = useCoordinates();
   const { autoRoutingEnabled } = useAutoRouting();
   const [hoveredComponentName, setHoveredComponentName] = useState<
@@ -364,14 +364,14 @@ export default function Canvas() {
     }
   }, [currentProjectId, isNewProject, components.length, autoRoutingEnabled]);
 
-  // Handle keyboard events
+  // Handle keyboard events for Shift key
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Control") setIsCtrlPressed(true);
+      if (e.key === "Shift") setIsShiftPressed(true);
     };
 
     const handleKeyUp = (e: KeyboardEvent) => {
-      if (e.key === "Control") setIsCtrlPressed(false);
+      if (e.key === "Shift") setIsShiftPressed(false);
     };
 
     window.addEventListener("keydown", handleKeyDown);
@@ -812,7 +812,7 @@ export default function Canvas() {
               key={component.id}
               x={component.x}
               y={component.y}
-              draggable={isCtrlPressed}
+              draggable={isShiftPressed}
               onDragStart={handleDragStart}
               onDragEnd={handleDragEnd}
             >
