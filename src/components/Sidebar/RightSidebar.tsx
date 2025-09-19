@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import type { EditorProps } from "@monaco-editor/react";
-import { useFile } from "~/contexts/FileContext";
 import { useComponents } from "~/contexts/ComponentContext";
 import { useRightSidebar } from "~/contexts/RightSidebarContext";
 import { useCanvasState } from "~/contexts/CanvasStateContext";
@@ -8,14 +7,6 @@ import { FaCode, FaRobot } from "react-icons/fa";
 import { gptAPI } from "~/api/gpt";
 
 export default function RightSidebar() {
-  const [Editor, setEditor] = useState<React.ComponentType<EditorProps> | null>(
-    null
-  );
-  const [isMounted, setIsMounted] = useState(false);
-  const { selectedFile, setSelectedFile } = useFile();
-  const { selectedComponents } = useComponents();
-  const { canvasState } = useCanvasState();
-  const [isLoading, setIsLoading] = useState(false);
   const {
     sidebarState: {
       code,
@@ -32,113 +23,21 @@ export default function RightSidebar() {
     setGeneratedConfig,
     setUnsavedChanges,
   } = useRightSidebar();
-
-  useEffect(() => {
-    setIsMounted(true);
-    import("@monaco-editor/react").then((module) => {
-      setEditor(() => module.default);
-    });
-  }, []);
-
-  async function loadFileContent() {
-    setIsLoading(true);
-    try {
-      if (selectedFile) {
-        // Check if this is a project-specific file
-        const projectMatch = selectedFile.match(/^\.\/projects\/(\d+)\/(.*)/);
-
-        if (projectMatch) {
-          // This is a project-specific file, use backend API
-          const [, projectId, filename] = projectMatch;
-          const BASE_URL =
-            import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
-
-          try {
-            const response = await fetch(
-              `${BASE_URL}/api/file-content?path=${encodeURIComponent(filename)}&projectId=${projectId}`,
-              {
-                credentials: "include",
-              }
-            );
-            const data = await response.json();
-            if (data.content !== undefined) {
-              setCode(data.content);
-            } else if (data.error) {
-              console.warn("Project file not found, falling back to default");
-              // Fall back to default file loading
-              await loadDefaultFile();
-            }
-          } catch (error) {
-            console.error(
-              "Error loading project file, falling back to default:",
-              error
-            );
-            // Fall back to default file loading
-            await loadDefaultFile();
-          }
-        } else {
-          // Regular file, use Remix API
-          const response = await fetch(
-            `./api/file-content?path=${encodeURIComponent(selectedFile)}`
-          );
-          const data = await response.json();
-          if (data.content !== undefined) {
-            setCode(data.content);
-          }
-        }
-      } else {
-        await loadDefaultFile();
-      }
-    } catch (error) {
-      console.error("Error loading file:", error);
-      await loadDefaultFile();
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  async function loadDefaultFile() {
-    try {
-      const response = await fetch("./projects/defaultCode.ino");
-      const text = await response.text();
-      let modText = text.replace(/^\[|\]$/g, "");
-      const lines = modText.split("\n");
-      const modifiedLines = lines
-        .map((line) => line.slice(3, -2))
-        .map((line) => line.replace(/\\"/g, '"'));
-      modifiedLines.push("}");
-      const mergedLines = modifiedLines.join("\n");
-      setCode(mergedLines);
-    } catch (error) {
-      console.error("Error loading default file:", error);
-      setCode("// Error loading code file");
-    }
-  }
-
-  useEffect(() => {
-    loadFileContent();
-  }, [selectedFile]);
+  // Debug: Log code value on every render
+  console.log("[RightSidebar] code from context:", code);
+  const [Editor, setEditor] = useState<React.ComponentType<EditorProps> | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
+  const { selectedComponents } = useComponents();
+  const { canvasState } = useCanvasState();
+  // All code is now loaded from the database/project API only. No local file loading.
 
   const handleEditorChange = (value: string | undefined) => {
     if (value !== undefined) {
-      setCode(value);
+      setCode(value, true); // Mark as unsaved when user edits
     }
   };
 
-  const getFileName = () => {
-    if (!selectedFile) return "defaultCode.ino";
-    const parts = selectedFile.split("/");
-    return parts[parts.length - 1];
-  };
-
-  const getFilePath = () => {
-    if (!selectedFile) return "";
-    const projectsIndex = selectedFile.indexOf("./projects/");
-    if (projectsIndex === -1) return "";
-    const relativePath = selectedFile.slice(projectsIndex + 15);
-    const parts = relativePath.split("/");
-    return parts.slice(0, -1).join("/");
-  };
+  // No file name/path logic needed; code is always from the database.
 
   const handleGeneratePrompt = async () => {
     if (selectedComponents.length === 0) {
@@ -397,6 +296,17 @@ export default function RightSidebar() {
     );
   };
 
+  useEffect(() => {
+    setIsMounted(true);
+    console.log("[RightSidebar] useEffect: setting isMounted to true");
+    import("@monaco-editor/react").then((module) => {
+      setEditor(() => module.default);
+      console.log("[RightSidebar] Monaco Editor loaded:", !!module.default);
+    }).catch((err) => {
+      console.error("[RightSidebar] Failed to load Monaco Editor:", err);
+    });
+  }, []);
+
   return (
     <div className="flex flex-col h-full">
       {/* Tab Navigation */}
@@ -433,23 +343,7 @@ export default function RightSidebar() {
             <h2 className="font-semibold text-gray-900 dark:text-gray-100">
               Code Editor
             </h2>
-            {isLoading ? (
-              <div className="text-sm text-gray-500">Loading...</div>
-            ) : (
-              <div className="text-sm flex items-center mt-0.5 min-h-[1.25rem]">
-                <span className="text-gray-500 dark:text-gray-400 truncate">
-                  {getFilePath()}
-                </span>
-                {getFilePath() && (
-                  <span className="mx-1 text-gray-500 dark:text-gray-400">
-                    /
-                  </span>
-                )}
-                <span className="text-gray-700 dark:text-gray-300 truncate font-medium">
-                  {getFileName()}
-                </span>
-              </div>
-            )}
+            {/* No loading state or file path/name; code is always from the database */}
           </div>
           <div className="flex-1 relative">
             {isMounted && Editor ? (

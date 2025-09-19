@@ -16,7 +16,7 @@ interface RightSidebarState {
 
 interface RightSidebarContextType {
   sidebarState: RightSidebarState;
-  setCode: (code: string) => void;
+  setCode: (code: string, markUnsaved?: boolean) => void;
   setGeneratedPrompt: (prompt: any) => void;
   setActiveTab: (tab: "code" | "prompt") => void;
   setIsGenerating: (isGenerating: boolean) => void;
@@ -56,8 +56,10 @@ export function RightSidebarProvider({ children }: { children: ReactNode }) {
     }));
   }, [projectId, isNew]);
 
-  const setCode = (code: string) =>
-    setSidebarState((prev) => ({ ...prev, code, unsavedChanges: true }));
+  const setCode = (code: string, markUnsaved: boolean = true) => {
+    console.log("[RightSidebarContext] setCode called with:", code, "markUnsaved:", markUnsaved);
+    setSidebarState((prev) => ({ ...prev, code, unsavedChanges: markUnsaved }));
+  };
 
   const setGeneratedPrompt = (prompt: any) =>
     setSidebarState((prev) => ({
