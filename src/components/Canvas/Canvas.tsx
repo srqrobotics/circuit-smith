@@ -156,9 +156,10 @@ export default function Canvas() {
 
             // Handle code data
             if (arduino_code) {
-              console.log("Loaded Arduino code:", arduino_code);
+              console.log("[Canvas] Loaded Arduino code from DB, length:", arduino_code.length);
               setCode(arduino_code, false); // Do not mark as unsaved when loading from DB
             } else {
+              console.log("[Canvas] No Arduino code found in DB");
               setCode("", false);
             }
           } else {

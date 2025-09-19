@@ -21,11 +21,11 @@ export default function ComponentItem({
     } else {
       setImagePath(icon);
     }
-    // console.log(`Component ${name} icon path:`, imagePath);
+    // Cleaned up logs
   }, [name, icon]);
 
   const handleImageError = () => {
-    console.error(`Failed to load image for component ${name}:`, imagePath);
+    // Only log critical errors if needed
     setImageError(true);
   };
 

@@ -23,8 +23,6 @@ export default function RightSidebar() {
     setGeneratedConfig,
     setUnsavedChanges,
   } = useRightSidebar();
-  // Debug: Log code value on every render
-  console.log("[RightSidebar] code from context:", code);
   const [Editor, setEditor] = useState<React.ComponentType<EditorProps> | null>(null);
   const [isMounted, setIsMounted] = useState(false);
   const { selectedComponents } = useComponents();
@@ -298,12 +296,8 @@ export default function RightSidebar() {
 
   useEffect(() => {
     setIsMounted(true);
-    console.log("[RightSidebar] useEffect: setting isMounted to true");
     import("@monaco-editor/react").then((module) => {
       setEditor(() => module.default);
-      console.log("[RightSidebar] Monaco Editor loaded:", !!module.default);
-    }).catch((err) => {
-      console.error("[RightSidebar] Failed to load Monaco Editor:", err);
     });
   }, []);
 

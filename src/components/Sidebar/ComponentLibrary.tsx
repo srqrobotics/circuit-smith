@@ -6,8 +6,8 @@ const apiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY || "";
 useEffect(() => {
   fetch("./api/proxy")
     .then((res) => res.json())
-    .then((data) => console.log(data))
-    .catch((err) => console.error("Error:", err));
+  // Cleaned up logs
+  // Only log critical errors if needed
 }, []);
 
 interface ComponentItem {
@@ -58,9 +58,7 @@ export default function ComponentLibrary() {
 
   useEffect(() => {
     if (fetcher.data?.packages) {
-      console.log("Fetched packages:", fetcher.data.packages);
       processPackages(fetcher.data.packages).then((processed) => {
-        console.log("Processed categories:", processed);
         setCategories(processed);
       });
     }
@@ -69,7 +67,7 @@ export default function ComponentLibrary() {
   const processPackages = async (
     packages: FileSystemItem[]
   ): Promise<ComponentCategory[]> => {
-    console.log("Processing packages:", packages);
+  // Cleaned up logs
 
     const processDirectory = async (
       dir: FileSystemItem
@@ -83,12 +81,12 @@ export default function ComponentLibrary() {
           children.push(childCategory);
         } else if (item.type === "file" && item.name.endsWith(".json")) {
           try {
-            console.log("Loading component data for:", item.path);
+            // Cleaned up logs
             const response = await fetch(
               `./api/file-content?path=${encodeURIComponent(item.path)}`
             );
             const data = await response.json();
-            console.log("Loaded component data:", data);
+            // Cleaned up logs
 
             const componentItem: ComponentItem = {
               id: item.name.replace(".json", ""),
@@ -97,13 +95,10 @@ export default function ComponentLibrary() {
               icon: "🔲",
               image: data.image,
             };
-            console.log("Created component item:", componentItem);
+            // Cleaned up logs
             items.push(componentItem);
           } catch (error) {
-            console.error(
-              `Error loading component data for ${item.path}:`,
-              error
-            );
+            // Only log critical errors if needed
             items.push({
               id: item.name.replace(".json", ""),
               name: item.name.replace(".json", ""),
@@ -125,7 +120,7 @@ export default function ComponentLibrary() {
       packages.filter((pkg) => pkg.type === "directory").map(processDirectory)
     );
 
-    console.log("Final categories:", categories);
+  // Cleaned up logs
     return categories.sort((a, b) => a.name.localeCompare(b.name));
   };
 
@@ -161,11 +156,7 @@ export default function ComponentLibrary() {
     });
 
     const responseText = await saveResponse.text();
-    console.log(`Save response for ${filePath}:`, {
-      status: saveResponse.status,
-      ok: saveResponse.ok,
-      text: responseText,
-    });
+    // Cleaned up logs
 
     if (!saveResponse.ok) {
       throw new Error(
@@ -174,17 +165,17 @@ export default function ComponentLibrary() {
     }
 
     try {
-      const result = JSON.parse(responseText);
-      console.log("Save response parsed:", result);
+  const result = JSON.parse(responseText);
+  // Cleaned up logs
     } catch (e) {
-      console.log("Could not parse save response as JSON:", responseText);
+  // Cleaned up logs
     }
   };
 
   const handleLogSelectedComponents = async () => {
     try {
       // Simulated API response
-      console.log("Selected components:", selectedComponents);
+  // Cleaned up logs
 
       const applicationsPrompt = `
       Based on the following electronic components:
@@ -207,7 +198,7 @@ export default function ComponentLibrary() {
       The generated applications should be practical, relevant, and make effective use of the given components.
       `;
 
-      // console.log("Generated applications prompt:", applicationsPrompt);
+  // Cleaned up logs
 
       const response = await fetch(
         "https://api.openai.com/v1/chat/completions",
@@ -236,20 +227,20 @@ export default function ComponentLibrary() {
 
       // Attempt to parse the response as JSON
       const responseText = await response.text(); // Get the raw response text
-      // console.log("Raw response:", responseText); // Log the raw response for debugging
+  // Cleaned up logs
 
       const responseJSON = JSON.parse(responseText); // Try to parse the response;
 
       try {
         const raw_msg = responseJSON.choices[0].message.content;
-        // console.log("Raw response:", raw_msg);
+  // Cleaned up logs
         const msg = raw_msg.replace(/^```json\s*|\s*```$/g, ""); // Remove the ```json and ``` wrapping
-        // console.log("New response:", msg);
+  // Cleaned up logs
 
         const applications = JSON.parse(msg);
         applicationsList.applications = applications.applications;
         setApplicationsList(applicationsList);
-        // console.log("setApplicationsList: ", applicationsList);
+  // Cleaned up logs
 
         // Check if the data has the expected structure
         if (applicationsList.applications) {
@@ -260,14 +251,14 @@ export default function ComponentLibrary() {
           ); // Map to an array of strings
           setShowAppChoices(true);
         } else {
-          console.error("Unexpected response structure:", applicationsList);
+          // Only log critical errors if needed
         }
       } catch (error) {
-        console.error("Error parsing JSON:", error);
+  // Only log critical errors if needed
         // Fallback: Create a default structure if parsing fails
       }
     } catch (error) {
-      console.error("Error fetching application choices:", error);
+  // Only log critical errors if needed
     }
   };
 
@@ -278,9 +269,9 @@ export default function ComponentLibrary() {
         (app) => app.name === selectedApp
       );
 
-      console.log("Found Application:", foundApp);
+  // Cleaned up logs
 
-      console.log("pins:", Array.from(selectedComponents).join(", \n-"));
+  // Cleaned up logs
 
       const prompt = `
       Generate a JSON file containing wiring configurations and an Arduino code snippet for an Arduino-based project. The project should include the following components: \n
@@ -338,7 +329,7 @@ export default function ComponentLibrary() {
       const data = await response.json();
 
       const raw_msg = data.choices[0].message.content;
-      // console.log("response:", raw_msg);
+  // Cleaned up logs
 
       // Separate JSON and C++ code
       const jsonMatch = raw_msg.match(/```json\s*([\s\S]*?)```/);
@@ -347,8 +338,7 @@ export default function ComponentLibrary() {
       const jsonString = jsonMatch ? jsonMatch[1].trim() : null;
       const cppString = cppMatch ? cppMatch[1].trim() : null;
 
-      console.log("Extracted JSON:\n", jsonString);
-      console.log("Extracted C++ Code:\n", cppString);
+  // Cleaned up logs
 
       // Save the updated config back to the file
       const fcppString = cppString.split("\n");
@@ -358,7 +348,7 @@ export default function ComponentLibrary() {
 
       // Handle the response as needed
     } catch (error) {
-      console.error("Error fetching second prompt:", error);
+  // Only log critical errors if needed
     }
   };
 

@@ -57,7 +57,10 @@ export function RightSidebarProvider({ children }: { children: ReactNode }) {
   }, [projectId, isNew]);
 
   const setCode = (code: string, markUnsaved: boolean = true) => {
-    console.log("[RightSidebarContext] setCode called with:", code, "markUnsaved:", markUnsaved);
+    // Clean log for code updates
+    if (code) {
+      console.log("[RightSidebarContext] setCode: code updated, length:", code.length, "markUnsaved:", markUnsaved);
+    }
     setSidebarState((prev) => ({ ...prev, code, unsavedChanges: markUnsaved }));
   };
 
