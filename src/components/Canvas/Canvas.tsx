@@ -45,6 +45,14 @@ export default function Canvas() {
   const isNewProject = sidebarState.isNewProject;
   const generatedConfig = sidebarState.generatedConfig;
 
+  const positionTracker = useRef({
+    x: 100,
+    y: 100,
+    direction: "horizontal",
+    boxWidth: 100, // initial bounding box width
+    boxHeight: 100, // initial bounding box height
+  });
+
   // Debug logging for currentProjectId
   useEffect(() => {
     console.log(`Canvas: currentProjectId changed to: ${currentProjectId}`);
@@ -500,36 +508,44 @@ export default function Canvas() {
       if (!stage) return;
 
       const rect = stage.container().getBoundingClientRect();
-      const x = (e.clientX - rect.left - stage.x()) / scale;
-      const y = (e.clientY - rect.top - stage.y()) / scale;
+      // const x = (e.clientX - rect.left - stage.x()) / scale;
+      // const y = (e.clientY - rect.top - stage.y()) / scale;
 
       // Add component to canvas
-      await addComponentToCanvas(componentData.id, x, y);
+      await addComponentToCanvas(componentData.id);
     } catch (error) {
       console.error("Error handling component drop:", error);
     }
   };
 
   // Add new component to canvas
-  const addComponentToCanvas = async (
-    componentId: string,
-    x: number,
-    y: number
-  ) => {
+  const updateNextComponentPosition = (imageWidth: number, imageHeight: number) => {
+    const padding = 30;
+
+    if (positionTracker.current.direction === "vertical") {
+      positionTracker.current.y += imageHeight + padding;
+    } else {
+      positionTracker.current.x += imageWidth + padding;
+    }
+
+    // Toggle direction
+    positionTracker.current.direction = (positionTracker.current.direction === "vertical") ? "horizontal" : "vertical";
+  };
+
+
+  const addComponentToCanvas = async (componentId: string) => {
     try {
-      // Load component data
       const componentData = await loadComponentData(componentId);
       if (!componentData) {
         console.error(`Component data not found for ${componentId}`);
         return;
       }
 
-      // Create new component
       const newComponent: DroppedComponent = {
         id: componentId,
         name: componentData.name,
-        x: x,
-        y: y,
+        x: positionTracker.current.x,
+        y: positionTracker.current.y,
         rotation: 0,
         image: {
           src:
@@ -537,43 +553,44 @@ export default function Canvas() {
           width: componentData.image?.width || 50,
           height: componentData.image?.height || 50,
         },
-        pinMap: undefined, // Will be loaded below
+        pinMap: undefined,
       };
 
-      // Load the component image
+      // Load image
       const img = await preloadImage(newComponent.image.src);
       newComponent.image.width = img.naturalWidth;
       newComponent.image.height = img.naturalHeight;
 
-      // Load pin mappings if available
+      // Optional pin map
       if (componentData["pin-map"]?.src) {
         try {
           const pinMapResponse = await fetch(componentData["pin-map"].src);
           (newComponent as any).pinMap = await pinMapResponse.json();
-          console.log(`Loaded pin mappings for ${componentId}`);
         } catch (error) {
-          console.warn(
-            `Failed to load pin mappings for ${componentId}:`,
-            error
-          );
+          console.warn(`Failed to load pin map for ${componentId}:`, error);
         }
       }
 
-      // Add to loaded images
+      // Add to state
       setLoadedImages((prev) => ({
         ...prev,
         [newComponent.image.src]: img,
       }));
 
-      // Add to components
       addComponent(newComponent);
 
-      // Save visual state
+      updateNextComponentPosition(newComponent.image.width, newComponent.image.height);
+
       await saveVisualState([...components, newComponent], wires);
 
-      console.log(`Added component ${componentId} to canvas at (${x}, ${y})`);
+      // 🧠 Update position for next component
+      // Update position for next component
+
+      console.log(
+        `Placed ${componentId} at (${newComponent.x}, ${newComponent.y})`
+      );
     } catch (error) {
-      console.error(`Error adding component ${componentId} to canvas:`, error);
+      console.error(`Error adding component ${componentId}:`, error);
     }
   };
 
@@ -763,9 +780,7 @@ export default function Canvas() {
         // Add each new component at a default position (spread them out)
         for (let i = 0; i < newComponents.length; i++) {
           const componentId = newComponents[i];
-          const x = 100 + i * 150; // Spread components horizontally
-          const y = 100;
-          await addComponentToCanvas(componentId, x, y);
+          await addComponentToCanvas(componentId);
         }
       }
     };
