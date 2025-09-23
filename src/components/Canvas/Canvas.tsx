@@ -49,8 +49,8 @@ export default function Canvas() {
     x: 100,
     y: 100,
     direction: "horizontal",
-    start_x: 0, // initial bounding box x
-    start_y: 0, // initial bounding box y
+    x_max: 0,
+    y_max: 0,
     boxWidth: 80, // initial bounding box width
     boxHeight: 80, // initial bounding box height
   });
@@ -524,13 +524,18 @@ export default function Canvas() {
   const updateNextComponentPosition = (imageWidth: number, imageHeight: number) => {
     const padding = 100;
 
-    if ((positionTracker.current.y) > positionTracker.current.boxHeight) {
-      positionTracker.current.boxHeight += imageHeight + padding;
-      // positionTracker.current.direction = "horizontal";
-    }
-    if ((positionTracker.current.x) > positionTracker.current.boxWidth) {
-      positionTracker.current.boxWidth += imageWidth + padding;
+    positionTracker.current.x_max = Math.max(positionTracker.current.x_max, imageWidth);
+    positionTracker.current.y_max = Math.max(positionTracker.current.y_max, imageHeight);
+
+    if ((positionTracker.current.x + imageWidth) > positionTracker.current.boxWidth) {
+      positionTracker.current.boxWidth = positionTracker.current.x_max + positionTracker.current.x;
+      positionTracker.current.x_max = 0;
       // positionTracker.current.direction = "vertical";
+    }
+    if ((positionTracker.current.y + imageHeight) > positionTracker.current.boxHeight) {
+      positionTracker.current.boxHeight = positionTracker.current.y_max + positionTracker.current.y;
+      positionTracker.current.y_max = 0;
+      // positionTracker.current.direction = "horizontal";
     }
 
     if (positionTracker.current.direction === "vertical") {
@@ -541,11 +546,13 @@ export default function Canvas() {
 
     if (positionTracker.current.y > positionTracker.current.boxHeight) {
       positionTracker.current.direction = "horizontal";
-      positionTracker.current.x = positionTracker.current.start_x + 20;
+      positionTracker.current.x = padding;
+      positionTracker.current.y = positionTracker.current.boxHeight + padding;
     }
     else if (positionTracker.current.x > positionTracker.current.boxWidth) {
       positionTracker.current.direction = "vertical";
-      positionTracker.current.y = positionTracker.current.start_y + 20;
+      positionTracker.current.y = padding;
+      positionTracker.current.x = positionTracker.current.boxWidth + padding;
     }
 
     // positionTracker.current.direction = (positionTracker.current.direction === "vertical") ? "horizontal" : "vertical";
