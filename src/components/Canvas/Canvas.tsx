@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Stage, Layer, Line, Group, Image } from "react-konva";
+import { Stage, Layer, Line, Group, Image, Rect, Circle } from "react-konva";
 import Konva from "konva";
 import type { Wire, DroppedComponent } from "~/types/circuit";
 import {
@@ -49,8 +49,10 @@ export default function Canvas() {
     x: 100,
     y: 100,
     direction: "horizontal",
-    boxWidth: 100, // initial bounding box width
-    boxHeight: 100, // initial bounding box height
+    start_x: 0, // initial bounding box x
+    start_y: 0, // initial bounding box y
+    boxWidth: 80, // initial bounding box width
+    boxHeight: 80, // initial bounding box height
   });
 
   // Debug logging for currentProjectId
@@ -520,7 +522,16 @@ export default function Canvas() {
 
   // Add new component to canvas
   const updateNextComponentPosition = (imageWidth: number, imageHeight: number) => {
-    const padding = 30;
+    const padding = 100;
+
+    if ((positionTracker.current.y) > positionTracker.current.boxHeight) {
+      positionTracker.current.boxHeight += imageHeight + padding;
+      // positionTracker.current.direction = "horizontal";
+    }
+    if ((positionTracker.current.x) > positionTracker.current.boxWidth) {
+      positionTracker.current.boxWidth += imageWidth + padding;
+      // positionTracker.current.direction = "vertical";
+    }
 
     if (positionTracker.current.direction === "vertical") {
       positionTracker.current.y += imageHeight + padding;
@@ -528,8 +539,16 @@ export default function Canvas() {
       positionTracker.current.x += imageWidth + padding;
     }
 
-    // Toggle direction
-    positionTracker.current.direction = (positionTracker.current.direction === "vertical") ? "horizontal" : "vertical";
+    if (positionTracker.current.y > positionTracker.current.boxHeight) {
+      positionTracker.current.direction = "horizontal";
+      positionTracker.current.x = positionTracker.current.start_x + 20;
+    }
+    else if (positionTracker.current.x > positionTracker.current.boxWidth) {
+      positionTracker.current.direction = "vertical";
+      positionTracker.current.y = positionTracker.current.start_y + 20;
+    }
+
+    // positionTracker.current.direction = (positionTracker.current.direction === "vertical") ? "horizontal" : "vertical";
   };
 
 
@@ -806,21 +825,35 @@ export default function Canvas() {
         scaleY={scale}
         ref={stageRef}
       >
-        {/* Origin Cross Layer: Draw a 100x100px cross at the origin */}
+        {/* Origin Cross Layer */}
         <Layer listening={false}>
-          {/* Vertical line of the cross */}
-          <Line
-            points={[-50, 0, 50, 0]}
-            stroke={'#888'}
+          <Line points={[-50, 0, 50, 0]} stroke={'#888'} strokeWidth={2} />
+          <Line points={[0, -50, 0, 50]} stroke={'#888'} strokeWidth={2} />
+        </Layer>
+
+        {/* === 🔍 DEBUG LAYER START (remove this block when not needed) === */}
+        <Layer listening={false}>
+          {/* Bounding Box */}
+          <Rect
+            x={0}
+            y={0}
+            width={positionTracker.current.boxWidth}
+            height={positionTracker.current.boxHeight}
+            stroke="red"
             strokeWidth={2}
+            dash={[4, 4]} // dashed outline for visibility
           />
-          {/* Horizontal line of the cross */}
-          <Line
-            points={[0, -50, 0, 50]}
-            stroke={'#888'}
-            strokeWidth={2}
+
+          {/* Next Component Position */}
+          <Circle
+            x={positionTracker.current.x}
+            y={positionTracker.current.y}
+            radius={5}
+            fill="blue"
           />
         </Layer>
+        {/* === 🔍 DEBUG LAYER END === */}
+
         <Layer>
           {/* Render components */}
           {components.map((component) => (
@@ -840,7 +873,7 @@ export default function Canvas() {
             </Group>
           ))}
 
-          {/* Render wires - using straight lines instead of curved ones */}
+          {/* Render wires */}
           {!isDraggingWires &&
             wires.map((wire, i) => (
               <Line
@@ -848,11 +881,12 @@ export default function Canvas() {
                 points={wire.points}
                 stroke={wire.color}
                 strokeWidth={2}
-                tension={0} // Set tension to 0 for straight lines
+                tension={0}
               />
             ))}
         </Layer>
       </Stage>
+
     </div>
   );
 }
