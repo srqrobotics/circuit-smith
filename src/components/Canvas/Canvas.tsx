@@ -839,9 +839,9 @@ export default function Canvas() {
         </Layer>
 
         {/* === 🔍 DEBUG LAYER START (remove this block when not needed) === */}
-        <Layer listening={false}>
+        {/* <Layer listening={false}> */}
           {/* Bounding Box */}
-          <Rect
+          {/* <Rect
             x={0}
             y={0}
             width={positionTracker.current.boxWidth}
@@ -849,16 +849,16 @@ export default function Canvas() {
             stroke="red"
             strokeWidth={2}
             dash={[4, 4]} // dashed outline for visibility
-          />
+          /> */}
 
           {/* Next Component Position */}
-          <Circle
+          {/* <Circle
             x={positionTracker.current.x}
             y={positionTracker.current.y}
             radius={5}
             fill="blue"
-          />
-        </Layer>
+          /> */}
+        {/* </Layer> */}
         {/* === 🔍 DEBUG LAYER END === */}
 
         <Layer>
